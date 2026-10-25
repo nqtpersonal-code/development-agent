@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { doctor } from './lib/runtime.mjs';
 import { nameVariants } from './lib/names.mjs';
 import { searchCode } from './lib/search.mjs';
+import { readSchema } from './lib/schema.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 function writeJson(file, data) {
@@ -87,6 +88,13 @@ const commands = {
     console.log(`search: ${r.hits.length} hits in ${top.length} files (${r.filesScanned} scanned, ${r.droppedNoContext} dropped without context${r.truncated ? ', TRUNCATED' : ''})`);
     for (const [f, n] of top.slice(0, 8)) console.log(`  ${n.toString().padStart(3)}  ${f}`);
     if (top.length > 8) console.log(`  … ${top.length - 8} more files${args.out ? ` in ${args.out}` : ''}`);
+  },
+  async schema(args) {
+    if (!args.db) throw new Error('usage: schema --db <url> [--out file.json]');
+    const s = await readSchema(args.db, getDataDir());
+    if (args.out) writeJson(args.out, s);
+    console.log(`schema (${s.engine}): ${s.tables.length} tables, ${s.fks.length} foreign keys, ${s.implicit.length} inferred relations, ${s.views.length} views, ${s.triggers.length} triggers`);
+    for (const r of s.implicit.slice(0, 6)) console.log(`  inferred: ${r.from.table}.${r.from.column} -> ${r.to.table}.${r.to.column}`);
   },
   'scan-leaks'(args) {
     const projectNames = projectNamesFrom(getDataDir());
