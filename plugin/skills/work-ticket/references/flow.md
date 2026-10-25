@@ -42,6 +42,9 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 2. Brainstorm with the owner in natural language, one question at a time, only about what the survey could not settle (e.g. "I see the web app calls the server through one helper file; are there other apps (mobile, admin) that call the same server?"). Record answers.
 3. Write `adapter.json` (format in formats.md) with `assumptions` for everything the adapter relies on. When the ticket folder holds several repos (`nqt.mjs repos`), declare each component by `remote` (+ `path`), not by folder name, so every later ticket folder works.
 4. Ask the owner for 1–2 flows they know well ("when the student name changes, where does it show?"). Write them as `tests.json`; run `nqt.mjs tracer-test --project <p> --root PROJECT_ROOT`. Adjust the adapter until they pass; if a test fails because the owner's expectation and the code disagree, show the evidence and let the owner decide.
+5. Save the health baseline: `node "PLUGIN/scripts/nqt.mjs" tracer-health --project <p> --root "PROJECT_ROOT" --save`.
+
+**Adapter outdated** (setup returns `need-adapter-update`): tell the owner in plain words what changed ("the web app now calls the server through a new helper in 5 places that the map does not know"), dispatch `nqt:code-tracer` to survey only what changed, update `adapter.json` (add patterns, components, assumptions), re-run `tracer-test` until all tests pass, then save a new baseline with `tracer-health --save`. Ask the owner only what the survey cannot settle.
 
 ## analysis
 

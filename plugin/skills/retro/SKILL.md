@@ -44,7 +44,7 @@ copies found during the run become pitfalls too, so the next ticket knows from t
 Present findings in natural language, most important first, one decision at a
 time, each with the concrete proposed change.
 
-- **tracer**: first add the missed place as a new test in `tracer/tests.json`; run `node PLUGIN/scripts/nqt.mjs tracer-test --project <project> --root <project folder>` and show it fails; propose the adapter change; after approval apply it and re-run until all tests (old and new) pass.
+- **tracer**: first add the missed place as a new test in `tracer/tests.json`; run `node PLUGIN/scripts/nqt.mjs tracer-test --project <project> --root <project folder>` and show it fails; propose the adapter change; after approval apply it and re-run until all tests (old and new) pass, then refresh the baseline with `tracer-health --project <project> --root <project folder> --save`.
 - **project-pitfall**: one line per trap in the format of `PLUGIN/shared/formats.md` (date, ticket, trap, link). Traps only, never business rules. Also propose removing pitfalls the code no longer confirms.
 - **workflow / agent**: write the change **generalised** — no project, customer or table names, no ticket ids, no code from the project, fictional examples only. Before showing it, save the proposed text to a temp file and run `node PLUGIN/scripts/nqt.mjs scan-leaks --dir <temp folder>`; fix any finding. After approval, edit the files in `pluginSourceDir` (never the installed copy), run its tests (`npm test` there) and tell the owner to commit and update the plugin. If a lesson is half generic, half specific: generic half to the plugin, specific half to the project's pitfalls.
 - **pattern**: suggest editing, removing or adding a pack; never copy project code into a pack.

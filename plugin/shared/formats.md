@@ -72,7 +72,7 @@ Components (front end, back end, workers) live in `tracer/adapter.json`.
   "assumptions": [{ "id": "...", "description": "...", "check": { "fileExists": "path" } | { "pattern": "regex", "inRoot": "dir" } }] }
 ```
 
-`kind` is `be`, `fe`, `worker` or `shared`. `tests.json` is a list of
+`kind` is `be`, `fe`, `worker` or `shared`. `tracer/health.json` is the snapshot taken when the adapter was built or last updated (`nqt.mjs tracer-health --save`); each run compares against it to detect an outdated adapter. `tests.json` is a list of
 `{ "name", "start": { "table", "column" }, "expect": [{ "file", "viaIncludes"? }] }`.
 
 ## state.json (in `<work>`)

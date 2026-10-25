@@ -23,7 +23,8 @@ import { gitHistory, testCoverage } from './lib/risk.mjs';
 import { detectHost, fetchTicket } from './lib/githost.mjs';
 import { resolveProject, rememberProject } from './lib/project-id.mjs';
 import { listRepos, resolveComponents } from './lib/workspace.mjs';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { snapshot, compareSnapshots } from './lib/health.mjs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
   const dataDir = getDataDir();
@@ -154,6 +155,28 @@ const commands = {
     const res = checkAssumptions(ctx.adapter, ctx.root);
     for (const a of res) console.log(`${a.ok ? 'ok    ' : 'FAILED'} ${a.id} — ${a.description}`);
     return res.every((a) => a.ok) ? 0 : 1;
+  },
+  'tracer-health'(args) {
+    const ctx = projectContext(args);
+    if (!ctx.adapter) {
+      console.log(`no tracer adapter for ${args.project}`);
+      return 1;
+    }
+    const file = join(ctx.dataDir, 'projects', args.project, 'tracer', 'health.json');
+    const cur = snapshot({ projectRoot: ctx.root, components: ctx.components, adapter: ctx.adapter });
+    if (args.save || !existsSync(file)) {
+      writeJson(file, cur);
+      console.log(`tracer-health: baseline saved (${cur.routes} routes, link rate ${cur.linkRate}, data libs: ${cur.dataLibs.join(', ') || 'none'})`);
+      return 0;
+    }
+    const { drift } = compareSnapshots(JSON.parse(readFileSync(file, 'utf8')), cur);
+    if (!drift.length) {
+      console.log(`tracer-health: ok — no sign the adapter is outdated (link rate ${cur.linkRate})`);
+      return 0;
+    }
+    console.log(`tracer-health: OUTDATED? ${drift.length} sign(s):`);
+    for (const d of drift) console.log(`  [${d.kind}] ${d.detail}`);
+    return 1;
   },
   async 'tracer-test'(args) {
     const ctx = projectContext(args);
