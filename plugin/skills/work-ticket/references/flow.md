@@ -14,7 +14,7 @@ Default agent and step names when no nickname is configured:
 | test-design | Viết kịch bản test / Test design |
 | free-qa | Hỏi đáp tự do / Free Q&A |
 | architect | Thiết kế kỹ thuật / Technical design |
-| design | Thiết kế giải pháp / Solution design |
+| design | Dev: brainstorming (tuỳ chọn) / Dev: brainstorming (optional) |
 | plan | Lập kế hoạch / Planning |
 | plan-check | Soát kế hoạch / Plan check |
 | implement | Viết code / Implementation |

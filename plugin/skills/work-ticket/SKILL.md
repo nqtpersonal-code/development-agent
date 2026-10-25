@@ -37,8 +37,8 @@ when to stop and ask, and how to update `state.json`. Order:
 
 `setup → analysis (code-tracer + ba) → screens (UI tickets) → risk (risk-analyst, when a change point touches a code smell) → brief →
 test-design (qa) → free-qa (system-explainer) → architect (optional) →
-design (superpowers:brainstorming) → plan (superpowers:writing-plans) →
-plan-check (plan-checker, ≤3 rounds) → implement (superpowers:subagent-driven-development)
+design (dev starts: ask whether to re-run superpowers:brainstorming) → plan (superpowers:writing-plans) →
+plan-check (plan-checker, ≤3 rounds) → implement (superpowers:executing-plans for small tickets, subagent-driven-development for large ones)
 → review (reviewer) → qa (qa + ui-checker) → report → done`.
 
 The superpowers steps follow [references/superpowers-bridge.md](references/superpowers-bridge.md).
@@ -64,7 +64,7 @@ The superpowers steps follow [references/superpowers-bridge.md](references/super
 2b. Risk (when smells are involved): choose, per smell, patch-and-preserve or fix-the-smell, after the risk-analyst's recommendation.
 3. The ticket brief: approve it (no open questions left).
 4. Architect step: ask whether to run it, with your recommendation (rule in flow.md).
-5. Design (inside brainstorming): approve the design summary in natural language.
+5. Start of dev: ask whether to re-run brainstorming (with your recommendation); if it runs, approve its design summary in natural language.
 6. Any time implementation diverges from the plan or needs DB/API changes the plan lacks.
 7. Final report: the owner reviews, and pushes themselves.
 

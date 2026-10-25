@@ -15,9 +15,21 @@ override their defaults — state them explicitly when invoking each skill:
 - Talk to the owner in natural language per `PLUGIN/shared/rules.md`; no technical questions to the owner.
 - Touch exactly the brief's **must patch** change points, never the **do not touch** ones, in the brief's Fix mode (preserve the scene unless the owner chose otherwise); patch at the narrowest point on the ticket's path.
 
-## design (superpowers:brainstorming)
+## design — start of the dev phase: brainstorming, if the owner wants it
 
-Invoke `superpowers:brainstorming` with this context:
+Ask the owner (question tool, with your recommendation) whether to run brainstorming
+again before coding, now that the brief (and architecture, if any) is settled:
+- recommend **skip** when the brief has no open questions and either `architecture.md`
+  exists or the change is small (few change points, risk level `quick` or none);
+- recommend **run** when the architect step was skipped and the change is not small,
+  or something is still undecided (a new fragment, an unresolved variant, a plan-checker
+  "needs owner" finding from an earlier round).
+
+**Skip** → write `WORK/spec.md` as a short pointer document: the brief's acceptance
+criteria, change points and fix mode, plus `architecture.md` content if present (or a link
+to it); no owner conversation. `S --set design=skipped`, continue with plan.
+
+**Run** → invoke `superpowers:brainstorming` with this context:
 
 > Owner preferences: design doc path `WORK/spec.md`, do not commit it.
 > The requirements are already settled in `WORK/ticket-brief.md` (approved by the owner),
@@ -46,12 +58,18 @@ the plan-checker reviews it. `S --set plan=done`.
 3. After round 3 still `revise` → show the remaining findings in plain words and ask how to proceed.
 4. `pass` → `S --set plan-check=done`.
 
-## implement (superpowers:subagent-driven-development)
+## implement — pick the execution by ticket size
 
-Invoke `superpowers:subagent-driven-development` with plan `WORK/plan.md`,
-spec `WORK/spec.md`, and the preferences above (it keeps its own
-self-ignored `.superpowers/sdd/` workspace in the repo — accepted). Tell it the
-execution method is subagent-driven (already chosen by the owner's workflow).
+- **Small** (≤ 4 plan tasks, ≤ 3 must-patch change points, no smell rated `full`):
+  `superpowers:executing-plans` — implemented in this session task by task, one fresh
+  whole-branch review at the end. Cheapest.
+- **Large or risky** (anything else): `superpowers:subagent-driven-development` — a fresh
+  implementer and reviewer per task.
+
+Tell the owner which one you picked and why in one sentence; they may switch. Pass plan
+`WORK/plan.md`, spec `WORK/spec.md` and the preferences above (both keep a self-ignored
+`.superpowers/sdd/` workspace in the repo — accepted); say the execution method is already
+chosen so the skill does not ask again.
 
 Stop and come back to the owner when an implementer reports something that
 contradicts the brief, finds another fragment of the same behaviour (a late change point), or when a DB/API change appears that the plan did not
