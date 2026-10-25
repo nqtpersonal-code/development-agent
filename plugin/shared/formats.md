@@ -38,7 +38,7 @@ aliases: [<other names used for this project>]
 language: vi                     # override config language for this project
 gitHost: github | gitlab           # from `nqt.mjs detect-host`
 gitHostname: <github.com, gitlab.com or the self-hosted name>
-repo: <owner/repo or group/subgroup/repo>
+repo: <owner/repo or group/subgroup/repo>   # where the issues live (with several repos: the one holding issues)
 baseBranch: dev                  # or main
 branchPattern: feature/{ticket}-{slug}
 commitConvention: <e.g. conventional commits, or "follow git log">
@@ -63,6 +63,7 @@ Components (front end, back end, workers) live in `tracer/adapter.json`.
 ```
 { "version": 1,
   "components": [{ "name": "api", "root": "api", "kind": "be" }, { "name": "web", "root": "web", "kind": "fe" }],
+  // or, when each ticket folder holds one clone per repo: { "name": "web", "remote": "group/frontend", "path": "src", "kind": "fe" }
   "aliases": { "<table>": ["<model or helper spelling>"] },
   "dbAccessPatterns": ["<regex>"], "routePatterns": ["<regex: (method)(path) or (path)>"],
   "apiClientPatterns": ["<regex: (method)?(path)>"], "apiBase": "/api/v1",
@@ -98,7 +99,7 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 | `screens.md` | screen-designer | screen flow (mermaid), per-screen content (tabs, filters, fields, buttons, messages, navigation), desktop + mobile layout, real data examples |
 | `mockup/index.html` | screen-designer | optional static clickable mockup |
 | `ticket-brief.md` | orchestrator (from ba/screens/trace + owner answers) | see below |
-| `test-scenarios.md` | qa (design mode) | per TC: steps in user language with real data, expected result; cross-impact scenarios X1…; TCs that cannot be verified |
+| `test-scenarios.md` | qa (design mode) | per scenario: id (TCn / Xn / Rn), steps in user language with real data, expected result, **Verify by** (`code` / `unit` / `api` / `browser`) with one-line reason; TCs that cannot be verified; count per method |
 | `questions.md` | orchestrator | free Q&A log: question, answer (natural language + links), proposed brief changes and owner decision |
 | `architecture.md` | architect | Technical part: DB/migration changes, legacy data handling, API, flow, reuse, risks. Owner part: business-impacting decisions as questions |
 | `spec.md` | superpowers:brainstorming | design spec |

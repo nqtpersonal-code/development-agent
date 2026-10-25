@@ -28,4 +28,6 @@ Record each run in `tests/e2e/results/<date>-<ticket>.md` (gitignored).
 | 16 | a-2 | risk step | risk-analyst runs (diverging copies), compares patch vs align with measured signals, recommends; owner decision lands in Fix mode |
 | 17 | a-1 | variants | reports that the attendance query, unlike the others, does not filter deleted students (variant) without fixing it |
 | 18 | any | preserve the scene | diff touches only must-patch points; QA regression on re-check points compares before/after |
+| 19 | any | QA economy | each scenario has a Verify-by method; browser only for changed screen flows; totals shown |
+| 20 | two-repo folder | workspace | project asked once, components found by remote, branch in each repo, report per repo |
 | 14 | b-1 | impact only | worker, contact report (suspected) and both web screens listed; teachers route not listed |

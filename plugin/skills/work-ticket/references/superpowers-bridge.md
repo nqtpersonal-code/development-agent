@@ -7,7 +7,7 @@ override their defaults — state them explicitly when invoking each skill:
 - Save design docs and plans in `WORK/` (not `docs/superpowers/...` in the repo) and **do not commit them**.
 - No git worktree: skip `superpowers:using-git-worktrees`; the ticket already has its own folder and DB.
 - Never run `superpowers:finishing-a-development-branch`, never push, never merge, never open PRs.
-- Local commits on the current feature branch are fine.
+- Local commits on the current feature branch are fine. When the ticket folder holds several repos, each task names the repo it changes, implementers run git inside that repo's folder, and each repo gets its own commits.
 - DB writes (migrations, seeds, test data) only after `node "PLUGIN/scripts/nqt.mjs" db-check --project <project> --root "PROJECT_ROOT"` passes; never touch a non-local DB.
 - Talk to the owner in natural language per `PLUGIN/shared/rules.md`; no technical questions to the owner.
 - Touch exactly the brief's **must patch** change points, never the **do not touch** ones, in the brief's Fix mode (preserve the scene unless the owner chose otherwise); patch at the narrowest point on the ticket's path.

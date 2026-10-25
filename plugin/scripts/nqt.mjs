@@ -22,6 +22,7 @@ import { blastRadius, summarizeRadius } from './lib/radius.mjs';
 import { gitHistory, testCoverage } from './lib/risk.mjs';
 import { detectHost, fetchTicket } from './lib/githost.mjs';
 import { resolveProject, rememberProject } from './lib/project-id.mjs';
+import { listRepos, resolveComponents } from './lib/workspace.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
@@ -34,7 +35,10 @@ function projectContext(args) {
   }
   const fm = projectConfig(dataDir, args.project).project;
   const adapter = loadAdapter(dataDir, args.project);
-  const components = adapter?.components ?? [{ name: 'project', root: '.', kind: 'be' }];
+  // Components found by remote may be absent from this ticket folder: point them at a
+  // path that does not exist so analysis reports them as not scanned.
+  const components = resolveComponents(root, adapter?.components ?? [{ name: 'project', root: '.', kind: 'be' }])
+    .map((c) => (c.root === null ? { ...c, root: `.nqt-missing/${c.name}` } : c));
   const confirmedLocalHosts = [].concat(fm.confirmedLocalHosts ?? []).filter(Boolean);
   return { dataDir, root, fm, adapter, components, confirmedLocalHosts, dbUrl: args.db ?? resolveDbUrl(root, fm) };
 }
@@ -209,6 +213,20 @@ const commands = {
     console.log(r.project ? `project: ${r.project} (${r.source})` : `project: unknown — ${r.source}`);
     return r.project ? 0 : 1;
   },
+  repos(args) {
+    const root = resolve(args.root ?? process.cwd());
+    const repos = listRepos(root);
+    if (!repos.length) {
+      console.log('repos: no git repository in this folder');
+      return 1;
+    }
+    for (const r of repos) {
+      const dir = join(root, r.dir);
+      const branch = spawnSync('git', ['branch', '--show-current'], { cwd: dir, encoding: 'utf8' }).stdout.trim();
+      const dirty = spawnSync('git', ['status', '--porcelain'], { cwd: dir, encoding: 'utf8' }).stdout.split(/\r?\n/).filter(Boolean).length;
+      console.log(`${r.dir.padEnd(16)} ${r.repo ?? '(no remote)'} — branch ${branch || '(detached)'}${dirty ? `, ${dirty} uncommitted changes` : ', clean'}`);
+    }
+  },
   'detect-host'(args) {
     const root = resolve(args.root ?? process.cwd());
     const remote = spawnSync('git', ['remote', 'get-url', args.remote ?? 'origin'], { cwd: root, encoding: 'utf8' });
@@ -225,8 +243,13 @@ const commands = {
     const ctx = projectContext(args);
     let info = ctx.fm.gitHost && ctx.fm.repo ? { host: ctx.fm.gitHost, hostname: ctx.fm.gitHostname, repo: ctx.fm.repo } : null;
     if (!info) {
-      const remote = spawnSync('git', ['remote', 'get-url', 'origin'], { cwd: ctx.root, encoding: 'utf8' });
-      info = remote.status === 0 ? detectHost(remote.stdout.trim()) : { host: 'unknown' };
+      const repos = listRepos(ctx.root).filter((r) => r.key);
+      const own = repos.find((r) => r.dir === '.') ?? (repos.length === 1 ? repos[0] : null);
+      info = own ? detectHost(`https://${own.hostname}/${own.repo}`) : { host: 'unknown' };
+      if (!own && repos.length > 1) {
+        console.log(`fetch-ticket: need-owner — ${repos.length} repos here; set gitHost, gitHostname and repo (where the issues live) in project.md`);
+        return 3;
+      }
     }
     const r = fetchTicket(info, String(args.ticket));
     if (!r.ok) {

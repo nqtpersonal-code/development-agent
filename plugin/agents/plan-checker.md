@@ -21,7 +21,7 @@ and `WORK/spec.md` if present, `DATA/projects/PROJECT/pitfalls.md`.
 1. **Coverage** — for every `TCn`: which plan task implements it and which test proves it. Missing → finding.
 2. **Scope** — plan tasks or file changes no TC needs (refactors, renames, formatting, "while we're here") → finding.
 3. **Cross-impact** — every confirmed or suspected place in the impact map that the change can break: handled, explicitly tested, or explicitly argued unaffected. Silent → finding.
-4. **Scenarios** — every scenario in test-scenarios.md is executable after the plan (data, screens, endpoints exist).
+4. **Scenarios** — every scenario in test-scenarios.md is executable after the plan (data, screens, endpoints exist); a rule verified by `unit` has a plan task writing that test.
 5. **Pitfalls** — each relevant trap is respected (after confirming it still holds in code).
 6. **Change points** — every must-patch point in the brief has a plan task; no task touches a do-not-touch point; each patch sits at the narrowest point (compare with `nqt.mjs radius`); every re-check point has a regression test; the fix mode per smell is respected.
 7. **Hygiene** — no work files in the repo, no worktree, no push, no `.gitignore` edits.

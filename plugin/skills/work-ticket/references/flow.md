@@ -40,7 +40,7 @@ Default agent and step names when no nickname is configured:
 Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 1. Detect: dispatch `nqt:code-tracer` with task "survey for adapter": components (folders, kind), data access style (ORM, query helper, raw SQL), how the front end calls the API (wrapper, base path), route declaration style, jobs/queues, dynamic SQL habits. It returns a draft adapter and its uncertainties.
 2. Brainstorm with the owner in natural language, one question at a time, only about what the survey could not settle (e.g. "I see the web app calls the server through one helper file; are there other apps (mobile, admin) that call the same server?"). Record answers.
-3. Write `adapter.json` (format in formats.md) with `assumptions` for everything the adapter relies on.
+3. Write `adapter.json` (format in formats.md) with `assumptions` for everything the adapter relies on. When the ticket folder holds several repos (`nqt.mjs repos`), declare each component by `remote` (+ `path`), not by folder name, so every later ticket folder works.
 4. Ask the owner for 1–2 flows they know well ("when the student name changes, where does it show?"). Write them as `tests.json`; run `nqt.mjs tracer-test --project <p> --root PROJECT_ROOT`. Adjust the adapter until they pass; if a test fails because the owner's expectation and the code disagree, show the evidence and let the owner decide.
 
 ## analysis
@@ -75,7 +75,7 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 
 1. Dispatch `nqt:qa` with `MODE=design`.
 2. "Cannot verify" items → send back to `nqt:ba` (re-open analysis questions) and update the brief.
-3. Show a short list of scenarios (user language) — informational, no approval needed unless something changed the brief. `S --set test-design=done`.
+3. Show a short list of scenarios (user language) with how each will be checked ("read in the code", "existing tests", "call the server and check the data", "click through in a browser") and the totals — informational, no approval needed unless something changed the brief. `S --set test-design=done`.
 
 ## free-qa
 
@@ -101,12 +101,12 @@ boundary 2. After implement → clear-suggestion boundary 3.
 
 ## qa
 
-1. Dispatch `nqt:qa` with `MODE=run`; for UI tickets dispatch `nqt:ui-checker` in parallel once the app is running.
+1. Dispatch `nqt:qa` with `MODE=run`; for UI tickets dispatch `nqt:ui-checker` in parallel once the app is running, only for the screens the ticket changed.
 2. Failures → show in user language; fix via superpowers as in review; re-run the failed scenarios.
 3. `S --set qa=done`.
 
 ## report
 
 1. Write `WORK/final-report.md` (formats.md).
-2. **Checkpoint 7** — show: what changed for users, TC → proof table, review and QA results with screenshots for UI, what was not tested, then a "Technical part" with commits (`git log BASE..HEAD --oneline`) and how to view the diff. Remind: the owner pushes; suggest `/nqt:retro <project> <ticket>` in a fresh session.
+2. **Checkpoint 7** — show: what changed for users, TC → proof table, review and QA results with screenshots for UI, what was not tested, then a "Technical part" with commits per repo (`git log BASE..HEAD --oneline` in each repo from `nqt.mjs repos`) and how to view each diff; the owner pushes each repo. Remind: the owner pushes; suggest `/nqt:retro <project> <ticket>` in a fresh session.
 3. `S --set report=done`.

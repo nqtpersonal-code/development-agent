@@ -21,7 +21,7 @@ Rules: run `node PLUGIN/scripts/nqt.mjs config --project PROJECT` and read
 every `*.md` in `reviewRules.personal` and in `teamReviewRules`. A folder that
 is missing or empty → write "no personal rules" / "no team rules" and continue.
 
-The change: `git diff BASE...HEAD` and `git log BASE..HEAD --oneline` in `PROJECT_ROOT`.
+The change: for each repo listed by `node "PLUGIN/scripts/nqt.mjs" repos --root "PROJECT_ROOT"`, `git diff BASE...HEAD` and `git log BASE..HEAD --oneline` inside that repo (BASE per repo). Report findings with the repo name.
 
 ## Checks
 
