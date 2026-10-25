@@ -124,6 +124,7 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
     frontier = next;
   }
   if (!routes.length) notes.push('no API routes recognised in back-end code (adapter routePatterns may be needed)');
+  notes.push('caller-tracing: name-search (less precise)');
 
   // 4. Front-end code calling the reached routes, and the screens showing it.
   const calls = extractApiCalls(fe, adapter);
