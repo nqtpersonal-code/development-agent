@@ -58,6 +58,15 @@ export function setStep(workDir, step, status, patch = {}) {
   return writeState(workDir, s);
 }
 
+const FLAGS = ['hasUI', 'architect'];
+
+export function setFlag(workDir, flag, value) {
+  if (!FLAGS.includes(flag)) throw new Error(`unknown flag: ${flag}`);
+  const s = load(workDir);
+  s.flags[flag] = value === true || value === 'true' ? true : value === false || value === 'false' ? false : null;
+  return writeState(workDir, s);
+}
+
 export function setWaiting(workDir, waiting) {
   const s = load(workDir);
   s.waitingFor = waiting ? { ...waiting, since: new Date().toISOString() } : null;

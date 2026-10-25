@@ -4,7 +4,7 @@
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { getDataDir, ensureDataDir, loadConfig, projectConfig } from './lib/config.mjs';
-import { STEPS, newState, readState, writeState, setStep, setWaiting } from './lib/state.mjs';
+import { STEPS, newState, readState, writeState, setStep, setWaiting, setFlag } from './lib/state.mjs';
 import { scanLeaks, projectNamesFrom } from './lib/leaks.mjs';
 import { walkFiles, readText, rel } from './lib/files.mjs';
 import { execFileSync } from 'node:child_process';
@@ -68,6 +68,10 @@ const commands = {
     for (const pair of [].concat(args.set ?? [])) {
       const [step, status] = String(pair).split('=');
       setStep(workDir, step, status);
+    }
+    for (const pair of [].concat(args.flag ?? [])) {
+      const [flag, value] = String(pair).split('=');
+      setFlag(workDir, flag, value);
     }
     if (args.wait) setWaiting(workDir, { kind: args.wait, text: args._.slice(1).join(' ') });
     if (args['clear-wait']) setWaiting(workDir, null);

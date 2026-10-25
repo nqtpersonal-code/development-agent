@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmp } from '../helpers/tmp.mjs';
-import { STEPS, newState, readState, writeState, setStep, setWaiting } from '../../plugin/scripts/lib/state.mjs';
+import { STEPS, newState, readState, writeState, setStep, setWaiting, setFlag } from '../../plugin/scripts/lib/state.mjs';
 
 test('a new state starts at setup with every step pending', () => {
   const s = newState('demo', '12');
@@ -42,6 +42,17 @@ test('a corrupted state file raises an error naming the file', () => {
   const d = tmp();
   writeFileSync(join(d, 'state.json'), '{not json');
   assert.throws(() => readState(d), /state\.json/);
+});
+
+test('setFlag stores booleans and counters and rejects unknown flags', () => {
+  const d = tmp();
+  writeState(d, newState('demo', '12'));
+  setFlag(d, 'hasUI', 'true');
+  setFlag(d, 'architect', 'false');
+  const s = readState(d);
+  assert.equal(s.flags.hasUI, true);
+  assert.equal(s.flags.architect, false);
+  assert.throws(() => setFlag(d, 'colour', 'red'), /unknown flag/);
 });
 
 test('setStep rejects unknown steps and statuses', () => {

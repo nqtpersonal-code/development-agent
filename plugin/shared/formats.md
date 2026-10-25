@@ -82,7 +82,7 @@ Components (front end, back end, workers) live in `tracer/adapter.json`.
 
 Steps in order: `setup, analysis, screens, brief, test-design, free-qa,
 architect, design, plan, plan-check, implement, review, qa, report, done`.
-Manage it with `nqt.mjs state <work> --init <project> <ticket> | --set step=status | --wait kind text | --clear-wait`.
+Manage it with `nqt.mjs state <work> --init <project> <ticket> | --set step=status | --flag hasUI=true | --wait kind text | --clear-wait`.
 
 ## Ticket work files (in `<work>`)
 

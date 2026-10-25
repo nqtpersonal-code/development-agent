@@ -1,0 +1,54 @@
+# Bridge to superpowers (design → plan → plan-check → implement)
+
+The owner always wants superpowers brainstorming in the build phase. The
+superpowers skills run in this main session. These owner preferences
+override their defaults — state them explicitly when invoking each skill:
+
+- Save design docs and plans in `WORK/` (not `docs/superpowers/...` in the repo) and **do not commit them**.
+- No git worktree: skip `superpowers:using-git-worktrees`; the ticket already has its own folder and DB.
+- Never run `superpowers:finishing-a-development-branch`, never push, never merge, never open PRs.
+- Local commits on the current feature branch are fine.
+- Talk to the owner in natural language per `PLUGIN/shared/rules.md`; no technical questions to the owner.
+
+## design (superpowers:brainstorming)
+
+Invoke `superpowers:brainstorming` with this context:
+
+> Owner preferences: design doc path `WORK/spec.md`, do not commit it.
+> The requirements are already settled in `WORK/ticket-brief.md` (approved by the owner),
+> with `WORK/screens.md`, `WORK/trace/impact.md`, `WORK/test-scenarios.md`,
+> `WORK/questions.md` and, if present, `WORK/architecture.md`. Read them; do not re-ask
+> anything they answer. The owner does not want technical questions: decide technical
+> matters yourself (record them in the spec as your calls) and ask the owner only about
+> choices that change what users get, in plain language with real data. Use the
+> builder check as the skill describes. Present the design for approval as a short
+> natural-language summary; the full technical spec stays in the file.
+
+When brainstorming hands off to writing-plans, continue below. `S --set design=done`.
+
+## plan (superpowers:writing-plans)
+
+Invoke `superpowers:writing-plans` with: spec `WORK/spec.md`; save the plan to
+`WORK/plan.md` (owner preference); Global Constraints must include "no work
+files in the repo, no worktree, no push, surgical changes only"; every plan task
+names the TCs it serves. Do not ask the owner to review the technical plan;
+the plan-checker reviews it. `S --set plan=done`.
+
+## plan-check (nqt:plan-checker)
+
+1. Dispatch `nqt:plan-checker` with `ROUND`. Increment `planCheckRounds` in state.json.
+2. `revise` → apply the findings to `WORK/plan.md` yourself (or re-invoke writing-plans for large gaps) and re-check. "needs owner" findings → ask the owner first.
+3. After round 3 still `revise` → show the remaining findings in plain words and ask how to proceed.
+4. `pass` → `S --set plan-check=done`.
+
+## implement (superpowers:subagent-driven-development)
+
+Invoke `superpowers:subagent-driven-development` with plan `WORK/plan.md`,
+spec `WORK/spec.md`, and the preferences above (it keeps its own
+self-ignored `.superpowers/sdd/` workspace in the repo — accepted). Tell it the
+execution method is subagent-driven (already chosen by the owner's workflow).
+
+Stop and come back to the owner when an implementer reports something that
+contradicts the brief, or when a DB/API change appears that the plan did not
+contain — offer the architect step for it. When it finishes (its own final
+review included, but **not** finishing-a-development-branch), `S --set implement=done`.
