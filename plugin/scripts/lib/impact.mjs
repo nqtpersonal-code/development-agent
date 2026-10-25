@@ -1,16 +1,16 @@
 import { existsSync } from 'node:fs';
-import { basename, join, relative, sep } from 'node:path';
+import { isAbsolute, join, relative, sep } from 'node:path';
 import { nameVariants } from './names.mjs';
 import { searchCode } from './search.mjs';
 import { relatedTables } from './schema.mjs';
-import { extractRoutes, extractApiCalls, linkCalls, enclosingFunction } from './routes.mjs';
-import { walkFiles, readText } from './files.mjs';
+import { extractRoutes, extractApiCalls, linkCalls } from './routes.mjs';
+import { readText } from './files.mjs';
 import { checkAssumptions } from './assumptions.mjs';
+import { walkCallers, screenMap, loadFiles } from './trace.mjs';
 
 const DYNAMIC_SQL = /\$queryRawUnsafe|\$executeRawUnsafe|\b(?:FROM|JOIN|UPDATE|INTO)\s*['"`]\s*\+|\b(?:FROM|JOIN|UPDATE|INTO)\s+['"`]?\s*\$\{|\+\s*table\s*\+|\.raw\(\s*[A-Za-z_$]/i;
 const JOB_HINT = /@Cron\b|\bcron\b|schedule|\bworker\b|\bqueue\b|consumer|\.job\.|jobs[\\/]/i;
 const RANK = { 'confirmed-uses-column': 3, 'related-via-table': 2, suspected: 1 };
-const MAX_CALLER_DEPTH = 4;
 
 const posix = (p) => p.split(sep).join('/');
 
@@ -95,41 +95,19 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
 
   // 3. Walk callers upward in back-end code until a route is reached.
   const routes = extractRoutes(be, adapter);
-  const reached = new Map();
-  const beFiles = be.flatMap((root) => [...walkFiles(root)].map((abs) => ({ root, abs, text: readText(abs) ?? '' })));
-  const routeAt = (absFile, line) => routes
-    .filter((r) => join(r.root, r.file) === absFile && r.line <= line && line - r.line <= 60)
-    .sort((x, y) => y.line - x.line)[0];
-  let frontier = [...places.values()].filter((p) => p.layer !== 'fe' && p.layer !== 'db')
-    .flatMap((p) => (p.lines ?? [p.line]).map((line) => ({ abs: join(p.root, p.relFile), line, chain: [p.file] })));
-  const visited = new Set();
-  for (let depth = 0; depth < MAX_CALLER_DEPTH && frontier.length; depth++) {
-    const next = [];
-    for (const node of frontier) {
-      const r = routeAt(node.abs, node.line);
-      if (r) {
-        reached.set(`${r.method} ${r.path}`, { route: r, chain: node.chain });
-        continue;
-      }
-      const text = readText(node.abs) ?? '';
-      const fn = enclosingFunction(text, node.line);
-      if (!fn || visited.has(`${node.abs}|${fn}`)) continue;
-      visited.add(`${node.abs}|${fn}`);
-      const modBase = basename(node.abs).replace(/\.(ts|tsx|js|jsx|mjs|cjs)$/, '');
-      const callRe = new RegExp(`\\b${fn}\\s*\\(`);
-      for (const f of beFiles) {
-        if (f.abs === node.abs || !callRe.test(f.text) || !f.text.includes(modBase)) continue;
-        const lines = f.text.split(/\r?\n/);
-        lines.forEach((l, i) => {
-          if (!callRe.test(l) || /\b(function|async)\s+\w+\s*\(/.test(l)) return;
-          const file = fileOf(f.root, posix(relative(f.root, f.abs)));
-          add({ layer: layerOf(f.root, file, f.text), file, line: i + 1, root: f.root, relFile: posix(relative(f.root, f.abs)), via: [`calls ${fn}() in ${node.chain.at(-1)}`], certainty: 'confirmed-uses-column', reason: `calls ${fn}()` });
-          next.push({ abs: f.abs, line: i + 1, chain: [...node.chain, file] });
-        });
-      }
-    }
-    frontier = next;
-  }
+  const beFiles = loadFiles(be);
+  const seeds = [...places.values()].filter((p) => p.layer !== 'fe' && p.layer !== 'db')
+    .flatMap((p) => (p.lines ?? [p.line]).map((line) => ({ abs: join(p.root, p.relFile), line, label: p.file })));
+  const relOf = (c) => posix(relative(c.root, c.abs));
+  const reached = walkCallers({
+    seeds, beFiles, routes,
+    onCaller: (c) => {
+      const file = fileOf(c.root, relOf(c));
+      const text = beFiles.find((f) => f.abs === c.abs)?.text;
+      const from = isAbsolute(c.from) ? posix(relative(projectRoot, c.from)) : c.from;
+      add({ layer: layerOf(c.root, file, text), file, line: c.line, root: c.root, relFile: relOf(c), via: [`calls ${c.fn}() in ${from}`], certainty: 'confirmed-uses-column', reason: `calls ${c.fn}()` });
+    },
+  });
   if (!routes.length) notes.push('no API routes recognised in back-end code (adapter routePatterns may be needed)');
   notes.push('caller-tracing: name-search (less precise)');
 
@@ -149,25 +127,6 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
 
   const out = [...places.values()].map(({ root, relFile, lines, ...p }) => p);
   return { start, places: out, routes: [...reached.keys()], unscanned, notes: [...new Set(notes)] };
-}
-
-// Maps page component files to router paths (react-router <Route path element> and { path, element/component }).
-function screenMap(feRoots) {
-  const compPath = new Map();
-  const files = feRoots.flatMap((root) => [...walkFiles(root)].filter((p) => /\.(tsx|jsx|ts|js|vue)$/.test(p)));
-  for (const abs of files) {
-    const text = readText(abs) ?? '';
-    for (const m of text.matchAll(/path\s*[=:]\s*["'`]([^"'`]+)["'`][^>\n]*?(?:element\s*[=:]\s*\{?\s*<\s*|component\s*[=:]\s*\{?\s*)([A-Z]\w*)/g)) {
-      compPath.set(m[2], m[1]);
-    }
-  }
-  const out = new Map();
-  for (const abs of files) {
-    const text = readText(abs) ?? '';
-    const name = /export\s+default\s+function\s+([A-Z]\w*)/.exec(text)?.[1] ?? basename(abs).replace(/\.\w+$/, '');
-    if (compPath.has(name)) out.set(abs, compPath.get(name));
-  }
-  return out;
 }
 
 export function summarizeImpact(impact) {

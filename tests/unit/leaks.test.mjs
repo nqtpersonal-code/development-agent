@@ -52,6 +52,10 @@ test('internal urls and emails are caught, allowlisted ones are not', () => {
   assert.deepEqual(one('see https://github.com/anthropics/claude-code and http://localhost:3000 and noreply@anthropic.com'), []);
 });
 
+test('emails at reserved example domains are allowed', () => {
+  assert.deepEqual(one('git config user.email t@example.com and a@test.example.org'), []);
+});
+
 test('clean fictional text produces no findings and lines are reported', () => {
   assert.deepEqual(one('Học sinh HS trong lớp L1 ngày 22/09'), []);
   const [f] = one('line one\nfixes JIRA-9');

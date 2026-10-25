@@ -17,6 +17,9 @@ import { loadAdapter, checkAssumptions, runAdapterTests, resolveDbUrl } from './
 import { resolve } from 'node:path';
 import { uiCheck, summarizeUi } from './lib/uicheck.mjs';
 import { parseDbUrl, assertLocalDb } from './lib/localhost.mjs';
+import { findSiblings, tableVariants, columnVariants } from './lib/siblings.mjs';
+import { blastRadius, summarizeRadius } from './lib/radius.mjs';
+import { gitHistory, testCoverage } from './lib/risk.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
@@ -115,9 +118,11 @@ const commands = {
     const ctx = args.project ? projectContext(args) : { dbUrl: args.db, dataDir: getDataDir(), confirmedLocalHosts: [] };
     if (!ctx.dbUrl) throw new Error('no DB settings in project.md (dbUrl or dbEnvFile)');
     const s = await readSchema(ctx.dbUrl, ctx.dataDir, ctx);
+    s.columnVariants = columnVariants(s);
     if (args.out) writeJson(args.out, s);
     console.log(`schema (${s.engine}): ${s.tables.length} tables, ${s.fks.length} foreign keys, ${s.implicit.length} inferred relations, ${s.views.length} views, ${s.triggers.length} triggers`);
     for (const r of s.implicit.slice(0, 6)) console.log(`  inferred: ${r.from.table}.${r.from.column} -> ${r.to.table}.${r.to.column}`);
+    for (const g of s.columnVariants.slice(0, 4)) console.log(`  look-alike columns (${g.reason}): ${g.columns.map((c) => `${c.table}.${c.column}`).join(', ')}`);
   },
   async impact(args) {
     const ctx = projectContext(args);
@@ -154,6 +159,41 @@ const commands = {
     const r = await uiCheck({ url: args.url, outDir: args.out, login, waitFor: args['wait-for'] });
     for (const l of summarizeUi(r)) console.log(l);
     return r.issues.length ? 1 : 0;
+  },
+  siblings(args) {
+    const ctx = projectContext(args);
+    let r;
+    if (args.table) {
+      r = tableVariants({ table: args.table, projectRoot: ctx.root, components: ctx.components, aliases: ctx.adapter?.aliases?.[args.table] ?? [] });
+      console.log(`siblings of table ${args.table}: ${r.functions.length} functions touch it`);
+      for (const d of r.divergences) console.log(`  "${d.term}" used by ${d.usedBy.length}, missing in: ${d.missingIn.join('; ')}`);
+      if (!r.divergences.length) console.log('  no diverging filter columns found');
+    } else if (args.file && args.line) {
+      r = findSiblings({ seed: { file: args.file, line: Number(args.line) }, projectRoot: ctx.root, components: ctx.components });
+      console.log(`siblings of ${r.seed.name}() in ${r.seed.file}: ${r.siblings.length} candidates`);
+      for (const s of r.siblings.slice(0, 6)) console.log(`  ${s.score}  ${s.file}:${s.start} ${s.name}${s.shared.length ? ` — shares ${s.shared.slice(0, 5).join(', ')}` : ''}${s.onlyInSeed.length ? ` — lacks ${s.onlyInSeed.slice(0, 3).join(', ')}` : ''}`);
+    } else throw new Error('usage: siblings --project p [--root dir] (--table t | --file f --line n) [--out file.json]');
+    if (args.out) writeJson(args.out, r);
+  },
+  radius(args) {
+    const ctx = projectContext(args);
+    if (!args.file || !args.function) throw new Error('usage: radius --project p [--root dir] --file f --function name [--out file.json]');
+    const r = blastRadius({ file: args.file, fn: args.function, projectRoot: ctx.root, components: ctx.components, adapter: ctx.adapter ?? {} });
+    if (args.out) writeJson(args.out, r);
+    for (const l of summarizeRadius(r)) console.log(l);
+  },
+  'risk-signals'(args) {
+    const ctx = projectContext(args);
+    if (!args.file || !args.function) throw new Error('usage: risk-signals --project p [--root dir] --file f --function name [--days 180] [--out file.json]');
+    const radius = blastRadius({ file: args.file, fn: args.function, projectRoot: ctx.root, components: ctx.components, adapter: ctx.adapter ?? {} });
+    const history = gitHistory(ctx.root, args.file, { days: Number(args.days ?? 180) });
+    const roots = ctx.components.map((c) => join(ctx.root, c.root));
+    const tests = testCoverage(roots, [args.function, ...radius.routes.map((r) => r.split(' ')[1])]);
+    const r = { radius, history, tests };
+    if (args.out) writeJson(args.out, r);
+    for (const l of summarizeRadius(radius)) console.log(l);
+    console.log(`history (${history.days} days): ${history.commits ?? 'unknown'} commits, ${history.fixCommits ?? 'unknown'} bug fixes, last ${history.lastChanged ?? 'unknown'}`);
+    console.log(`tests mentioning it or its routes: ${tests.files.length ? tests.files.join(', ') : 'none'}`);
   },
   'db-check'(args) {
     const ctx = projectContext(args);
