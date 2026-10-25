@@ -10,7 +10,7 @@
     "aliases": { "students": ["repo('students')"] },
     "dbAccessPatterns": ["repo\\(['\"]([a-z_]+)['\"]\\)"],
     "routePatterns": [],
-    "apiClientPatterns": ["api\\.(get|post|put|delete)\\(\\s*['\"`]([^'\"`]+)"],
+    "apiClientPatterns": ["api\\.(get|post|put|delete)(?:<[^>]*>)?\\(\\s*['\"`]([^'\"`]+)"],
     "apiBase": "/api/v1",
     "jobPatterns": ["worker", "consumer"],
     "assumptions": [
