@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bad</title>
+<style>
+  body { margin: 0; font-family: sans-serif; }
+  form { min-width: 1000px; }
+  .label { display: block; width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tiny { padding: 1px 4px; font-size: 10px; }
+  footer { position: fixed; bottom: 0; left: 0; right: 0; height: 120px; background: #333; }
+  .spacer { height: 680px; }
+</style>
+</head>
+<body>
+  <form>
+    <span class="label" id="lbl">Họ tên học sinh đầy đủ</span>
+    <input id="name">
+    <button class="tiny" id="save" type="button">Lưu</button>
+    <div class="spacer"></div>
+    <input id="hidden-by-footer" style="height:44px;width:200px">
+  </form>
+  <footer></footer>
+</body>
+</html>

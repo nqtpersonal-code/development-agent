@@ -15,6 +15,7 @@ import { readSchema } from './lib/schema.mjs';
 import { analyzeImpact, summarizeImpact } from './lib/impact.mjs';
 import { loadAdapter, checkAssumptions, runAdapterTests, resolveDbUrl } from './lib/adapter.mjs';
 import { resolve } from 'node:path';
+import { uiCheck, summarizeUi } from './lib/uicheck.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
@@ -137,6 +138,13 @@ const commands = {
     for (const t of res) console.log(`${t.pass ? 'pass' : 'FAIL'} ${t.name}${t.pass ? '' : ' — missing: ' + t.missing.join(', ')}`);
     console.log(`${res.filter((t) => t.pass).length}/${res.length} tracer tests pass`);
     return res.every((t) => t.pass) ? 0 : 1;
+  },
+  async 'ui-check'(args) {
+    if (!args.url || !args.out) throw new Error('usage: ui-check --url <url> --out <dir> [--login <json>] [--wait-for <selector>]');
+    const login = args.login ? JSON.parse(args.login) : undefined;
+    const r = await uiCheck({ url: args.url, outDir: args.out, login, waitFor: args['wait-for'] });
+    for (const l of summarizeUi(r)) console.log(l);
+    return r.issues.length ? 1 : 0;
   },
   'scan-leaks'(args) {
     const projectNames = projectNamesFrom(getDataDir());
