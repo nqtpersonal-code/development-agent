@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { getDataDir, ensureDataDir, loadConfig, projectConfig } from './lib/config.mjs';
 import { STEPS, newState, readState, writeState, setStep, setWaiting } from './lib/state.mjs';
+import { scanLeaks, projectNamesFrom } from './lib/leaks.mjs';
+import { walkFiles, readText, rel } from './lib/files.mjs';
+import { execFileSync } from 'node:child_process';
 
 const pluginRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -50,6 +53,27 @@ const commands = {
     const done = STEPS.filter((x) => ['done', 'skipped'].includes(s.steps[x])).length;
     console.log(`ticket ${s.project}/${s.ticket}: step ${s.current} (${done}/${STEPS.length} done)`);
     console.log(s.waitingFor ? `waiting: ${s.waitingFor.kind}: ${s.waitingFor.text}` : 'waiting: nothing');
+  },
+  'scan-leaks'(args) {
+    const projectNames = projectNamesFrom(getDataDir());
+    let files;
+    if (args.staged) {
+      const names = execFileSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACMR'], { encoding: 'utf8' })
+        .split('\n').filter(Boolean);
+      files = names.map((path) => ({ path, content: execFileSync('git', ['show', `:${path}`], { encoding: 'utf8', maxBuffer: 1 << 26 }) }));
+    } else if (args.dir) {
+      files = [...walkFiles(args.dir)].map((p) => ({ path: rel(args.dir, p), content: readText(p) ?? '' }));
+    } else {
+      throw new Error('usage: scan-leaks --staged | --dir <path>');
+    }
+    const findings = scanLeaks({ files, projectNames });
+    if (!findings.length) {
+      console.log(`leak scan: clean (${files.length} files, ${projectNames.length} project names checked)`);
+      return 0;
+    }
+    console.log(`leak scan: ${findings.length} finding(s) — commit/export blocked`);
+    for (const f of findings.slice(0, 20)) console.log(`  ${f.path}:${f.line} [${f.kind}] ${f.match}`);
+    return 1;
   },
 };
 

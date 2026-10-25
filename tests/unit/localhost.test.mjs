@@ -1,3 +1,4 @@
+// nqt-leak-scan: ignore-file
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { isLocalHost, parseDbUrl } from '../../plugin/scripts/lib/localhost.mjs';

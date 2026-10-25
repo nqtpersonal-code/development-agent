@@ -1,0 +1,3 @@
+#!/bin/sh
+# Blocks commits that would leak project data into the plugin repo.
+exec node plugin/scripts/nqt.mjs scan-leaks --staged
