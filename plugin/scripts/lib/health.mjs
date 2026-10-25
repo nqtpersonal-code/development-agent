@@ -98,3 +98,43 @@ export function compareSnapshots(base, cur) {
   if (cur.routes < base.routes * 0.8) drift.push({ kind: 'routes-drop', detail: `recognised API routes fell from ${base.routes} to ${cur.routes}` });
   return { drift };
 }
+
+const FE_DEPS = ['react', 'react-dom', 'vue', '@angular/core', 'svelte', 'next', 'nuxt', 'preact', 'solid-js', 'Microsoft.AspNetCore.Components.WebAssembly'];
+const BE_DEPS = ['@nestjs/core', 'express', 'fastify', 'koa', '@hapi/hapi', 'hapi'];
+
+// Components from manifests (package.json, *.csproj): front end if it depends on a
+// UI framework, back end if on a server framework or the .NET Web SDK.
+export function detectComponents(root) {
+  const out = [];
+  for (const p of packages(root)) {
+    const dir = join(root, p);
+    const ds = deps(root, p);
+    const webSdk = readdirSync(dir).some((n) => n.endsWith('.csproj') && /Microsoft\.NET\.Sdk\.(Web|Razor|BlazorWebAssembly)/.test(readFileSync(join(dir, n), 'utf8')));
+    const fe = ds.some((d) => FE_DEPS.includes(d)) || readdirSync(dir).some((n) => n.endsWith('.csproj') && /BlazorWebAssembly/.test(readFileSync(join(dir, n), 'utf8')));
+    const be = ds.some((d) => BE_DEPS.includes(d)) || (webSdk && !fe);
+    if (!fe && !be) continue;
+    out.push({ name: p === '.' ? 'app' : p.split('/').pop(), root: p, kind: fe ? 'fe' : 'be' });
+  }
+  return out;
+}
+
+const NAVIGATION = /\b(?:to|href|path)\s*[=:]|navigate\s*\(|\.push\s*\(|redirect/;
+
+// Do the generic rules connect this project's front end to its API? If they
+// do, no tracer adapter is needed; if calls only match routes by suffix (a
+// wrapper adds a base path) or no route is recognised, an adapter is needed.
+export function adapterNeeded({ projectRoot, components }) {
+  const present = components.filter((c) => c.root && existsSync(join(projectRoot, c.root)));
+  const be = present.filter((c) => c.kind !== 'fe').map((c) => join(projectRoot, c.root));
+  const fe = present.filter((c) => c.kind === 'fe').map((c) => join(projectRoot, c.root));
+  const reasons = [];
+  const routes = extractRoutes(be);
+  if (be.length && !routes.length) reasons.push('no API routes recognised in the back end');
+  const lineText = (c) => (readText(join(c.root, c.file)) ?? '').split(/\r?\n/)[c.line - 1] ?? '';
+  const calls = [...extractApiCalls(fe), ...extractApiCalls(be, {}, { only: /\.(cshtml|razor)$/ })].filter((c) => !NAVIGATION.test(lineText(c)));
+  const linked = new Set(linkCalls(routes, calls).map((l) => l.call));
+  const routeNorms = routes.map((r) => normalizePath(r.path).toLowerCase());
+  const suffixOnly = calls.filter((c) => !linked.has(c) && c.norm.length > 1 && routeNorms.some((n) => n !== c.norm.toLowerCase() && n.endsWith(c.norm.toLowerCase())));
+  if (suffixOnly.length) reasons.push(`${suffixOnly.length} front-end call(s) such as "${suffixOnly[0].path}" match API routes only after a base path: a wrapper adds it, the adapter must learn it`);
+  return { needed: reasons.length > 0, reasons, linked: linked.size, calls: calls.length };
+}

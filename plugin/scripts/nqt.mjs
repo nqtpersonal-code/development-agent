@@ -23,7 +23,8 @@ import { gitHistory, testCoverage, riskLevel } from './lib/risk.mjs';
 import { detectHost, fetchTicket } from './lib/githost.mjs';
 import { resolveProject, rememberProject } from './lib/project-id.mjs';
 import { listRepos, resolveComponents } from './lib/workspace.mjs';
-import { snapshot, compareSnapshots } from './lib/health.mjs';
+import { snapshot, compareSnapshots, detectComponents, adapterNeeded } from './lib/health.mjs';
+import { ruleSections } from './lib/docs.mjs';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
@@ -296,6 +297,35 @@ const commands = {
     }
     const r = riskLevel({ copies, routes: radius.routes.length, screens: radius.screens.length, fixCommits: history.commits === null ? null : history.fixCommits, dataChange: Boolean(args['data-change']) });
     console.log(`risk-level: ${r.level}${r.reasons.length ? ` — ${r.reasons.join('; ')}` : ` — ${copies} copies, ${radius.routes.length} APIs, ${radius.screens.length} screens, ${history.fixCommits ?? 'unknown'} recent bug fixes`}`);
+    return 0;
+  },
+  rules(args) {
+    const topics = String(args.topics ?? '').split('|').map((t) => t.trim()).filter(Boolean);
+    if (!topics.length) throw new Error('usage: rules --topics "Heading one|Heading two"');
+    console.log(ruleSections(join(pluginRoot, 'shared', 'rules.md'), topics));
+  },
+  formats(args) {
+    const sections = String(args.sections ?? '').split('|').map((t) => t.trim()).filter(Boolean);
+    if (!sections.length) throw new Error('usage: formats --sections "Heading one|Heading two"');
+    console.log(ruleSections(join(pluginRoot, 'shared', 'formats.md'), sections));
+  },
+  'tracer-need'(args) {
+    const ctx = projectContext(args);
+    if (ctx.adapter) {
+      console.log('tracer-need: an adapter already exists (use tracer-check / tracer-health)');
+      return 0;
+    }
+    const components = detectComponents(ctx.root);
+    const r = adapterNeeded({ projectRoot: ctx.root, components });
+    console.log(`components: ${components.map((c) => `${c.name} (${c.kind}, ${c.root})`).join(', ') || 'none detected'}`);
+    if (r.needed) {
+      console.log(`tracer-need: NEEDED — ${r.reasons.join('; ')}`);
+      return 1;
+    }
+    const dir = join(ctx.dataDir, 'projects', args.project, 'tracer');
+    writeJson(join(dir, 'adapter.json'), { version: 1, generated: 'auto: generic rules connect this project', components });
+    writeJson(join(dir, 'health.json'), snapshot({ projectRoot: ctx.root, components }));
+    console.log(`tracer-need: not needed — generic rules link ${r.linked}/${r.calls} front-end calls; saved components and a health baseline`);
     return 0;
   },
   'db-check'(args) {

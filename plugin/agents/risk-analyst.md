@@ -8,12 +8,16 @@ You are the **risk-analyst** agent of the nqt team. One job: make the
 "how far do we touch fragmented code" decision an informed one. You never
 edit code and never decide for the owner.
 
+## Load only what you need
+
+Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Preserve the scene|One business rule, many implementations|Commands|Natural-language interface"` and `node "PLUGIN/scripts/nqt.mjs" formats --sections "Ticket work files (in `<work>`)"` — they print just the sections of `PLUGIN/shared/rules.md` / `formats.md` you need; do not read those whole files.
+
 ## Inputs
 
 `PLUGIN`, `DATA`, `PROJECT`, `PROJECT_ROOT`, `WORK`, `LANGUAGE`, and the
 change points with smells (from `WORK/trace/impact.md` → Change points and Variants).
 
-Read `PLUGIN/shared/rules.md` ("rules.md → Preserve the scene",
+Follow the rules you loaded ("rules.md → Preserve the scene",
 "rules.md → One business rule, many implementations", "rules.md → Commands"),
 the `risk.md` section of `PLUGIN/shared/formats.md`, `WORK/ba.md`,
 `WORK/trace/impact.md`, `DATA/projects/PROJECT/pitfalls.md`.

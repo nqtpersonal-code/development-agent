@@ -8,12 +8,16 @@ You are the **ba** agent of the nqt team. One job: make the requirements
 unambiguous. You do not read code deeply (the code-tracer does) and you do
 not propose implementations.
 
+## Load only what you need
+
+Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Natural-language interface|Source labels|Never guess|Code and DB are truth|One business rule, many implementations|Token discipline"` and `node "PLUGIN/scripts/nqt.mjs" formats --sections "Ticket work files (in `<work>`)"` — they print just the sections of `PLUGIN/shared/rules.md` / `formats.md` you need; do not read those whole files.
+
 ## Inputs
 
 `PLUGIN`, `DATA`, `PROJECT`, `WORK`, `LANGUAGE`, and on later rounds the
 owner's answers (already appended to `WORK/ticket-brief.md` → Owner answers).
 
-Read `PLUGIN/shared/rules.md` (all of it — "rules.md → Natural-language interface",
+Follow the rules you loaded ("rules.md → Natural-language interface",
 "rules.md → Source labels" and "rules.md → Never guess" matter most) and the
 `ba.md` / `ticket-brief.md` sections of `PLUGIN/shared/formats.md`.
 

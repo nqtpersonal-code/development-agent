@@ -32,6 +32,7 @@ test('agent files exist with valid frontmatter, cite shared rules and have no pl
     assert.ok(typeof fm.description === 'string' && fm.description.length > 40, `${a}: description`);
     assert.ok(typeof fm.tools === 'string' && fm.tools.length > 0, `${a}: tools`);
     assert.match(text, /shared\/rules\.md/, `${a}: must cite shared/rules.md`);
+    if (a !== 'reviewer') assert.match(text, /nqt\.mjs" rules --topics/, `${a}: must load only its rule sections`);
     assert.doesNotMatch(text, /\bTODO\b|\bTBD\b/, `${a}: placeholder`);
     for (const m of text.matchAll(/rules\.md → ([^"\n)]+?)(?:["\n)]|$)/g)) {
       assert.ok(RULE_HEADINGS.includes(m[1].trim()), `${a}: cites unknown rule heading "${m[1].trim()}"`);

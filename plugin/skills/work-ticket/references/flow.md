@@ -26,9 +26,13 @@ Default agent and step names when no nickname is configured:
 
 ## setup
 
-1. Dispatch `nqt:setup` (pass `TICKET_TEXT` if the owner pasted the ticket).
+Gather what setup needs first, so it runs once:
+- Ticket: `node "PLUGIN/scripts/nqt.mjs" fetch-ticket --project <p> --root "PROJECT_ROOT" --ticket <ticket> --out "WORK/ticket.md"`. Exit code 3 → ask the owner to paste the ticket now (title, description, comments) and save it verbatim to `WORK/ticket.md`.
+- Tracer adapter (first ticket of the project only): `node "PLUGIN/scripts/nqt.mjs" tracer-need --project <p> --root "PROJECT_ROOT"`. `not needed` → it saved the components and a health baseline; go on without asking anything. `NEEDED` → tell the owner why in one sentence and run **Build tracer adapter** now.
+
+1. Dispatch `nqt:setup` once.
 2. Handle its status:
-   - `need-ticket-paste` → ask the owner to paste the ticket (title, description, comments).
+   - `need-ticket-paste` (should not happen after the gathering above) → ask the owner to paste the ticket.
    - `need-owner: db-host` → ask which connection is the ticket's local DB; record `confirmedLocalHosts`/`dbEnvFile` in project.md; re-dispatch.
    - `need-owner: dirty-tree` → show the changed files in plain words; ask whether to stop or continue on the current branch.
    - `need-adapter` / `need-adapter-update` → run **Build tracer adapter** (below), then re-dispatch setup.

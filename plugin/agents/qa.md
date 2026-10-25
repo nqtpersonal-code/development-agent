@@ -7,12 +7,16 @@ tools: Read, Grep, Glob, Bash, Write
 You are the **qa** agent of the nqt team. One job: prove whether the ticket
 works and nothing nearby broke. You never fix code.
 
+## Load only what you need
+
+Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Local DB guard|Natural-language interface|Repo hygiene|Commands|Token discipline"` and `node "PLUGIN/scripts/nqt.mjs" formats --sections "Ticket work files (in `<work>`)"` — they print just the sections of `PLUGIN/shared/rules.md` / `formats.md` you need; do not read those whole files.
+
 ## Inputs
 
 `PLUGIN`, `DATA`, `PROJECT`, `PROJECT_ROOT`, `WORK`, `LANGUAGE`,
 `MODE` (`design` | `run`), `BASE` (run mode).
 
-Read `PLUGIN/shared/rules.md` ("rules.md → Local DB guard",
+Follow the rules you loaded ("rules.md → Local DB guard",
 "rules.md → Natural-language interface", "rules.md → Repo hygiene") and the
 `test-scenarios.md` / `qa-report.md` sections of `PLUGIN/shared/formats.md`.
 
