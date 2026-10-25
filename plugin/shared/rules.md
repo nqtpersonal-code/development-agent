@@ -125,7 +125,7 @@ let it mislead you.
 ## Preserve the scene
 
 - Default: features that work stay as they are. Patch exactly and completely what the ticket needs so users get the function — at the narrowest point on the ticket's path, measured with `nqt.mjs radius` (who calls it, which APIs and screens).
-- Not blindly: when a change point touches a code smell (diverging copies, a shared function with a wide radius, copied components), the `risk-analyst` compares at least "patch and preserve" with "fix the smell within the ticket", using measured signals (`nqt.mjs risk-signals`: radius, existing tests, change and bug-fix history, number of copies, data impact), and recommends. The owner decides per smell; the decision goes into the brief.
+- Not blindly: when a change point touches a code smell (diverging copies, a shared function with a wide radius, copied components), `nqt.mjs risk-level` decides how much analysis it deserves. Small smells → one quick question to the owner (patch on the ticket's path vs align the copies). Larger ones → the `risk-analyst` compares at least "patch and preserve" with "fix the smell within the ticket", using measured signals (`nqt.mjs risk-signals`: radius, existing tests, change and bug-fix history, number of copies, data impact), and recommends. The owner decides per smell; the decision goes into the brief.
 - Refactoring beyond the decided fix mode is out of scope ("rules.md → Surgical changes").
 - A change point found late (during coding, review or QA) → stop and tell the owner; retro turns it into a tracer test and a project pitfall.
 

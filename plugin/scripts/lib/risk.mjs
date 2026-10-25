@@ -35,3 +35,16 @@ export function testCoverage(roots, terms) {
   }
   return { files };
 }
+
+// Thresholds for how much analysis a code smell on the ticket's path deserves.
+export const FULL_ANALYSIS = { copies: 3, reach: 4, fixCommits: 2 };
+
+// quick = the orchestrator asks one question with options; full = dispatch the risk-analyst.
+export function riskLevel({ copies = 0, routes = 0, screens = 0, fixCommits = null, dataChange = false }) {
+  const reasons = [];
+  if (copies >= FULL_ANALYSIS.copies) reasons.push(`${copies} copies of the same rule`);
+  if (routes + screens >= FULL_ANALYSIS.reach) reasons.push(`used by ${routes} APIs and ${screens} screens`);
+  if (fixCommits !== null && fixCommits >= FULL_ANALYSIS.fixCommits) reasons.push(`${fixCommits} bug-fix commits recently`);
+  if (dataChange) reasons.push('existing data would change');
+  return { level: reasons.length ? 'full' : 'quick', reasons };
+}

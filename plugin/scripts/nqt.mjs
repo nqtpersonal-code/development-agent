@@ -19,7 +19,7 @@ import { uiCheck, summarizeUi } from './lib/uicheck.mjs';
 import { parseDbUrl, assertLocalDb } from './lib/localhost.mjs';
 import { findSiblings, tableVariants, columnVariants } from './lib/siblings.mjs';
 import { blastRadius, summarizeRadius } from './lib/radius.mjs';
-import { gitHistory, testCoverage } from './lib/risk.mjs';
+import { gitHistory, testCoverage, riskLevel } from './lib/risk.mjs';
 import { detectHost, fetchTicket } from './lib/githost.mjs';
 import { resolveProject, rememberProject } from './lib/project-id.mjs';
 import { listRepos, resolveComponents } from './lib/workspace.mjs';
@@ -282,6 +282,21 @@ const commands = {
     mkdirSync(dirname(args.out), { recursive: true });
     writeFileSync(args.out, r.markdown, 'utf8');
     console.log(`fetch-ticket: ${info.host} issue ${r.id} saved to ${args.out}`);
+  },
+  'risk-level'(args) {
+    const ctx = projectContext(args);
+    if (!args.file || !args.function) throw new Error('usage: risk-level --project p [--root dir] --file f --function name [--copies n] [--data-change] [--days 180]');
+    const radius = blastRadius({ file: args.file, fn: args.function, projectRoot: ctx.root, components: ctx.components, adapter: ctx.adapter ?? {} });
+    const history = gitHistory(ctx.root, args.file, { days: Number(args.days ?? 180) });
+    let copies = args.copies !== undefined ? Number(args.copies) : null;
+    if (copies === null) {
+      const lines = readFileSync(join(ctx.root, args.file), 'utf8').split(/\r?\n/);
+      const def = lines.findIndex((l) => new RegExp(`\\b${args.function}\\s*(?:=|\\()`).test(l)) + 1;
+      copies = 1 + findSiblings({ seed: { file: args.file, line: def + 1 }, projectRoot: ctx.root, components: ctx.components, minScore: 0.5 }).siblings.length;
+    }
+    const r = riskLevel({ copies, routes: radius.routes.length, screens: radius.screens.length, fixCommits: history.commits === null ? null : history.fixCommits, dataChange: Boolean(args['data-change']) });
+    console.log(`risk-level: ${r.level}${r.reasons.length ? ` — ${r.reasons.join('; ')}` : ` — ${copies} copies, ${radius.routes.length} APIs, ${radius.screens.length} screens, ${history.fixCommits ?? 'unknown'} recent bug fixes`}`);
+    return 0;
   },
   'db-check'(args) {
     const ctx = projectContext(args);

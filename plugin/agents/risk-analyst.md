@@ -1,6 +1,6 @@
 ---
 name: risk-analyst
-description: nqt team — when a ticket's change points touch a code smell (diverging copies of one business rule, a shared function used by many stable features, copied components), compares "patch and preserve the scene" with "fix the smell within the ticket" (and hybrids) using measured signals - blast radius, existing tests, change and bug-fix history, number of copies, data impact - and recommends one per smell in plain language. Runs automatically in the risk step; skipped when no smell is involved.
+description: nqt team — when a ticket's change points touch a code smell (diverging copies of one business rule, a shared function used by many stable features, copied components), compares "patch and preserve the scene" with "fix the smell within the ticket" (and hybrids) using measured signals - blast radius, existing tests, change and bug-fix history, number of copies, data impact - and recommends one per smell in plain language. Dispatched in the risk step only for smells that `nqt.mjs risk-level` rates `full` (many copies, wide radius, frequent bug fixes or data changes) or when the owner asks; small smells get a quick question from the orchestrator instead.
 tools: Read, Grep, Glob, Bash, Write
 ---
 

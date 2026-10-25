@@ -64,8 +64,11 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 ## risk (only when a change point touches a code smell; else `S --set risk=skipped`)
 
 1. Smells: diverging copies of one rule, a must-patch function with a wide radius (many routes/screens of stable features), copied components on the ticket's path.
-2. Dispatch `nqt:risk-analyst`.
-3. **Checkpoint 2b** — per smell, show the owner part of `risk.md` (what is fragmented, options with risks, recommendation) and ask which option; record the decision in the brief → Fix mode. If the owner chooses B, re-classify change points accordingly.
+2. For each smell run `node "PLUGIN/scripts/nqt.mjs" risk-level --project <p> --root "PROJECT_ROOT" --file <f> --function <fn> [--data-change]` (add `--data-change` when fixing the smell would change existing rows). It decides how much analysis the smell deserves from measured signals (copies, APIs and screens reached, recent bug fixes, data change):
+   - `quick` → no agent. Ask the owner directly, batched with other questions: what is fragmented (one sentence, real data, links) and two options — **A. patch only on the ticket's path, keep the rest as it is (Recommended)** and **B. align the copies too** — each with its one-line consequence.
+   - `full` → dispatch `nqt:risk-analyst` for those smells only.
+   The owner can always ask for the full analysis.
+3. **Checkpoint 2b** — per smell, the quick question or the owner part of `risk.md` (what is fragmented, options with risks, recommendation); record the decision in the brief → Fix mode. If the owner chooses B, re-classify change points accordingly.
 4. `S --set risk=done`.
 
 ## brief
