@@ -8,6 +8,7 @@ import { STEPS, newState, readState, writeState, setStep, setWaiting } from './l
 import { scanLeaks, projectNamesFrom } from './lib/leaks.mjs';
 import { walkFiles, readText, rel } from './lib/files.mjs';
 import { execFileSync } from 'node:child_process';
+import { doctor } from './lib/runtime.mjs';
 
 const pluginRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -53,6 +54,17 @@ const commands = {
     const done = STEPS.filter((x) => ['done', 'skipped'].includes(s.steps[x])).length;
     console.log(`ticket ${s.project}/${s.ticket}: step ${s.current} (${done}/${STEPS.length} done)`);
     console.log(s.waitingFor ? `waiting: ${s.waitingFor.kind}: ${s.waitingFor.text}` : 'waiting: nothing');
+  },
+  doctor(args) {
+    const dataDir = getDataDir();
+    ensureDataDir(dataDir, pluginRoot);
+    const r = doctor(dataDir, { install: Boolean(args.install) });
+    for (const c of r.checks) {
+      const mark = c.ok ? 'ok ' : c.required ? 'MISSING' : 'optional-missing';
+      console.log(`${mark.padEnd(16)} ${c.name} — ${c.detail}`);
+    }
+    if (!r.ok) console.log('fix: node <plugin>/scripts/nqt.mjs doctor --install (and install the superpowers plugin if missing)');
+    return r.ok ? 0 : 1;
   },
   'scan-leaks'(args) {
     const projectNames = projectNamesFrom(getDataDir());
