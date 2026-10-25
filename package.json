@@ -1,0 +1,9 @@
+{
+  "name": "nqt-plugin-repo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"tests/unit/*.test.mjs\"",
+    "export": "node tools/export-zip.mjs"
+  }
+}

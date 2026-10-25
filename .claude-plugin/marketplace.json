@@ -1,0 +1,13 @@
+{
+  "name": "nqt-local",
+  "description": "Personal marketplace for the nqt agent team plugin",
+  "owner": { "name": "nqt" },
+  "plugins": [
+    {
+      "name": "nqt",
+      "description": "Natural-language agent team for working on software tickets with code and DB evidence",
+      "version": "0.1.0",
+      "source": "./plugin"
+    }
+  ]
+}
