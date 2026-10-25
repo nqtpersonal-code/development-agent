@@ -7,6 +7,9 @@ import { extractRoutes, extractApiCalls, linkCalls } from './routes.mjs';
 import { readText } from './files.mjs';
 import { checkAssumptions } from './assumptions.mjs';
 import { walkCallers, screenMap, loadFiles } from './trace.mjs';
+import { efMappings, efNamesForTable, efNamesForColumn } from './efcore.mjs';
+
+const esc = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const DYNAMIC_SQL = /\$queryRawUnsafe|\$executeRawUnsafe|\b(?:FROM|JOIN|UPDATE|INTO)\s*['"`]\s*\+|\b(?:FROM|JOIN|UPDATE|INTO)\s+['"`]?\s*\$\{|\+\s*table\s*\+|\.raw\(\s*[A-Za-z_$]/i;
 const JOB_HINT = /@Cron\b|\bcron\b|schedule|\bworker\b|\bqueue\b|consumer|\.job\.|jobs[\\/]/i;
@@ -51,6 +54,10 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
 
   const tableTerms = [...nameVariants(start.table), ...(adapter.aliases?.[start.table] ?? [])];
   const colTerms = start.column ? nameVariants(start.column) : tableTerms;
+  // EF Core: entity/DbSet names for the table, property names for the column.
+  const ef = efMappings(be);
+  tableTerms.push(...efNamesForTable(ef, start.table));
+  if (start.column) colTerms.push(...efNamesForColumn(ef, start.table, start.column));
   const roots = present.map((c) => c.abs);
 
   // 1. Direct users of the column (near a mention of its table/model).
@@ -93,6 +100,24 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
     if (dynamic) notes.push(`dynamic SQL in ${fileOf(h.root, h.file)}: verify by reading the code`);
   }
 
+  // 2b. Stored procedures, views and triggers reading the column, and the code calling them.
+  const dbObjects = [];
+  for (const [kind, list] of [['procedure', schema?.procedures ?? []], ['view', schema?.views ?? []], ['trigger', schema?.triggers ?? []]]) {
+    for (const o of list) {
+      const body = String(o.sql ?? '');
+      const mentions = (name) => new RegExp(`(?<![\\w])\\[?${esc(name)}\\]?(?![\\w])`, 'i').test(body);
+      if (!mentions(start.table) || (start.column && !mentions(start.column))) continue;
+      add({ layer: 'db', file: `db:${kind}/${o.name}`, line: 0, via: [], certainty: 'confirmed-uses-column', reason: `${kind} uses ${start.table}${start.column ? '.' + start.column : ''}` });
+      dbObjects.push({ kind, name: o.name });
+    }
+  }
+  if (dbObjects.length) {
+    for (const h of searchCode({ roots, terms: dbObjects.map((o) => o.name) }).hits) {
+      const obj = dbObjects.find((o) => o.name === h.term);
+      add({ layer: layerOf(h.root, h.file, readText(join(h.root, h.file))), lines: [h.line], file: fileOf(h.root, h.file), line: h.line, root: h.root, relFile: h.file, via: [`uses ${obj.kind} ${obj.name}`], certainty: 'confirmed-uses-column', reason: `calls database ${obj.kind} ${obj.name}` });
+    }
+  }
+
   // 3. Walk callers upward in back-end code until a route is reached.
   const routes = extractRoutes(be, adapter);
   const beFiles = loadFiles(be);
@@ -112,7 +137,7 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
   notes.push('caller-tracing: name-search (less precise)');
 
   // 4. Front-end code calling the reached routes, and the screens showing it.
-  const calls = extractApiCalls(fe, adapter);
+  const calls = [...extractApiCalls(fe, adapter), ...extractApiCalls(be, adapter, { only: /\.(cshtml|razor)$/ })];
   const links = linkCalls([...reached.values()].map((x) => x.route), calls);
   for (const { route, call } of links) {
     const chain = reached.get(`${route.method} ${route.path}`)?.chain ?? [];
@@ -123,6 +148,13 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
     if (p.layer !== 'fe') continue;
     const s = screens.get(join(p.root, p.relFile));
     if (s) p.screen = s;
+  }
+
+  // Razor Pages are screens themselves.
+  for (const { route } of reached.values()) {
+    if (route.kind !== 'razor-page') continue;
+    const place = places.get(fileOf(route.root, route.file));
+    if (place) place.screen ??= route.path;
   }
 
   const out = [...places.values()].map(({ root, relFile, lines, ...p }) => p);

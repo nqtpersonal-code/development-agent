@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-export const RUNTIME_PACKAGES = ['pg', 'mysql2', 'playwright'];
+export const RUNTIME_PACKAGES = ['pg', 'mysql2', 'mssql', 'playwright'];
 
 export class NqtMissingRuntime extends Error {}
 

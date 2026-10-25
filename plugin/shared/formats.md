@@ -46,9 +46,10 @@ runApp: <command(s) to start the app>
 runTests: <command to run the test suite, or none>
 writeTests: no                  # yes = the project requires automated tests for changes (write them its way); no = never add tests or test frameworks
 appUrl: http://localhost:5173
-dbEngine: postgres | mysql
+dbEngine: postgres | mysql | sqlserver
 dbUrl: <only if not taken from an env file>
-dbEnvFile: <path relative to project folder, e.g. api/.env>
+dbEnvFile: <path relative to project folder, e.g. api/.env, or src/App/appsettings.Development.json>
+dbConnectionName: DefaultConnection   # for appsettings JSON (ADO.NET connection string; SQL Server, Npgsql, MySQL)
 dbEnvVar: DATABASE_URL           # or omit and use DB_HOST/DB_PORT/... parts
 confirmedLocalHosts: []
 dbTool: <how to run queries: prisma, mysql client, docker exec …>

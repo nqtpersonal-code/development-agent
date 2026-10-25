@@ -8,14 +8,21 @@ const DATA_LIBS = [
   '@prisma/client', 'prisma', 'typeorm', 'sequelize', 'knex', 'mysql2', 'mysql', 'pg', 'mongoose', 'mongodb',
   'drizzle-orm', '@mikro-orm/core', 'objection', 'better-sqlite3', 'sqlite3', 'redis', 'ioredis', 'bullmq', 'bull',
   'amqplib', 'kafkajs', '@nestjs/typeorm', '@nestjs/sequelize', '@nestjs/mongoose',
+  // .NET (NuGet)
+  'Dapper', 'Microsoft.Data.SqlClient', 'System.Data.SqlClient', 'MySqlConnector', 'MySql.Data', 'MongoDB.Driver',
+  'StackExchange.Redis', 'MassTransit', 'RabbitMQ.Client', 'Confluent.Kafka', 'linq2db',
 ];
-const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', 'coverage', '.superpowers']);
+// NuGet package families counted as data libraries by prefix.
+const DATA_LIB_PREFIXES = ['Microsoft.EntityFrameworkCore', 'Npgsql', 'Pomelo.EntityFrameworkCore', 'Hangfire', 'Oracle.ManagedDataAccess'];
+const isDataLib = (d) => DATA_LIBS.includes(d) || DATA_LIB_PREFIXES.some((p) => d === p || d.startsWith(`${p}.`));
+const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', 'coverage', '.superpowers', 'bin', 'obj']);
+const hasManifest = (dir) => existsSync(join(dir, 'package.json')) || readdirSync(dir).some((n) => n.endsWith('.csproj'));
 const BUILTIN_CALLERS = /^(fetch|axios(\.\w+)?|require|import|navigate|router\.(push|replace)|history\.push|redirect|describe|it|test)$/;
 
 function packages(root, depth = 3) {
   const out = [];
   const visit = (dir, d) => {
-    if (existsSync(join(dir, 'package.json'))) out.push(posix(relative(root, dir)) || '.');
+    if (hasManifest(dir)) out.push(posix(relative(root, dir)) || '.');
     if (d >= depth) return;
     for (const name of readdirSync(dir)) {
       const p = join(dir, name);
@@ -27,12 +34,18 @@ function packages(root, depth = 3) {
 }
 
 function deps(root, pkgDir) {
+  const dir = join(root, pkgDir);
+  const out = [];
   try {
-    const j = JSON.parse(readFileSync(join(root, pkgDir, 'package.json'), 'utf8'));
-    return Object.keys({ ...j.dependencies, ...j.devDependencies });
+    const j = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+    out.push(...Object.keys({ ...j.dependencies, ...j.devDependencies }));
   } catch {
-    return [];
+    // no package.json here
   }
+  for (const proj of readdirSync(dir).filter((n) => n.endsWith('.csproj'))) {
+    for (const m of readFileSync(join(dir, proj), 'utf8').matchAll(/<PackageReference\s+Include="([^"]+)"/g)) out.push(m[1]);
+  }
+  return out;
 }
 
 // Functions called with a path-like first argument in front-end code, with counts.
@@ -67,7 +80,7 @@ export function snapshot({ projectRoot, components, adapter = {} }) {
     components: present.map((c) => c.name),
     packages: pkgs,
     unknownPackages: pkgs.filter((p) => !inComponent(p)),
-    dataLibs: [...new Set(pkgs.flatMap((p) => deps(projectRoot, p)).filter((d) => DATA_LIBS.includes(d)))].sort(),
+    dataLibs: [...new Set(pkgs.flatMap((p) => deps(projectRoot, p)).filter(isDataLib))].sort(),
     routes: routes.length,
     linkRate: apiLikeKeys.size ? Math.round((linked.size / apiLikeKeys.size) * 100) / 100 : 1,
     callHelpers: callHelpers(fe),

@@ -16,7 +16,8 @@ const URL_RE = /https?:\/\/([^\s)"'`<>\]]+)/g;
 const EMAIL_RE = /[\w.+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}\b/gi;
 const SECRET_RES = [
   /-----BEGIN [A-Z ]*(?:PRIVATE KEY|CERTIFICATE)-----/,
-  /\b(?:api[_-]?key|secret|token|password|passwd|pwd)\b["']?\s*[:=]\s*(?!process\.env|\$\{|<|["']?\$)["']?[^\s"']{8,}/i,
+  // value must look like a literal: not env lookups, templates, or code such as kv.password / decode(x)
+  /\b(?:api[_-]?key|secret|token|password|passwd|pwd)\b["']?\s*[:=]\s*(?!process\.env|\$\{|<|["']?\$|[A-Za-z_$][\w$]*\s*[.(])["']?[^\s"']{8,}/i,
   /\b(?:postgres(?:ql)?|mysql|mariadb|mongodb(?:\+srv)?|redis|mssql|sqlserver):\/\/([^:@\s/]+):([^@\s/]+)@/i,
 ];
 

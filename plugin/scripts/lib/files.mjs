@@ -3,7 +3,7 @@ import { join, relative, sep } from 'node:path';
 
 export const DEFAULT_IGNORE = [
   'node_modules', '.git', 'dist', 'build', 'coverage', '.next', '.superpowers', '.turbo', '.cache',
-  'out', 'vendor', '__pycache__', '.venv', 'graphify-out',
+  'out', 'vendor', '__pycache__', '.venv', 'graphify-out', 'bin', 'obj', '.vs',
 ];
 const BINARY_EXT = /\.(png|jpe?g|gif|webp|ico|pdf|zip|gz|tgz|7z|woff2?|ttf|eot|mp4|mp3|exe|dll|so|dylib|lock|bin)$/i;
 const SKIP_FILE = /(^|[\\/])(package-lock\.json|yarn\.lock|pnpm-lock\.yaml)$|\.min\.(js|css)$/i;

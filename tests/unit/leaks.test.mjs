@@ -52,6 +52,12 @@ test('fixture-only fictional passwords are allowed, real-looking ones are not', 
   assert.deepEqual(kinds(one('Password=Pr0dSecret!99', 'tests/fixtures/clinic/appsettings.json')), ['secret']);
 });
 
+test('code reading a password from a variable is not a leak', () => {
+  assert.deepEqual(one('    password: kv.password ?? kv.pwd,'), []);
+  assert.deepEqual(one('    password: decodeURIComponent(u.password),'), []);
+  assert.deepEqual(kinds(one('password: "hunter2hunter2"')), ['secret']);
+});
+
 test('internal urls and emails are caught, allowlisted ones are not', () => {
   assert.deepEqual(kinds(one('see https://git.company.internal/x')), ['url']);
   assert.deepEqual(kinds(one('mail boss@company.vn')), ['email']);

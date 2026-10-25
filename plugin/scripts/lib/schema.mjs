@@ -1,6 +1,7 @@
 import { parseDbUrl, assertLocalDb } from './localhost.mjs';
 import { readPg } from './schema-pg.mjs';
 import { readMysql } from './schema-mysql.mjs';
+import { readMssql } from './schema-mssql.mjs';
 import { singular } from './names.mjs';
 
 const rel = (fromTable, fromColumn, toTable, toColumn, source, evidence) => ({
@@ -15,6 +16,7 @@ export async function readSchema(url, dataDir, { confirmedLocalHosts = [] } = {}
   const { engine } = parseDbUrl(url);
   const raw = engine === 'postgres' ? await readPg(url, dataDir)
     : engine === 'mysql' ? await readMysql(url, dataDir)
+    : engine === 'sqlserver' ? await readMssql(url, dataDir)
     : null;
   if (!raw) throw new Error(`unsupported DB engine for schema reading: ${engine} (text search still works)`);
   const tables = new Map();
@@ -28,6 +30,7 @@ export async function readSchema(url, dataDir, { confirmedLocalHosts = [] } = {}
     fks: raw.fks.map((f) => rel(f.from_table, f.from_column, f.to_table, f.to_column, 'fk')),
     views: raw.views,
     triggers: raw.triggers,
+    procedures: raw.procedures ?? [],
   };
   schema.implicit = implicitRelations(schema);
   return schema;

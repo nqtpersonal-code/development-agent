@@ -4,6 +4,12 @@ Plugin cho Claude Code. Bạn mô tả bằng lời, đội agent lo phần kỹ
 đọc ticket, lần theo code và DB thật, hỏi bạn khi chưa rõ, thiết kế màn hình,
 viết kịch bản test, code (qua superpowers), review, kiểm thử và báo cáo. Không bao giờ tự push.
 
+## Hỗ trợ
+
+- JavaScript/TypeScript: NestJS, Express, React, Vue, Angular, Prisma, SQL viết tay.
+- .NET: ASP.NET Core (controller, minimal API, MVC, Razor Pages), Blazor, EF Core, Dapper, stored procedure, chuỗi kết nối trong `appsettings*.json`; giao diện Angular/React đi kèm.
+- DB đọc được cấu trúc: PostgreSQL, MySQL, SQL Server (kể cả stored procedure, view, trigger). Loại khác vẫn chạy bằng tìm kiếm văn bản.
+
 ## Cần có
 
 - Claude Code, Node.js 20+ (khuyên 24), Git.
