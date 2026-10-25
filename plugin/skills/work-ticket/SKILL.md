@@ -1,6 +1,6 @@
 ---
 name: work-ticket
-description: "nqt team lead. Use when the owner runs /nqt:work-ticket <project> <ticket> (or asks the nqt team to work a ticket) in the ticket's project folder: runs the whole natural-language workflow - setup, analysis with code and DB evidence, screen design, agreed ticket brief, early test design, free Q&A, optional architecture, superpowers design/plan/build, plan check, review, QA and final report - asking the owner whenever anything is unclear. Never pushes."
+description: "nqt team lead. Use when the owner runs /nqt:work-ticket <ticket> (optionally /nqt:work-ticket <project> <ticket>) (or asks the nqt team to work a ticket) in the ticket's project folder: runs the whole natural-language workflow - setup, analysis with code and DB evidence, screen design, agreed ticket brief, early test design, free Q&A, optional architecture, superpowers design/plan/build, plan check, review, QA and final report - asking the owner whenever anything is unclear. Never pushes."
 ---
 
 # nqt — work a ticket
@@ -9,7 +9,7 @@ You are the **team lead** of the nqt agent team, running in the owner's main
 session. You coordinate; specialist agents do the work. You are also the
 **interpreter**: everything the owner reads is natural language.
 
-Arguments: `<project> <ticket>`. Missing → ask for them (one question).
+Arguments: `<ticket>` (issue number, `#number` or issue URL), optionally preceded by a project name. Missing ticket → ask (one question).
 
 ## 0. Locate everything
 
@@ -17,6 +17,7 @@ Arguments: `<project> <ticket>`. Missing → ask for them (one question).
 - `PROJECT_ROOT` = the current working directory (the ticket's own project folder).
 - Run `node PLUGIN/scripts/nqt.mjs init` → prints `DATA` (data dir).
 - Run `node PLUGIN/scripts/nqt.mjs doctor`. Any required item missing → tell the owner in plain words what to do (`doctor --install` for runtime packages; install the superpowers plugin) and stop.
+- Project: run `node "PLUGIN/scripts/nqt.mjs" project --root "PROJECT_ROOT"`. It derives the project from the folder's git remote (every ticket folder cloned from the same repo maps to the same project). If the owner gave a project name as an extra argument, use it and remember it with `project --root "PROJECT_ROOT" --set <name>`. Unknown (no remote) → ask the owner once for a short name, then `--set` it.
 - Run `node PLUGIN/scripts/nqt.mjs config --project <project>` → `LANGUAGE`, nicknames, review rule folders.
 - `WORK` = `DATA/work/<project>/<ticket>`. If `WORK/state.json` is missing: `node PLUGIN/scripts/nqt.mjs state WORK --init <project> <ticket>`.
 - Read `PLUGIN/shared/rules.md` now. It binds you and every agent.
@@ -70,7 +71,7 @@ The superpowers steps follow [references/superpowers-bridge.md](references/super
 ## 6. Saving tokens between phases
 
 At these boundaries, if the session is long, set `waitingFor.kind=clear-suggestion`
-and tell the owner they may type `/clear` and then `/nqt:work-ticket <project> <ticket>`
+and tell the owner they may type `/clear` and then `/nqt:work-ticket <ticket>`
 to continue in a fresh session (everything is saved): after free-qa (before
 architect), after plan-check passes (before implement), after implement
 (before review). Never suggest it in the middle of a conversation.

@@ -1,6 +1,6 @@
 ---
 name: ask-system
-description: "nqt - answer the owner's questions about how an existing system behaves, from its code and local database only, with evidence links and real examples, outside any ticket. Use when the owner runs /nqt:ask-system <project> or asks the nqt team how something in the current project works."
+description: "nqt - answer the owner's questions about how an existing system behaves, from its code and local database only, with evidence links and real examples, outside any ticket. Use when the owner runs /nqt:ask-system (optionally with a project name) or asks the nqt team how something in the current project works."
 ---
 
 # nqt — ask the system
@@ -8,12 +8,14 @@ description: "nqt - answer the owner's questions about how an existing system be
 You run in the owner's main session inside the project folder. You answer
 questions about the current system; you never change code or data.
 
-Argument: `<project>`. Missing → ask (one question).
+Argument: optional project name; normally derived from the folder.
 
 ## Setup
 
 - `PLUGIN` = two folders above this skill's base directory; `PROJECT_ROOT` = current directory.
-- `node PLUGIN/scripts/nqt.mjs init` → `DATA`; `node PLUGIN/scripts/nqt.mjs config --project <project>` → `LANGUAGE`, nicknames.
+- `node PLUGIN/scripts/nqt.mjs init` → `DATA`.
+- Project: run `node "PLUGIN/scripts/nqt.mjs" project --root "PROJECT_ROOT"`. It derives the project from the folder's git remote (every ticket folder cloned from the same repo maps to the same project). If the owner gave a project name as an extra argument, use it and remember it with `project --root "PROJECT_ROOT" --set <name>`. Unknown (no remote) → ask the owner once for a short name, then `--set` it.
+- `node PLUGIN/scripts/nqt.mjs config --project <project>` → `LANGUAGE`, nicknames.
 - Read `PLUGIN/shared/rules.md`.
 - If `DATA/projects/<project>/project.md` or `tracer/adapter.json` is missing, build them first: dispatch `nqt:setup` without a ticket (skip ticket and branch steps — say so in the dispatch), then follow "Build tracer adapter" in `PLUGIN/skills/work-ticket/references/flow.md`.
 - Log file: `DATA/work/<project>/_questions/<YYYY-MM-DD>.md` (append).

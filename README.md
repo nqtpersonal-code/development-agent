@@ -43,10 +43,12 @@ Mở Claude Code **trong folder project của ticket**, rồi:
 
 | Lệnh | Việc |
 |---|---|
-| `/nqt:work-ticket <dự-án> <số-ticket>` | làm trọn một ticket |
-| `/nqt:ask-system <dự-án>` | hỏi đáp về hệ thống hiện tại |
-| `/nqt:retro <dự-án> <số-ticket>` | rút kinh nghiệm sau một ticket (nên mở phiên mới) |
+| `/nqt:work-ticket <số-ticket>` | làm trọn một ticket (số issue, có hoặc không có dấu `#`, hoặc dán link issue) |
+| `/nqt:ask-system` | hỏi đáp về hệ thống hiện tại |
+| `/nqt:retro <số-ticket>` | rút kinh nghiệm sau một ticket (nên mở phiên mới) |
 | `/nqt:add-pattern <thư-mục>` | thêm một bộ mẫu best practice vào thư viện |
+
+Tên dự án được tự suy ra từ `git remote` của folder: mọi folder ticket clone từ cùng một repo dùng chung một hồ sơ dự án. Muốn đặt tên khác (ví dụ gộp repo FE và BE vào một hồ sơ) thì gõ thêm tên trước số ticket: `/nqt:work-ticket shop 123`, tên đó được ghi nhớ.
 
 Lần đầu với một dự án, đội agent sẽ tự dò và hỏi bạn vài câu để tạo hồ sơ dự án
 và "bộ chuyển đổi truy vết" (kèm bài kiểm tra) — các lần sau dùng lại.

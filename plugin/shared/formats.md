@@ -13,6 +13,7 @@
 ├── review-rules/                personal review rules (*.md), default location
 ├── patterns/<pack>/index.md     global pattern library
 ├── runtime/                     pg, mysql2, playwright (installed by `doctor --install`)
+├── projects/_map.json            remembered project names (git remote → project, or folder → project)
 ├── projects/<project>/
 │   ├── project.md
 │   ├── ui.md                    project design context (owner-confirmed)

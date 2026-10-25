@@ -21,12 +21,17 @@ import { findSiblings, tableVariants, columnVariants } from './lib/siblings.mjs'
 import { blastRadius, summarizeRadius } from './lib/radius.mjs';
 import { gitHistory, testCoverage } from './lib/risk.mjs';
 import { detectHost, fetchTicket } from './lib/githost.mjs';
+import { resolveProject, rememberProject } from './lib/project-id.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
-  if (!args.project) throw new Error('missing --project <name>');
   const dataDir = getDataDir();
   const root = resolve(args.root ?? process.cwd());
+  if (!args.project) {
+    const found = resolveProject({ root, dataDir });
+    if (!found.project) throw new Error('cannot tell which project this folder belongs to (no git remote); run: project --set <name>');
+    args.project = found.project;
+  }
   const fm = projectConfig(dataDir, args.project).project;
   const adapter = loadAdapter(dataDir, args.project);
   const components = adapter?.components ?? [{ name: 'project', root: '.', kind: 'be' }];
@@ -195,6 +200,14 @@ const commands = {
     for (const l of summarizeRadius(radius)) console.log(l);
     console.log(`history (${history.days} days): ${history.commits ?? 'unknown'} commits, ${history.fixCommits ?? 'unknown'} bug fixes, last ${history.lastChanged ?? 'unknown'}`);
     console.log(`tests mentioning it or its routes: ${tests.files.length ? tests.files.join(', ') : 'none'}`);
+  },
+  project(args) {
+    const dataDir = getDataDir();
+    const root = resolve(args.root ?? process.cwd());
+    if (typeof args.set === 'string') rememberProject({ root, dataDir, project: args.set });
+    const r = resolveProject({ root, dataDir, explicit: typeof args.set === 'string' ? args.set : undefined });
+    console.log(r.project ? `project: ${r.project} (${r.source})` : `project: unknown — ${r.source}`);
+    return r.project ? 0 : 1;
   },
   'detect-host'(args) {
     const root = resolve(args.root ?? process.cwd());

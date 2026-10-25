@@ -1,11 +1,13 @@
 ---
 name: retro
-description: "nqt - retrospective of one finished ticket run - what went smoothly, what stumbled, and for each mistake whether to fix the workflow, fix an agent, add a project pitfall, improve the project's tracer adapter or adjust patterns. Proposes changes; applies only what the owner approves; never leaks project data into the plugin. Use when the owner runs /nqt:retro <project> <ticket>, preferably in a fresh session."
+description: "nqt - retrospective of one finished ticket run - what went smoothly, what stumbled, and for each mistake whether to fix the workflow, fix an agent, add a project pitfall, improve the project's tracer adapter or adjust patterns. Proposes changes; applies only what the owner approves; never leaks project data into the plugin. Use when the owner runs /nqt:retro <ticket> (optionally /nqt:retro <project> <ticket>), preferably in a fresh session."
 ---
 
 # nqt — retro
 
-Arguments: `<project> <ticket>`. You run in the main session.
+Arguments: `<ticket>`, optionally preceded by a project name. You run in the main session.
+
+Project: run `node "PLUGIN/scripts/nqt.mjs" project --root "PROJECT_ROOT"`. It derives the project from the folder's git remote (every ticket folder cloned from the same repo maps to the same project). If the owner gave a project name as an extra argument, use it and remember it with `project --root "PROJECT_ROOT" --set <name>`. Unknown (no remote) → ask the owner once for a short name, then `--set` it.
 
 ## Setup
 
