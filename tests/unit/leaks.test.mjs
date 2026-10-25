@@ -17,6 +17,18 @@ test('project names are caught across casing, separators and diacritics', () => 
   }
 });
 
+test('project names next to punctuation, in paths and squashed are caught', () => {
+  const probes = ['"truong-abc"', 'projects/truong-abc/project.md', '(Trường ABC)', '`truong-abc`', 'truong-abc,', 'truong-abc:', 'TruongABC', 'truongabc.vn'];
+  for (const text of probes) {
+    const f = one(`x ${text} y`, 'plugin/agents/x.md', ['truong-abc']);
+    assert.deepEqual(kinds(f), ['project-name'], text);
+  }
+});
+
+test('short single-word names are not matched inside other words', () => {
+  assert.deepEqual(one('a subclass here', 'plugin/agents/x.md', ['class']), []);
+});
+
 test('ticket ids are caught outside fixtures and relaxed inside fixtures', () => {
   assert.deepEqual(kinds(one('fixes JIRA-123')), ['ticket-id']);
   assert.deepEqual(kinds(one('see #4521')), ['ticket-id']);

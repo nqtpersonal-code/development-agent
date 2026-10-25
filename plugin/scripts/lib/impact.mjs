@@ -19,6 +19,13 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
   if (failed.length) {
     return { start, places: [], routes: [], unscanned: [], notes: failed.map((a) => `adapter-assumption-failed: ${a.id}`) };
   }
+  const table = schema?.tables.find((t) => t.name === start.table);
+  if (schema && start.column && table && !table.columns.some((c) => c.name === start.column)) {
+    return {
+      start, places: [], routes: [], unscanned: [],
+      notes: [`column ${start.table}.${start.column} not found in the schema (columns: ${table.columns.map((c) => c.name).join(', ')})`],
+    };
+  }
   const comps = components.map((c) => ({ ...c, abs: join(projectRoot, c.root) }));
   const present = comps.filter((c) => existsSync(c.abs));
   const unscanned = comps.filter((c) => !existsSync(c.abs)).map((c) => c.name);
@@ -56,14 +63,14 @@ export function analyzeImpact({ start, schema, projectRoot, components, adapter 
     if (!hitLines.has(key)) hitLines.set(key, []);
     hitLines.get(key).push(h.line);
   }
-  // 2. Column mentioned next to dynamic SQL, even without the table name.
-  const loose = searchCode({ roots, terms: colTerms });
+  // 2. Column mentioned in files that build SQL at runtime, even without the table name.
+  const loose = searchCode({ roots, terms: colTerms, fileFilter: DYNAMIC_SQL });
   for (const h of loose.hits) {
     const key = `${h.root}|${h.file}`;
-    if (byFile.has(key)) continue;
-    const text = readText(join(h.root, h.file)) ?? '';
-    if (DYNAMIC_SQL.test(text)) byFile.set(key, h);
+    if (!byFile.has(key)) byFile.set(key, h);
   }
+  if (schema && !table) notes.push(`table ${start.table} not found in the schema: check the name or adapter aliases`);
+  if (direct.truncated || loose.truncated) notes.push('search hit the result cap: some places may be missing; narrow the start point or add adapter aliases');
 
   const related = schema ? relatedTables(schema, start.table, maxDepth).map((r) => r.table) : [];
   for (const h of byFile.values()) {

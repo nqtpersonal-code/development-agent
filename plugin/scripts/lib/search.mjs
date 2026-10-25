@@ -1,5 +1,10 @@
 import { walkFiles, readText, rel, DEFAULT_IGNORE } from './files.mjs';
 
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// A term matches only as a whole identifier: "id" in "row.id" but not in
+// "providers" or "getElementById".
+const termRe = (t) => new RegExp(`(?<![A-Za-z0-9_$:])${esc(t)}(?![A-Za-z0-9_])`);
+
 // Finds every line mentioning one of `terms`. With `contextTerms`, keeps only
 // hits that have a context term within `contextWindow` lines, so common
 // column names (name, status) do not flood the result.
@@ -10,7 +15,9 @@ export function searchCode({
   contextWindow = 40,
   ignore = DEFAULT_IGNORE,
   maxHits = 5000,
+  fileFilter,
 }) {
+  const res = terms.map((t) => [t, termRe(t)]);
   const hits = [];
   let filesScanned = 0;
   let droppedNoContext = 0;
@@ -21,12 +28,13 @@ export function searchCode({
       if (text === null) continue;
       filesScanned++;
       if (!terms.some((t) => text.includes(t))) continue;
+      if (fileFilter && !fileFilter.test(text)) continue;
       const lines = text.split(/\r?\n/);
       const ctxLines = contextTerms.length
         ? lines.map((l, i) => (contextTerms.some((c) => l.includes(c)) ? i : -1)).filter((i) => i >= 0)
         : [];
       for (let i = 0; i < lines.length; i++) {
-        const term = terms.find((t) => lines[i].includes(t));
+        const term = res.find(([, re]) => re.test(lines[i]))?.[0];
         if (!term) continue;
         const context = contextTerms.length ? ctxLines.some((c) => Math.abs(c - i) <= contextWindow) : true;
         if (!context) {

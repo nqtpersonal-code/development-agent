@@ -1,4 +1,4 @@
-import { parseDbUrl } from './localhost.mjs';
+import { parseDbUrl, assertLocalDb } from './localhost.mjs';
 import { readPg } from './schema-pg.mjs';
 import { readMysql } from './schema-mysql.mjs';
 import { singular } from './names.mjs';
@@ -10,7 +10,8 @@ const rel = (fromTable, fromColumn, toTable, toColumn, source, evidence) => ({
   ...(evidence ? { evidence } : {}),
 });
 
-export async function readSchema(url, dataDir) {
+export async function readSchema(url, dataDir, { confirmedLocalHosts = [] } = {}) {
+  assertLocalDb(url, confirmedLocalHosts);
   const { engine } = parseDbUrl(url);
   const raw = engine === 'postgres' ? await readPg(url, dataDir)
     : engine === 'mysql' ? await readMysql(url, dataDir)

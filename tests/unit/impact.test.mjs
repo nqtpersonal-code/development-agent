@@ -54,6 +54,25 @@ test('fixture B: students.phone with the adapter reaches worker, report and both
   assert.equal(byFile.get('school-b-api/workers/sms.worker.js').layer, 'job');
 });
 
+test('a column that does not exist in the schema stops with a note instead of fuzzy matches', async (t) => {
+  const a = answers('school-a');
+  const schema = await schemaOr('postgresql://school:school@localhost:55432/school_a', t);
+  if (!schema) return;
+  const r = analyzeImpact({ start: { table: 'students', column: 'name' }, schema, projectRoot: join(fx, 'school-a'), components: a.components });
+  assert.deepEqual(r.places, []);
+  assert.ok(r.notes.some((n) => /column students\.name not found/.test(n)), r.notes.join('; '));
+});
+
+test('students.id does not match unrelated words like providers or getElementById', async (t) => {
+  const a = answers('school-a');
+  const schema = await schemaOr('postgresql://school:school@localhost:55432/school_a', t);
+  if (!schema) return;
+  const r = analyzeImpact({ start: { table: 'students', column: 'id' }, schema, projectRoot: join(fx, 'school-a'), components: a.components });
+  const files = r.places.map((p) => p.file);
+  assert.ok(!files.includes('api/src/app.module.ts'), 'providers is not id');
+  assert.ok(!files.includes('web/src/main.tsx'), 'getElementById is not id');
+});
+
 test('a component missing on disk is reported as not scanned', async (t) => {
   const b = answers('school-b');
   const schema = await schemaOr('mysql://school:school@127.0.0.1:53307/school_b', t);

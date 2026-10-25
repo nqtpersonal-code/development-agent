@@ -44,6 +44,10 @@ test('mysql fixture: no FKs, relations recovered by naming and multi-hop paths',
   assert.equal(att.path.length, 2);
 });
 
+test('readSchema refuses a non-local host before connecting', async () => {
+  await assert.rejects(readSchema('postgresql://u:pw@db.staging.internal:5432/x', dataDir), /not local/);
+});
+
 test('implicitRelations never duplicates an existing FK', () => {
   const schema = {
     tables: [

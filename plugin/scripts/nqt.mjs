@@ -16,6 +16,7 @@ import { analyzeImpact, summarizeImpact } from './lib/impact.mjs';
 import { loadAdapter, checkAssumptions, runAdapterTests, resolveDbUrl } from './lib/adapter.mjs';
 import { resolve } from 'node:path';
 import { uiCheck, summarizeUi } from './lib/uicheck.mjs';
+import { parseDbUrl, assertLocalDb } from './lib/localhost.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
@@ -25,7 +26,8 @@ function projectContext(args) {
   const fm = projectConfig(dataDir, args.project).project;
   const adapter = loadAdapter(dataDir, args.project);
   const components = adapter?.components ?? [{ name: 'project', root: '.', kind: 'be' }];
-  return { dataDir, root, fm, adapter, components, dbUrl: args.db ?? resolveDbUrl(root, fm) };
+  const confirmedLocalHosts = [].concat(fm.confirmedLocalHosts ?? []).filter(Boolean);
+  return { dataDir, root, fm, adapter, components, confirmedLocalHosts, dbUrl: args.db ?? resolveDbUrl(root, fm) };
 }
 
 function writeJson(file, data) {
@@ -108,8 +110,10 @@ const commands = {
     if (top.length > 8) console.log(`  … ${top.length - 8} more files${args.out ? ` in ${args.out}` : ''}`);
   },
   async schema(args) {
-    if (!args.db) throw new Error('usage: schema --db <url> [--out file.json]');
-    const s = await readSchema(args.db, getDataDir());
+    if (!args.db && !args.project) throw new Error('usage: schema --project p [--root dir] | --db <url>  [--out file.json]');
+    const ctx = args.project ? projectContext(args) : { dbUrl: args.db, dataDir: getDataDir(), confirmedLocalHosts: [] };
+    if (!ctx.dbUrl) throw new Error('no DB settings in project.md (dbUrl or dbEnvFile)');
+    const s = await readSchema(ctx.dbUrl, ctx.dataDir, ctx);
     if (args.out) writeJson(args.out, s);
     console.log(`schema (${s.engine}): ${s.tables.length} tables, ${s.fks.length} foreign keys, ${s.implicit.length} inferred relations, ${s.views.length} views, ${s.triggers.length} triggers`);
     for (const r of s.implicit.slice(0, 6)) console.log(`  inferred: ${r.from.table}.${r.from.column} -> ${r.to.table}.${r.to.column}`);
@@ -117,7 +121,8 @@ const commands = {
   async impact(args) {
     const ctx = projectContext(args);
     if (!args.table) throw new Error('usage: impact --project p --table t [--column c] [--root dir] [--db url] [--out file.json]');
-    const schema = ctx.dbUrl ? await readSchema(ctx.dbUrl, ctx.dataDir).catch((e) => (console.log(`schema: unavailable (${e.message})`), null)) : null;
+    if (ctx.dbUrl) assertLocalDb(ctx.dbUrl, ctx.confirmedLocalHosts);
+    const schema = ctx.dbUrl ? await readSchema(ctx.dbUrl, ctx.dataDir, ctx).catch((e) => (console.log(`schema: unavailable (${e.message})`), null)) : null;
     const r = analyzeImpact({ start: { table: args.table, column: args.column }, schema, projectRoot: ctx.root, components: ctx.components, adapter: ctx.adapter ?? {} });
     if (!ctx.adapter) r.notes.push('no tracer adapter for this project yet: results use generic rules only');
     if (args.out) writeJson(args.out, r);
@@ -126,14 +131,17 @@ const commands = {
   },
   'tracer-check'(args) {
     const ctx = projectContext(args);
-    if (!ctx.adapter) return void console.log(`no tracer adapter for ${args.project}`) ?? 1;
+    if (!ctx.adapter) {
+      console.log(`no tracer adapter for ${args.project}`);
+      return 1;
+    }
     const res = checkAssumptions(ctx.adapter, ctx.root);
     for (const a of res) console.log(`${a.ok ? 'ok    ' : 'FAILED'} ${a.id} — ${a.description}`);
     return res.every((a) => a.ok) ? 0 : 1;
   },
   async 'tracer-test'(args) {
     const ctx = projectContext(args);
-    const schema = ctx.dbUrl ? await readSchema(ctx.dbUrl, ctx.dataDir) : null;
+    const schema = ctx.dbUrl ? await readSchema(ctx.dbUrl, ctx.dataDir, ctx) : null;
     const res = runAdapterTests({ dataDir: ctx.dataDir, project: args.project, projectRoot: ctx.root, schema });
     for (const t of res) console.log(`${t.pass ? 'pass' : 'FAIL'} ${t.name}${t.pass ? '' : ' — missing: ' + t.missing.join(', ')}`);
     console.log(`${res.filter((t) => t.pass).length}/${res.length} tracer tests pass`);
@@ -145,6 +153,22 @@ const commands = {
     const r = await uiCheck({ url: args.url, outDir: args.out, login, waitFor: args['wait-for'] });
     for (const l of summarizeUi(r)) console.log(l);
     return r.issues.length ? 1 : 0;
+  },
+  'db-check'(args) {
+    const ctx = projectContext(args);
+    if (!ctx.dbUrl) {
+      console.log('db-check: no DB settings in project.md (dbUrl or dbEnvFile)');
+      return 1;
+    }
+    const { engine, host, port, database } = parseDbUrl(ctx.dbUrl);
+    try {
+      assertLocalDb(ctx.dbUrl, ctx.confirmedLocalHosts);
+      console.log(`db-check: ok — ${engine} on ${host}${port ? ':' + port : ''}/${database} is local`);
+      return 0;
+    } catch (e) {
+      console.log(`db-check: BLOCKED — ${e.message}`);
+      return 1;
+    }
   },
   'scan-leaks'(args) {
     const projectNames = projectNamesFrom(getDataDir());
@@ -177,7 +201,12 @@ export async function main(argv) {
     console.error(`usage: nqt.mjs <${Object.keys(commands).join('|')}> [options]`);
     return 2;
   }
-  return (await cmd(args)) ?? 0;
+  try {
+    return (await cmd(args)) ?? 0;
+  } catch (e) {
+    console.error(`${name}: ${e.message}`);
+    return 1;
+  }
 }
 
 export function register(name, fn) {

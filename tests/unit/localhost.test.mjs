@@ -1,7 +1,7 @@
 // nqt-leak-scan: ignore-file
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isLocalHost, parseDbUrl } from '../../plugin/scripts/lib/localhost.mjs';
+import { isLocalHost, parseDbUrl, assertLocalDb } from '../../plugin/scripts/lib/localhost.mjs';
 
 test('local hosts are recognised', () => {
   for (const h of ['localhost', '127.0.0.1', '::1', '0.0.0.0', 'host.docker.internal', 'LOCALHOST']) {
@@ -25,6 +25,17 @@ test('parseDbUrl reads postgres and mysql urls', () => {
   assert.equal(my.engine, 'mysql');
   assert.equal(my.port, 3307);
   assert.equal(my.database, 's');
+});
+
+test('assertLocalDb refuses remote hosts unless confirmed, without leaking the password', () => {
+  assert.doesNotThrow(() => assertLocalDb('postgresql://u:p@localhost:5432/x'));
+  assert.throws(() => assertLocalDb('postgresql://u:topsecret@db.staging.internal:5432/x'), (e) => /db\.staging\.internal/.test(e.message) && !/topsecret/.test(e.message));
+  assert.doesNotThrow(() => assertLocalDb('mysql://u@db:3306/x', ['db']));
+});
+
+test('parseDbUrl handles bracketed IPv6 hosts', () => {
+  assert.equal(parseDbUrl('postgres://u@[::1]:5432/x').host, '::1');
+  assert.equal(isLocalHost(parseDbUrl('postgres://u@[::1]:5432/x').host), true);
 });
 
 test('parseDbUrl never exposes the password and flags unknown engines', () => {

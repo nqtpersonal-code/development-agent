@@ -46,6 +46,21 @@ test('paths with spaces and Vietnamese file names are searched', () => {
   assert.equal(hits[0].line, 1);
 });
 
+test('terms match whole identifiers only, not pieces of longer words', () => {
+  const root = tmp();
+  writeFileSync(join(root, 'a.ts'), 'providers: [];\ndocument.getElementById("x");\nconst id = row.id;\nwhere(s.full_name)\n<Route path="/classes/:id" />\n');
+  const { hits } = searchCode({ roots: [root], terms: nameVariants('id') });
+  assert.deepEqual(hits.map((h) => h.line), [3]);
+});
+
+test('fileFilter limits the search to matching files', () => {
+  const root = tmp();
+  writeFileSync(join(root, 'a.ts'), "q('SELECT ' + col + ' FROM students') // phone\n");
+  writeFileSync(join(root, 'b.ts'), 'const phone = 1;\n');
+  const { hits } = searchCode({ roots: [root], terms: ['phone'], fileFilter: /FROM\s*['"`]?\s*\+|' \+ col/ });
+  assert.deepEqual(hits.map((h) => h.file), ['a.ts']);
+});
+
 test('maxHits truncates and reports it', () => {
   const root = tmp();
   writeFileSync(join(root, 'a.ts'), Array.from({ length: 50 }, () => 'full_name').join('\n'));

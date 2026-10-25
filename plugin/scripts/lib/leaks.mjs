@@ -25,9 +25,13 @@ export function normalizeName(s) {
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[đĐ]/g, 'd')
     .toLowerCase()
-    .replace(/[-_\s.]+/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }
+
+// Multi-word names (or long single words) are also matched with spaces
+// removed, so "TruongABC" and "truongabc.vn" are caught for "truong-abc".
+const squashable = (n) => n.includes(' ') ? n.replace(/ /g, '').length >= 5 : n.length >= 8;
 
 const isFixture = (path) => /(^|[\\/])tests[\\/]fixtures[\\/]/.test(path);
 
@@ -43,7 +47,10 @@ export function scanLeaks({ files, projectNames = [], extraTerms = [] }) {
     text.split(/\r?\n/).forEach((line, idx) => {
       const add = (kind, match) => findings.push({ path, line: idx + 1, kind, match });
       const norm = ` ${normalizeName(line)} `;
-      for (const n of names) if (norm.includes(` ${n} `)) add('project-name', n);
+      const squashed = norm.replace(/ /g, '');
+      for (const n of names) {
+        if (norm.includes(` ${n} `) || (squashable(n) && squashed.includes(n.replace(/ /g, '')))) add('project-name', n);
+      }
       if (ignorePatterns) return;
       if (!fixture) {
         for (const m of line.matchAll(TICKET_RE)) {
