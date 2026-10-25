@@ -1,0 +1,9 @@
+@page
+@model Clinic.Api.Pages.Admin.PatientsModel
+<h1>Bệnh nhân</h1>
+<table>
+  @foreach (var p in Model.Items)
+  {
+    <tr><td>@p.FullName</td><td>@p.Phone</td><td><a asp-page="/Admin/PatientEdit" asp-route-id="@p.Id">Sửa</a></td></tr>
+  }
+</table>

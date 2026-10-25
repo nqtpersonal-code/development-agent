@@ -71,7 +71,9 @@ export function scanLeaks({ files, projectNames = [], extraTerms = [] }) {
       for (const re of SECRET_RES) {
         const m = re.exec(line);
         if (!m) continue;
-        const fictionalFixtureDb = fixture && m[1] && m[1] === 'school' && m[2] === 'school';
+        // Fixtures need runnable credentials: allow obviously fictional ones there only
+        // (user == password, or a password that says "local").
+        const fictionalFixtureDb = fixture && ((m[1] && m[1] === m[2]) || /local/i.test(m[0]));
         if (!fictionalFixtureDb) add('secret', m[0].slice(0, 40));
       }
     });

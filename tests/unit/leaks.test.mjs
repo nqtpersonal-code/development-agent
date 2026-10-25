@@ -46,6 +46,12 @@ test('fixture DB urls with the fictional school password are allowed', () => {
   assert.deepEqual(one('postgresql://school:school@localhost:55432/school_a', 'tests/fixtures/school-a/.env'), []);
 });
 
+test('fixture-only fictional passwords are allowed, real-looking ones are not', () => {
+  assert.deepEqual(one('"DefaultConnection": "Server=localhost,51433;User Id=sa;Password=Clinic_Local_123"', 'tests/fixtures/clinic/appsettings.json'), []);
+  assert.deepEqual(kinds(one('Password=Clinic_Local_123', 'plugin/agents/x.md')), ['secret']);
+  assert.deepEqual(kinds(one('Password=Pr0dSecret!99', 'tests/fixtures/clinic/appsettings.json')), ['secret']);
+});
+
 test('internal urls and emails are caught, allowlisted ones are not', () => {
   assert.deepEqual(kinds(one('see https://git.company.internal/x')), ['url']);
   assert.deepEqual(kinds(one('mail boss@company.vn')), ['email']);

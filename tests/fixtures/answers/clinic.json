@@ -1,0 +1,44 @@
+{
+  "fixture": "clinic",
+  "note": "Fictional clinic app (.NET 8 + EF Core + Dapper + SQL Server + Angular). Paths are relative to tests/fixtures/clinic.",
+  "components": [
+    { "name": "api", "root": "src/Clinic.Api", "kind": "be" },
+    { "name": "web", "root": "src/clinic-web", "kind": "fe" }
+  ],
+  "questions": [
+    {
+      "id": "C-Q1",
+      "question": "If the patient phone (Patients.Phone) changes, which places are affected?",
+      "start": { "table": "Patients", "column": "Phone" },
+      "expectedPlaces": [
+        { "file": "src/Clinic.Api/Services/PatientService.cs", "kind": "api", "userFacing": "API danh sách và chi tiết bệnh nhân (EF Core)" },
+        { "file": "src/Clinic.Api/Controllers/PatientsController.cs", "kind": "api", "userFacing": "GET /api/patients, GET /api/patients/{id}" },
+        { "file": "src/Clinic.Api/Repositories/AppointmentRepository.cs", "kind": "api", "userFacing": "Lịch hẹn hôm nay (Dapper, SQL viết tay)" },
+        { "file": "src/Clinic.Api/Endpoints/ReminderEndpoints.cs", "kind": "api", "userFacing": "Gửi nhắc lịch (minimal API, gọi stored procedure)" },
+        { "file": "src/Clinic.Api/Jobs/ReminderJob.cs", "kind": "job", "userFacing": "Job nền nhắc lịch hẹn" },
+        { "file": "src/Clinic.Api/Pages/Admin/Patients.cshtml.cs", "kind": "screen", "userFacing": "Trang quản trị bệnh nhân (/Admin/Patients, Razor Pages)" },
+        { "file": "src/clinic-web/src/app/patients/patient.service.ts", "kind": "screen", "userFacing": "Angular gọi API bệnh nhân" },
+        { "file": "src/clinic-web/src/app/patients/patient-detail.component.ts", "kind": "screen", "userFacing": "Trang chi tiết bệnh nhân (/patients/:id)" },
+        { "file": "src/clinic-web/src/app/appointments/appointments.service.ts", "kind": "screen", "userFacing": "Angular gọi API lịch hẹn hôm nay" }
+      ],
+      "expectedProcedures": ["usp_PatientContacts"],
+      "mustNotInclude": [
+        { "file": "src/Clinic.Api/Controllers/DoctorsController.cs", "reason": "Phone here belongs to doctors" }
+      ]
+    }
+  ],
+  "routes": [
+    "GET /api/patients", "GET /api/patients/:p", "POST /api/patients", "GET /api/appointments/today",
+    "POST /api/reminders/send", "GET /api/doctors/:p", "GET /Admin/Patients"
+  ],
+  "traps": [
+    { "id": "C1", "what": "controller routes use [Route(\"api/[controller]\")] tokens and {id:int} constraints" },
+    { "id": "C2", "what": "callers go through the IPatientService interface (DI), not the class name" },
+    { "id": "C3", "what": "Dapper repository joins Patients by hand and forgets the IsDeleted filter used elsewhere", "file": "src/Clinic.Api/Repositories/AppointmentRepository.cs" },
+    { "id": "C4", "what": "stored procedure usp_PatientContacts reads Patients.Phone; minimal API calls it by name" },
+    { "id": "C5", "what": "Invoices.AppointmentRef holds an appointment id without a foreign key" },
+    { "id": "C6", "what": "Angular builds URLs from environment.apiUrl and a service base field" },
+    { "id": "C7", "what": "Doctors also have Phone (decoy)" },
+    { "id": "C8", "what": "connection string lives in appsettings.Development.json in ADO.NET format" }
+  ]
+}
