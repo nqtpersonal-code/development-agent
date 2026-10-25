@@ -5,6 +5,7 @@ import { searchCode } from './search.mjs';
 import { relatedTables } from './schema.mjs';
 import { extractRoutes, extractApiCalls, linkCalls, enclosingFunction } from './routes.mjs';
 import { walkFiles, readText } from './files.mjs';
+import { checkAssumptions } from './assumptions.mjs';
 
 const DYNAMIC_SQL = /\$queryRawUnsafe|\$executeRawUnsafe|\b(?:FROM|JOIN|UPDATE|INTO)\s*['"`]\s*\+|\b(?:FROM|JOIN|UPDATE|INTO)\s+['"`]?\s*\$\{|\+\s*table\s*\+|\.raw\(\s*[A-Za-z_$]/i;
 const JOB_HINT = /@Cron\b|\bcron\b|schedule|\bworker\b|\bqueue\b|consumer|\.job\.|jobs[\\/]/i;
@@ -14,6 +15,10 @@ const MAX_CALLER_DEPTH = 4;
 const posix = (p) => p.split(sep).join('/');
 
 export function analyzeImpact({ start, schema, projectRoot, components, adapter = {}, maxDepth = 3 }) {
+  const failed = checkAssumptions(adapter, projectRoot).filter((a) => !a.ok);
+  if (failed.length) {
+    return { start, places: [], routes: [], unscanned: [], notes: failed.map((a) => `adapter-assumption-failed: ${a.id}`) };
+  }
   const comps = components.map((c) => ({ ...c, abs: join(projectRoot, c.root) }));
   const present = comps.filter((c) => existsSync(c.abs));
   const unscanned = comps.filter((c) => !existsSync(c.abs)).map((c) => c.name);

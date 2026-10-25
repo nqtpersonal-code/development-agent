@@ -12,7 +12,20 @@ import { doctor } from './lib/runtime.mjs';
 import { nameVariants } from './lib/names.mjs';
 import { searchCode } from './lib/search.mjs';
 import { readSchema } from './lib/schema.mjs';
+import { analyzeImpact, summarizeImpact } from './lib/impact.mjs';
+import { loadAdapter, checkAssumptions, runAdapterTests, resolveDbUrl } from './lib/adapter.mjs';
+import { resolve } from 'node:path';
 import { mkdirSync, writeFileSync } from 'node:fs';
+
+function projectContext(args) {
+  if (!args.project) throw new Error('missing --project <name>');
+  const dataDir = getDataDir();
+  const root = resolve(args.root ?? process.cwd());
+  const fm = projectConfig(dataDir, args.project).project;
+  const adapter = loadAdapter(dataDir, args.project);
+  const components = adapter?.components ?? [{ name: 'project', root: '.', kind: 'be' }];
+  return { dataDir, root, fm, adapter, components, dbUrl: args.db ?? resolveDbUrl(root, fm) };
+}
 
 function writeJson(file, data) {
   mkdirSync(dirname(file), { recursive: true });
@@ -95,6 +108,31 @@ const commands = {
     if (args.out) writeJson(args.out, s);
     console.log(`schema (${s.engine}): ${s.tables.length} tables, ${s.fks.length} foreign keys, ${s.implicit.length} inferred relations, ${s.views.length} views, ${s.triggers.length} triggers`);
     for (const r of s.implicit.slice(0, 6)) console.log(`  inferred: ${r.from.table}.${r.from.column} -> ${r.to.table}.${r.to.column}`);
+  },
+  async impact(args) {
+    const ctx = projectContext(args);
+    if (!args.table) throw new Error('usage: impact --project p --table t [--column c] [--root dir] [--db url] [--out file.json]');
+    const schema = ctx.dbUrl ? await readSchema(ctx.dbUrl, ctx.dataDir).catch((e) => (console.log(`schema: unavailable (${e.message})`), null)) : null;
+    const r = analyzeImpact({ start: { table: args.table, column: args.column }, schema, projectRoot: ctx.root, components: ctx.components, adapter: ctx.adapter ?? {} });
+    if (!ctx.adapter) r.notes.push('no tracer adapter for this project yet: results use generic rules only');
+    if (args.out) writeJson(args.out, r);
+    for (const l of summarizeImpact(r)) console.log(l);
+    return r.notes.some((n) => n.startsWith('adapter-assumption-failed')) ? 1 : 0;
+  },
+  'tracer-check'(args) {
+    const ctx = projectContext(args);
+    if (!ctx.adapter) return void console.log(`no tracer adapter for ${args.project}`) ?? 1;
+    const res = checkAssumptions(ctx.adapter, ctx.root);
+    for (const a of res) console.log(`${a.ok ? 'ok    ' : 'FAILED'} ${a.id} — ${a.description}`);
+    return res.every((a) => a.ok) ? 0 : 1;
+  },
+  async 'tracer-test'(args) {
+    const ctx = projectContext(args);
+    const schema = ctx.dbUrl ? await readSchema(ctx.dbUrl, ctx.dataDir) : null;
+    const res = runAdapterTests({ dataDir: ctx.dataDir, project: args.project, projectRoot: ctx.root, schema });
+    for (const t of res) console.log(`${t.pass ? 'pass' : 'FAIL'} ${t.name}${t.pass ? '' : ' — missing: ' + t.missing.join(', ')}`);
+    console.log(`${res.filter((t) => t.pass).length}/${res.length} tracer tests pass`);
+    return res.every((t) => t.pass) ? 0 : 1;
   },
   'scan-leaks'(args) {
     const projectNames = projectNamesFrom(getDataDir());
