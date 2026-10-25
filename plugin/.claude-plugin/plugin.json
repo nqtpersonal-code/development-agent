@@ -1,7 +1,7 @@
 {
   "name": "nqt",
   "description": "Natural-language agent team for working on software tickets with code and DB evidence",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": { "name": "nqt" },
   "license": "UNLICENSED",
   "keywords": ["agents", "tickets", "impact-analysis", "natural-language"]

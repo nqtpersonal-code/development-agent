@@ -75,7 +75,7 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 
 1. Dispatch `nqt:qa` with `MODE=design`.
 2. "Cannot verify" items → send back to `nqt:ba` (re-open analysis questions) and update the brief.
-3. Show a short list of scenarios (user language) with how each will be checked ("read in the code", "existing tests", "call the server and check the data", "click through in a browser") and the totals — informational, no approval needed unless something changed the brief. `S --set test-design=done`.
+3. Show a short list of scenarios (user language) with how each will be checked ("checked by reading the code change", "call the server and check the data", "click through in a browser") and the totals — informational, no approval needed unless something changed the brief. `S --set test-design=done`.
 
 ## free-qa
 

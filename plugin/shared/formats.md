@@ -99,7 +99,7 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 | `screens.md` | screen-designer | screen flow (mermaid), per-screen content (tabs, filters, fields, buttons, messages, navigation), desktop + mobile layout, real data examples |
 | `mockup/index.html` | screen-designer | optional static clickable mockup |
 | `ticket-brief.md` | orchestrator (from ba/screens/trace + owner answers) | see below |
-| `test-scenarios.md` | qa (design mode) | per scenario: id (TCn / Xn / Rn), steps in user language with real data, expected result, **Verify by** (`code` / `unit` / `api` / `browser`) with one-line reason; TCs that cannot be verified; count per method |
+| `test-scenarios.md` | qa (design mode) | per scenario: id (TCn / Xn / Rn), steps in user language with real data, expected result, **Verify by** (`code` / `api` / `browser`) with one-line reason; TCs that cannot be verified; count per method |
 | `questions.md` | orchestrator | free Q&A log: question, answer (natural language + links), proposed brief changes and owner decision |
 | `architecture.md` | architect | Technical part: DB/migration changes, legacy data handling, API, flow, reuse, risks. Owner part: business-impacting decisions as questions |
 | `spec.md` | superpowers:brainstorming | design spec |
