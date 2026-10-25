@@ -9,7 +9,7 @@ Arguments: `<project> <ticket>`. You run in the main session.
 
 ## Setup
 
-- `PLUGIN` = two folders above this skill's base directory; `node PLUGIN/scripts/nqt.mjs init` → `DATA`; config → `LANGUAGE`, `pluginSourceDir`.
+- `PLUGIN` = two folders above this skill's base directory; `node "PLUGIN/scripts/nqt.mjs" init` → `DATA`; config → `LANGUAGE`, `pluginSourceDir`. If `pluginSourceDir` is empty and a workflow/agent change is approved, ask the owner where the plugin's source repo is and save it in `DATA/config.md`; never edit the installed copy.
 - `WORK` = `DATA/work/<project>/<ticket>`. Read `state.json`, `ticket.md`, `ticket-brief.md`, `trace/impact.md` + `impact.json`, `questions.md`, `plan-check.md`, `review.md`, `qa-report.md`, `final-report.md`, and the current session's conversation if available.
 - Read `PLUGIN/shared/rules.md`, especially "rules.md → Confidentiality".
 

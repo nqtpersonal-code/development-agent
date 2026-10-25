@@ -54,3 +54,10 @@ test('project language override wins', () => {
   assert.equal(projectConfig(d, 'demo').language, 'en');
   assert.equal(projectConfig(d, 'missing').language, 'vi');
 });
+
+test('the default config carries no machine-specific paths', () => {
+  const d = tmp();
+  ensureDataDir(d, root);
+  assert.equal(loadConfig(d).pluginSourceDir, '');
+  assert.doesNotMatch(readFileSync(join(d, 'config.md'), 'utf8'), /[A-Za-z]:\\Users|\/home\//);
+});

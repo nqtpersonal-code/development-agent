@@ -11,8 +11,8 @@ language: vi
 # Thư mục quy tắc review CÁ NHÂN (đọc mọi file .md bên trong). Để trống = mặc định <thư mục dữ liệu>/review-rules
 reviewRules:
   personal:
-# Thư mục mã nguồn plugin (để /nqt:retro đề xuất sửa agent/workflow vào đúng chỗ).
-pluginSourceDir: C:\\Users\\nqtpe\\nqt-plugin
+# Thư mục mã nguồn plugin (repo git) để /nqt:retro đề xuất sửa agent/workflow vào đúng chỗ. Để trống: retro sẽ hỏi.
+pluginSourceDir:
 # Biệt danh cho agent và bước (chỉ dùng khi nói chuyện với bạn). Bỏ trống = tên mặc định.
 nicknames:
   agents:
@@ -75,7 +75,7 @@ export function loadConfig(dataDir) {
   return {
     language: asLang(fm.language),
     reviewRules: { personal },
-    pluginSourceDir: typeof fm.pluginSourceDir === 'string' ? fm.pluginSourceDir : '',
+    pluginSourceDir: typeof fm.pluginSourceDir === 'string' && fm.pluginSourceDir ? fm.pluginSourceDir : '',
     nicknames: {
       agents: asMap(asMap(fm.nicknames).agents),
       steps: asMap(asMap(fm.nicknames).steps),

@@ -6,7 +6,7 @@
     {
       "name": "nqt",
       "description": "Natural-language agent team for working on software tickets with code and DB evidence",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "source": "./plugin"
     }
   ]

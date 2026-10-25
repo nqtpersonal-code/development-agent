@@ -58,6 +58,17 @@ export function setStep(workDir, step, status, patch = {}) {
   return writeState(workDir, s);
 }
 
+// Called when a run resumes: a clear-suggestion has done its job once the
+// owner is back, so it is dropped; real questions/approvals stay pending.
+export function resumeState(workDir) {
+  const s = load(workDir);
+  if (s.waitingFor?.kind === 'clear-suggestion') {
+    s.waitingFor = null;
+    return writeState(workDir, s);
+  }
+  return s;
+}
+
 const FLAGS = ['hasUI', 'architect'];
 
 export function setFlag(workDir, flag, value) {

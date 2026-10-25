@@ -8,6 +8,7 @@ override their defaults — state them explicitly when invoking each skill:
 - No git worktree: skip `superpowers:using-git-worktrees`; the ticket already has its own folder and DB.
 - Never run `superpowers:finishing-a-development-branch`, never push, never merge, never open PRs.
 - Local commits on the current feature branch are fine.
+- DB writes (migrations, seeds, test data) only after `node "PLUGIN/scripts/nqt.mjs" db-check --project <project> --root "PROJECT_ROOT"` passes; never touch a non-local DB.
 - Talk to the owner in natural language per `PLUGIN/shared/rules.md`; no technical questions to the owner.
 
 ## design (superpowers:brainstorming)
@@ -30,7 +31,7 @@ When brainstorming hands off to writing-plans, continue below. `S --set design=d
 
 Invoke `superpowers:writing-plans` with: spec `WORK/spec.md`; save the plan to
 `WORK/plan.md` (owner preference); Global Constraints must include "no work
-files in the repo, no worktree, no push, surgical changes only"; every plan task
+files in the repo, no worktree, no push, surgical changes only, DB writes only after db-check passes"; every plan task
 names the TCs it serves. Do not ask the owner to review the technical plan;
 the plan-checker reviews it. `S --set plan=done`.
 

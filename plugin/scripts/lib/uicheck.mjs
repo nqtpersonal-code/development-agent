@@ -76,7 +76,9 @@ export async function uiCheck({ url, outDir, viewports = DEFAULT_VIEWPORTS, logi
     }
     for (const vp of viewports) {
       await page.setViewportSize({ width: vp.width, height: vp.height });
-      await page.goto(url, { waitUntil: 'networkidle' });
+      await page.goto(url, { waitUntil: 'load' });
+      // Apps that poll never reach network idle; wait briefly, then measure anyway.
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
       if (waitFor) await page.waitForSelector(waitFor, { timeout: 10000 });
       const found = await page.evaluate(measure, vp.width < 600);
       for (const i of found) issues.push({ viewport: vp.name, ...i });

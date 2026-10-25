@@ -105,6 +105,12 @@ Report in natural language what was right, what was wrong and why. If the
 conclusion changes, propose the brief update and name later steps affected.
 Still unsure after the re-trace → say so plainly.
 
+## Commands
+
+- On Windows the shell tool is often Git Bash: convert `PLUGIN`, `DATA`, `WORK` and `PROJECT_ROOT` to forward slashes (`C:/Users/...`) and always wrap them in double quotes: `node "C:/Users/me/.claude/plugins/cache/nqt-local/nqt/0.1.0/scripts/nqt.mjs" state "C:/Users/me/.claude/nqt/work/p/12" --resume`.
+- Pass DB access through the project (`--project <p> --root "<PROJECT_ROOT>"`) instead of putting connection strings with passwords on the command line.
+- Before any DB write (migration, seed, test data), run `node "<PLUGIN>/scripts/nqt.mjs" db-check --project <p> --root "<PROJECT_ROOT>"`; a non-zero exit means stop and ask the owner.
+
 ## Token discipline
 
 - Read inputs from the work files named in your instructions, not from the conversation.

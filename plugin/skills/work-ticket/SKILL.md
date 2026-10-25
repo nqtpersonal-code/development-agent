@@ -23,8 +23,9 @@ Arguments: `<project> <ticket>`. Missing → ask for them (one question).
 
 ## 1. Resume
 
-Read `WORK/state.json`. Continue at `current`. If `waitingFor` is set, re-ask
-that exact question/approval first (it survived a `/clear`). Announce the step
+Run `node "PLUGIN/scripts/nqt.mjs" state "WORK" --resume` (it drops a pending
+clear-suggestion, which has done its job). Continue at `current`. If `waitingFor`
+is still set, re-ask that exact question/approval first (it survived a `/clear`). Announce the step
 to the owner with its nickname and position, e.g. "Bước Soi ticket (2/14)".
 
 ## 2. The flow

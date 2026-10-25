@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmp } from '../helpers/tmp.mjs';
-import { STEPS, newState, readState, writeState, setStep, setWaiting, setFlag } from '../../plugin/scripts/lib/state.mjs';
+import { STEPS, newState, readState, writeState, setStep, setWaiting, setFlag, resumeState } from '../../plugin/scripts/lib/state.mjs';
 
 test('a new state starts at setup with every step pending', () => {
   const s = newState('demo', '12');
@@ -36,6 +36,15 @@ test('a pending owner question survives a reload (resume after /clear)', () => {
   assert.ok(s.waitingFor.since);
   setWaiting(d, null);
   assert.equal(readState(d).waitingFor, null);
+});
+
+test('resuming drops a pending clear-suggestion but keeps a pending question', () => {
+  const d = tmp();
+  writeState(d, newState('demo', '12'));
+  setWaiting(d, { kind: 'clear-suggestion', text: 'you may /clear' });
+  assert.equal(resumeState(d).waitingFor, null);
+  setWaiting(d, { kind: 'question', text: 'Có tính buổi nghỉ có phép?' });
+  assert.equal(resumeState(d).waitingFor.kind, 'question');
 });
 
 test('a corrupted state file raises an error naming the file', () => {
