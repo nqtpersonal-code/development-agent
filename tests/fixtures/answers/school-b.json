@@ -1,0 +1,46 @@
+{
+  "fixture": "school-b",
+  "note": "Fictional school app split in two folders. Paths are relative to tests/fixtures.",
+  "components": [
+    { "name": "api", "root": "school-b-api", "kind": "be" },
+    { "name": "web", "root": "school-b-web", "kind": "fe" }
+  ],
+  "adapter": {
+    "version": 1,
+    "aliases": { "students": ["repo('students')"] },
+    "dbAccessPatterns": ["repo\\(['\"]([a-z_]+)['\"]\\)"],
+    "routePatterns": [],
+    "apiClientPatterns": ["api\\.(get|post|put|delete)\\(\\s*['\"`]([^'\"`]+)"],
+    "apiBase": "/api/v1",
+    "jobPatterns": ["worker", "consumer"],
+    "assumptions": [
+      { "id": "repo-helper", "description": "DB access goes through db/repo.js", "check": { "fileExists": "school-b-api/db/repo.js" } },
+      { "id": "http-wrapper", "description": "Web calls the API through src/lib/http.ts", "check": { "fileExists": "school-b-web/src/lib/http.ts" } }
+    ]
+  },
+  "questions": [
+    {
+      "id": "B-Q1",
+      "question": "If the student phone (students.phone) changes, which places are affected?",
+      "start": { "table": "students", "column": "phone" },
+      "expectedPlaces": [
+        { "file": "school-b-api/routes/students.js", "kind": "api", "userFacing": "Chi tiết học sinh trả về số điện thoại" },
+        { "file": "school-b-api/routes/classes.js", "kind": "api", "userFacing": "Danh sách học sinh của lớp kèm số điện thoại (JOIN viết tay, không khoá ngoại)" },
+        { "file": "school-b-api/workers/sms.worker.js", "kind": "job", "userFacing": "Gửi SMS thông báo cho học sinh (hàng đợi)" },
+        { "file": "school-b-api/reports/contact-report.js", "kind": "export", "userFacing": "Báo cáo liên lạc (tên bảng ghép chuỗi)", "certainty": "suspected" },
+        { "file": "school-b-web/src/pages/StudentDetail.tsx", "kind": "screen", "userFacing": "Trang chi tiết học sinh (/students/:id)" },
+        { "file": "school-b-web/src/pages/ClassStudents.tsx", "kind": "screen", "userFacing": "Trang học sinh của lớp (/classes/:id/students)" }
+      ],
+      "mustNotInclude": [
+        { "file": "school-b-api/routes/teachers.js", "reason": "phone here belongs to teachers" }
+      ]
+    }
+  ],
+  "traps": [
+    { "id": "B1", "what": "no foreign keys at all; relations only via *_id names and JOINs in SQL strings", "file": "school-b-api/db/schema.sql" },
+    { "id": "B2", "what": "custom data access helper repo('students') instead of an ORM", "file": "school-b-api/db/repo.js" },
+    { "id": "B3", "what": "table name built by string concatenation", "file": "school-b-api/reports/contact-report.js" },
+    { "id": "B4", "what": "queue worker reads students.phone", "file": "school-b-api/workers/sms.worker.js" },
+    { "id": "B5", "what": "web reaches the API only through the http.ts wrapper with base /api/v1", "file": "school-b-web/src/lib/http.ts" }
+  ]
+}

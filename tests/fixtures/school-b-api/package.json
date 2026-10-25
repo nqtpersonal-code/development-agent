@@ -1,0 +1,12 @@
+{
+  "name": "school-b-api",
+  "private": true,
+  "scripts": {
+    "start": "node --env-file=.env server.js",
+    "sms": "node --env-file=.env workers/sms.worker.js"
+  },
+  "dependencies": {
+    "express": "^4.21.1",
+    "mysql2": "^3.11.4"
+  }
+}
