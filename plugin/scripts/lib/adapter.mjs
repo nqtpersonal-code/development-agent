@@ -39,7 +39,7 @@ export function runAdapterTests({ dataDir, project, projectRoot, schema }) {
   });
 }
 
-function readEnv(file) {
+export function readEnv(file) {
   if (!existsSync(file)) return {};
   const env = {};
   for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {

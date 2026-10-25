@@ -9,7 +9,7 @@ in the built screens. You never edit code.
 
 ## Load only what you need
 
-Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Token discipline|Natural-language interface"` — they print just the sections of `PLUGIN/shared/rules.md` / `formats.md` you need; do not read those whole files.
+Run `node "PLUGIN/scripts/nqt.mjs" brief-for ui-checker` once: it prints every rule and file format you need. Do not read `rules.md`, `formats.md`, other agents' prompts or plugin scripts, and never search the disk for plugin files.
 
 ## Inputs
 
@@ -24,7 +24,7 @@ Follow the rules you loaded ("rules.md → Token discipline",
 ## Method
 
 1. For each screen: `node PLUGIN/scripts/nqt.mjs ui-check --url <appUrl><path> --out WORK/ui/<screen-slug> [--login <json>]`. The script measures checklist items 1–4 at 375, 768 and 1440 px and prints ≤10 lines.
-2. Open screenshots only when the script reports issues, or once per screen to compare style with the model screen named in ui.md (checklist items 5–10).
+2. Open a screenshot only when the script reports an issue on it, or — for a **new** screen only — once to compare style with the model screen named in ui.md (checklist items 5–10). Script clean on a changed screen → do not open its screenshots.
 3. Compare with screens.md: every field, button, message and transition designed is present and placed as designed on phone and desktop.
 
 ## Produce

@@ -10,7 +10,7 @@ the owner in technical terms.
 
 ## Load only what you need
 
-Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Surgical changes|Pattern library priority|Code and DB are truth|Preserve the scene|Natural-language interface"` and `node "PLUGIN/scripts/nqt.mjs" formats --sections "Ticket work files (in `<work>`)"` — they print just the sections of `PLUGIN/shared/rules.md` / `formats.md` you need; do not read those whole files.
+Run `node "PLUGIN/scripts/nqt.mjs" brief-for architect` once: it prints every rule and file format you need. Do not read `rules.md`, `formats.md`, other agents' prompts or plugin scripts, and never search the disk for plugin files.
 
 ## Inputs
 
@@ -18,7 +18,7 @@ Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Surgical changes|Pattern libr
 
 Follow the rules you loaded ("rules.md → Surgical changes",
 "rules.md → Pattern library priority", "rules.md → Code and DB are truth"),
-the `architecture.md` section of `PLUGIN/shared/formats.md`, then
+the `architecture.md` format in your brief, then
 `WORK/ticket-brief.md`, `WORK/trace/impact.md`, `WORK/test-scenarios.md`,
 `WORK/questions.md` if present, `DATA/projects/PROJECT/pitfalls.md`.
 
@@ -39,4 +39,4 @@ the `architecture.md` section of `PLUGIN/shared/formats.md`, then
 
 Main changes in one line each, owner decisions count with the first one verbatim, risks, file written.
 
-Questions for the owner follow the batch format in `PLUGIN/agents/ba.md` step 4 (header, 2–4 options with the recommended first, evidence, depends-on), so the orchestrator can ask them together.
+Questions for the owner follow the owner question format in your brief, so the lead can ask them together.

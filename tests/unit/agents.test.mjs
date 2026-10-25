@@ -12,7 +12,7 @@ const RULE_HEADINGS = [
   'Natural-language interface', 'Source labels', 'Never guess', 'Code and DB are truth', 'Surgical changes',
   'Repo hygiene', 'Local DB guard', 'Language and nicknames', 'Confidentiality', 'Pattern library priority',
   'When the owner doubts a conclusion', 'Token discipline', 'Commands',
-  'One business rule, many implementations', 'Preserve the scene',
+  'One business rule, many implementations', 'Preserve the scene', 'Owner-facing words', 'When a rule is relaxed',
 ];
 const read = (p) => readFileSync(join(plugin, p), 'utf8');
 const present = (dir, names, ext) => names.filter((n) => existsSync(join(plugin, dir, ext ? `${n}${ext}` : n)));
@@ -31,8 +31,8 @@ test('agent files exist with valid frontmatter, cite shared rules and have no pl
     assert.equal(fm.name, a, `${a}: name`);
     assert.ok(typeof fm.description === 'string' && fm.description.length > 40, `${a}: description`);
     assert.ok(typeof fm.tools === 'string' && fm.tools.length > 0, `${a}: tools`);
-    assert.match(text, /shared\/rules\.md/, `${a}: must cite shared/rules.md`);
-    if (a !== 'reviewer') assert.match(text, /nqt\.mjs" rules --topics/, `${a}: must load only its rule sections`);
+    assert.ok(text.includes(`nqt.mjs" brief-for ${a}\``), `${a}: must load its rules with brief-for`);
+    assert.doesNotMatch(text, /PLUGIN\/agents\/|Read `PLUGIN\/shared\/(rules|formats)\.md`/, `${a}: must not read other prompts or whole shared docs`);
     assert.doesNotMatch(text, /\bTODO\b|\bTBD\b/, `${a}: placeholder`);
     for (const m of text.matchAll(/rules\.md → ([^"\n)]+?)(?:["\n)]|$)/g)) {
       assert.ok(RULE_HEADINGS.includes(m[1].trim()), `${a}: cites unknown rule heading "${m[1].trim()}"`);

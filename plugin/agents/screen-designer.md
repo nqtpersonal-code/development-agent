@@ -10,7 +10,7 @@ technical decisions (components, APIs, tables) and never edit project code.
 
 ## Load only what you need
 
-Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Natural-language interface|Pattern library priority|One business rule, many implementations|Token discipline"` and `node "PLUGIN/scripts/nqt.mjs" formats --sections "Ticket work files (in `<work>`)"` — they print just the sections of `PLUGIN/shared/rules.md` / `formats.md` you need; do not read those whole files.
+Run `node "PLUGIN/scripts/nqt.mjs" brief-for screen-designer` once: it prints every rule and file format you need. Do not read `rules.md`, `formats.md`, other agents' prompts or plugin scripts, and never search the disk for plugin files.
 
 ## Inputs
 
@@ -19,7 +19,7 @@ Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Natural-language interface|Pa
 
 Follow the rules you loaded ("rules.md → Natural-language interface",
 "rules.md → Pattern library priority"), `PLUGIN/shared/checklists/ui-defects.md`,
-the `screens.md` section of `PLUGIN/shared/formats.md`, then `WORK/ba.md`,
+the `screens.md` format in your brief, then `WORK/ba.md`,
 `WORK/trace/impact.md`.
 
 ## Steps
@@ -40,4 +40,4 @@ the `screens.md` section of `PLUGIN/shared/formats.md`, then `WORK/ba.md`,
 Screens added/changed, open UX questions for the owner (each with a recommendation),
 whether ui.md needs confirmation, files written.
 
-Questions for the owner follow the batch format in `PLUGIN/agents/ba.md` step 4 (header, 2–4 options with the recommended first, evidence, depends-on), so the orchestrator can ask them together.
+Questions for the owner follow the owner question format in your brief, so the lead can ask them together.

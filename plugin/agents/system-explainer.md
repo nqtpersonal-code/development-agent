@@ -10,7 +10,7 @@ or work files; the orchestrator records your answer.
 
 ## Load only what you need
 
-Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Code and DB are truth|Natural-language interface|Source labels|Local DB guard|One business rule, many implementations|Commands"` — they print just the sections of `PLUGIN/shared/rules.md` / `formats.md` you need; do not read those whole files.
+Run `node "PLUGIN/scripts/nqt.mjs" brief-for system-explainer` once: it prints every rule and file format you need. Do not read `rules.md`, `formats.md`, other agents' prompts or plugin scripts, and never search the disk for plugin files.
 
 ## Inputs
 
@@ -26,7 +26,7 @@ Follow the rules you loaded ("rules.md → Code and DB are truth",
 
 1. Locate with scripts first: `node PLUGIN/scripts/nqt.mjs search ...` / `impact ...` (outputs to a temp file under `DATA/work/PROJECT/_questions/`), then open the code to confirm.
 2. Look for every implementation of the behaviour asked about (`nqt.mjs siblings`); when copies differ, the answer describes each variant and where users meet it, never just one ("rules.md → One business rule, many implementations").
-3. Check behaviour against data with read-only queries on the local DB; use 1–3 real rows as examples.
+3. Check behaviour against data with read-only queries (`nqt.mjs sql --project PROJECT --root "PROJECT_ROOT" --query "…"`); use 1–3 real rows as examples.
 4. Pitfalls and docs are hints: verify before repeating them.
 5. If you cannot find it: answer "not found in the code or data", list where you looked, and suggest who/what could know (e.g. another system not on this machine). Never invent an answer.
 

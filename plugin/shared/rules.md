@@ -28,6 +28,25 @@ The few moments the owner reads technical material are: first project
 setup, reviewing the diff before pushing, and when the owner doubts a
 conclusion and opens an evidence link. Mark such sections "Technical part".
 
+## Owner-facing words
+
+Owner-facing text never uses developer words. Replace them:
+
+| Do not write | Write instead (en / vi) |
+|---|---|
+| API, endpoint, route, request, payload, 409/500 | "when you press Save, the system…" / "khi bấm Lưu, hệ thống…" |
+| service, controller, component, hook, handler, DTO | the screen or action it serves / tên màn hình, thao tác |
+| table, column, row, record, FK, unique constraint, index | "the list of students", "a student's name", "no two students may share a name" / "danh sách học sinh", "tên học sinh", "không cho trùng tên" |
+| null, undefined, boolean, enum, query, join | "left empty", "yes/no", "one of: …" / "để trống", "có/không", "một trong: …" |
+| soft delete, `deleted_at` | "hidden as deleted but still kept" / "đã xoá nhưng vẫn lưu lại" |
+| migration, seed, schema | "a change to how the data is stored", "sample data" / "đổi cách lưu dữ liệu", "dữ liệu mẫu" |
+| refactor, regression, edge case, TC7 alone | "tidy the code", "something that used to work breaks", "an unusual case", "check 7 (…what it checks)" |
+
+Technical words are fine only inside evidence links and sections marked
+"Technical part". Progress lines the orchestrator prints between steps
+("Checking the attendance page…") are owner-facing too: write them in the
+configured language.
+
 ## Source labels
 
 Every statement in a work file carries one internal label:
@@ -55,6 +74,19 @@ Every statement in a work file carries one internal label:
 - Code and the local database are the only sources of truth.
 - Docs, `pitfalls.md`, `ui.md`, pattern packs and earlier work files are hints that tell you where to look. Verify in code before relying on them; if code changed, say so and propose an update.
 - Script results (impact, search, schema) are candidates. Open the code to confirm each place before stating it as `[CODE]`.
+- A ticket that quotes or links a doc does not make the doc true. Check the quoted behaviour in code and data; when they differ, present both (doc vs today's system) and ask.
+
+## When a rule is relaxed
+
+A ticket that removes or loosens a constraint (allow duplicate names, allow
+empty fields, allow several per day…) can break places that silently relied
+on it. Before calling the change small, look for:
+
+- screens, lists, pickers, reports and exports where users could no longer tell two records apart (same name shown with nothing else to distinguish them);
+- code that looks records up by the relaxed field (find by name, `findFirst`, `.Single()`), imports and matching by text;
+- existing data that the old rule hid (rows already breaking it, hidden or deleted rows that would now show up).
+
+Each finding becomes a change point or a question for the owner.
 
 ## Surgical changes
 
@@ -74,6 +106,7 @@ Every statement in a work file carries one internal label:
 - Writes (insert/update/delete, migrations, seeds) are allowed only on the ticket's local database: host `localhost`, `127.0.0.1`, `::1`, `host.docker.internal`, a local Docker container, or a host listed in `confirmedLocalHosts` in `project.md`.
 - Any other host, or several connections where it is unclear which is local: stop and ask the owner. Record the answer in `project.md`.
 - Reading for analysis is fine on the local DB; never connect to shared/staging/production databases.
+- Test data an agent creates is recorded (what, which rows) in the work file named in its instructions (implementation-notes.md for developers, qa-report.md for QA) and removed afterwards unless the owner wants to keep it. A developer's self-check uses the smallest data possible and never repeats QA's scenarios.
 
 ## Language and nicknames
 
@@ -103,6 +136,9 @@ team/personal review rules > pattern library.
 
 Do not defend the earlier answer. The orchestrator dispatches a fresh agent
 (clean context) to re-trace exactly that point from code and data, once.
+The re-trace is scoped: it gets the doubted sentence, its evidence links and
+the related part of the impact map, and checks only that — it does not redo
+the whole analysis.
 Report in natural language what was right, what was wrong and why. If the
 conclusion changes, propose the brief update and name later steps affected.
 Still unsure after the re-trace → say so plainly.
@@ -134,6 +170,9 @@ let it mislead you.
 - On Windows the shell tool is often Git Bash: convert `PLUGIN`, `DATA`, `WORK` and `PROJECT_ROOT` to forward slashes (`C:/Users/...`) and always wrap them in double quotes: `node "C:/Users/me/.claude/plugins/cache/nqt-local/nqt/0.1.0/scripts/nqt.mjs" state "C:/Users/me/.claude/nqt/work/p/12" --resume`.
 - Pass DB access through the project (`--project <p> --root "<PROJECT_ROOT>"`) instead of putting connection strings with passwords on the command line.
 - Before any DB write (migration, seed, test data), run `node "<PLUGIN>/scripts/nqt.mjs" db-check --project <p> --root "<PROJECT_ROOT>"`; a non-zero exit means stop and ask the owner.
+- Query the DB with `nqt.mjs sql --project <p> --root "<PROJECT_ROOT>" --query "…"` (or `--file q.sql`); it reads the connection from the project, refuses non-local hosts and needs `--write` to change data. Never call psql/mysql/sqlcmd with a password.
+- Text with non-ASCII characters (Vietnamese names…) sent to the app or DB goes through a UTF-8 file (`curl --data-binary @body.json -H "Content-Type: application/json; charset=utf-8"`, `sql --file`), never inline on a Windows command line, which mangles it.
+- The plugin path is given in your instructions. Never search the disk for `nqt.mjs` or other plugin files, and never read plugin sources (scripts, other agents' prompts): run the commands and read their output.
 
 ## Token discipline
 

@@ -24,7 +24,12 @@ import { detectHost, fetchTicket } from './lib/githost.mjs';
 import { resolveProject, rememberProject } from './lib/project-id.mjs';
 import { listRepos, resolveComponents } from './lib/workspace.mjs';
 import { snapshot, compareSnapshots, detectComponents, adapterNeeded } from './lib/health.mjs';
-import { ruleSections } from './lib/docs.mjs';
+import { ruleSections, agentBrief, stepGuide } from './lib/docs.mjs';
+import { planCheck } from './lib/plancheck.mjs';
+import { setupDetect } from './lib/setup.mjs';
+import { runSql } from './lib/sql.mjs';
+import { appCheck } from './lib/appcheck.mjs';
+import { parseTicketRef } from './lib/githost.mjs';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
@@ -51,6 +56,26 @@ function writeJson(file, data) {
 }
 
 const pluginRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+const slash = (p) => String(p).replace(/\\/g, '/');
+
+function fetchTicketTo(ctx, ticket, out) {
+  let info = ctx.fm.gitHost && ctx.fm.repo ? { host: ctx.fm.gitHost, hostname: ctx.fm.gitHostname, repo: ctx.fm.repo } : null;
+  if (!info) {
+    const repos = listRepos(ctx.root).filter((r) => r.key);
+    const own = repos.find((r) => r.dir === '.') ?? (repos.length === 1 ? repos[0] : null);
+    info = own ? detectHost(`https://${own.hostname}/${own.repo}`) : { host: 'unknown' };
+    if (!own && repos.length > 1) {
+      return { code: 3, message: `need-owner — ${repos.length} repos here; set gitHost, gitHostname and repo (where the issues live) in project.md` };
+    }
+  }
+  const r = fetchTicket(info, ticket);
+  if (!r.ok) {
+    return { code: 3, message: `need-ticket-paste — ${r.reason}` };
+  }
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, r.markdown, 'utf8');
+  return { code: 0, message: `${info.host} issue ${r.id} saved to ${out}` };
+}
 
 export function parseArgs(argv) {
   const out = { _: [] };
@@ -66,6 +91,9 @@ export function parseArgs(argv) {
   }
   return out;
 }
+
+// Phase boundaries where a fresh session saves the most tokens.
+const CLEAR_AFTER = ['free-qa', 'plan-check', 'implement'];
 
 const commands = {
   init() {
@@ -84,9 +112,11 @@ const commands = {
     if (!workDir) throw new Error('usage: state <workDir> [--init project ticket] [--resume] [--set step=status] [--wait kind text] [--clear-wait]');
     if (args.init) writeState(workDir, newState(args.init, args._[1] ?? ''));
     if (args.resume) resumeState(workDir);
+    let boundary = false;
     for (const pair of [].concat(args.set ?? [])) {
       const [step, status] = String(pair).split('=');
       setStep(workDir, step, status);
+      if (CLEAR_AFTER.includes(step) && ['done', 'skipped'].includes(status)) boundary = true;
     }
     for (const pair of [].concat(args.flag ?? [])) {
       const [flag, value] = String(pair).split('=');
@@ -99,6 +129,7 @@ const commands = {
     const done = STEPS.filter((x) => ['done', 'skipped'].includes(s.steps[x])).length;
     console.log(`ticket ${s.project}/${s.ticket}: step ${s.current} (${done}/${STEPS.length} done)`);
     console.log(s.waitingFor ? `waiting: ${s.waitingFor.kind}: ${s.waitingFor.text}` : 'waiting: nothing');
+    if (boundary) console.log('boundary: suggest /clear now — run state --wait clear, tell the owner how to continue, and END your turn (do not start the next step)');
   },
   doctor(args) {
     const dataDir = getDataDir();
@@ -264,25 +295,9 @@ const commands = {
   },
   'fetch-ticket'(args) {
     if (!args.ticket || !args.out) throw new Error('usage: fetch-ticket --project p [--root dir] --ticket <id|#id|url> --out <file>');
-    const ctx = projectContext(args);
-    let info = ctx.fm.gitHost && ctx.fm.repo ? { host: ctx.fm.gitHost, hostname: ctx.fm.gitHostname, repo: ctx.fm.repo } : null;
-    if (!info) {
-      const repos = listRepos(ctx.root).filter((r) => r.key);
-      const own = repos.find((r) => r.dir === '.') ?? (repos.length === 1 ? repos[0] : null);
-      info = own ? detectHost(`https://${own.hostname}/${own.repo}`) : { host: 'unknown' };
-      if (!own && repos.length > 1) {
-        console.log(`fetch-ticket: need-owner — ${repos.length} repos here; set gitHost, gitHostname and repo (where the issues live) in project.md`);
-        return 3;
-      }
-    }
-    const r = fetchTicket(info, String(args.ticket));
-    if (!r.ok) {
-      console.log(`fetch-ticket: need-ticket-paste — ${r.reason}`);
-      return 3;
-    }
-    mkdirSync(dirname(args.out), { recursive: true });
-    writeFileSync(args.out, r.markdown, 'utf8');
-    console.log(`fetch-ticket: ${info.host} issue ${r.id} saved to ${args.out}`);
+    const r = fetchTicketTo(projectContext(args), String(args.ticket), args.out);
+    console.log(`fetch-ticket: ${r.message}`);
+    return r.code;
   },
   'risk-level'(args) {
     const ctx = projectContext(args);
@@ -343,6 +358,102 @@ const commands = {
       console.log(`db-check: BLOCKED — ${e.message}`);
       return 1;
     }
+  },
+  // One call at the start of /nqt:work-ticket: data dir, doctor, project,
+  // config, work dir and state, and the ticket fetched when still missing.
+  start(args) {
+    const dataDir = getDataDir();
+    ensureDataDir(dataDir, pluginRoot);
+    const root = resolve(args.root ?? process.cwd());
+    const ref = String(args.ticket ?? args._[0] ?? '');
+    if (!ref) throw new Error('usage: start --ticket <id|#id|url> [--project <name>] [--root dir]');
+    const doc = doctor(dataDir);
+    const missing = doc.checks.filter((c) => c.required && !c.ok).map((c) => c.name);
+    if (missing.length) {
+      console.log(`start: MISSING ${missing.join(', ')} — runtime packages: doctor --install; superpowers: install the plugin`);
+      return 1;
+    }
+    if (typeof args.project === 'string') rememberProject({ root, dataDir, project: args.project });
+    const found = resolveProject({ root, dataDir, explicit: typeof args.project === 'string' ? args.project : undefined });
+    if (!found.project) {
+      console.log('start: need-project — no git remote here; ask the owner for a short project name, then re-run start with --project <name>');
+      return 3;
+    }
+    const project = found.project;
+    const cfg = projectConfig(dataDir, project);
+    const ticket = parseTicketRef(ref) ?? ref.replace(/[^\w.-]+/g, '-');
+    const work = join(dataDir, 'work', project, ticket);
+    if (!readState(work)) writeState(work, newState(project, ticket));
+    else resumeState(work);
+    const s = readState(work);
+    let ticketLine = 'ticket: saved earlier';
+    if (!existsSync(join(work, 'ticket.md'))) {
+      const r = fetchTicketTo(projectContext({ project, root }), ref, join(work, 'ticket.md'));
+      ticketLine = `ticket: ${r.message}`;
+    }
+    const nick = Object.keys(cfg.nicknames.agents).length || Object.keys(cfg.nicknames.steps).length ? JSON.stringify(cfg.nicknames) : 'none';
+    const done = STEPS.filter((x) => ['done', 'skipped'].includes(s.steps[x])).length;
+    console.log(`PLUGIN="${slash(pluginRoot)}"\nDATA="${slash(dataDir)}"\nPROJECT=${project} (${found.source})\nPROJECT_ROOT="${slash(root)}"\nWORK="${slash(work)}"\nLANGUAGE=${cfg.language}`);
+    console.log(`nicknames: ${nick}`);
+    console.log(`project.md: ${existsSync(join(dataDir, 'projects', project, 'project.md')) ? 'present' : 'missing (setup will detect it)'}`);
+    console.log(`step: ${s.current} (${done}/${STEPS.length} done); waiting: ${s.waitingFor ? `${s.waitingFor.kind}: ${s.waitingFor.text}` : 'nothing'}`);
+    console.log(ticketLine);
+    console.log(`next: guide --step ${s.current}`);
+  },
+  guide(args) {
+    const step = args.step ?? args._[0];
+    if (!step) throw new Error(`usage: guide --step <${STEPS.join('|')}>`);
+    console.log(stepGuide(pluginRoot, String(step)));
+  },
+  'brief-for'(args) {
+    const agent = args._[0] ?? args.agent;
+    if (!agent) throw new Error('usage: brief-for <agent>');
+    console.log(agentBrief(pluginRoot, String(agent)));
+  },
+  'setup-detect'(args) {
+    const root = resolve(args.root ?? process.cwd());
+    const r = setupDetect(root);
+    if (args.out) writeJson(args.out, r);
+    console.log(`repos: ${r.repos.map((x) => `${x.dir} (${x.key ?? 'no remote'})`).join(', ') || 'none'}`);
+    console.log(`db settings: ${r.db.map((d) => `${d.file} ${d.key} → ${d.engine} ${d.host}${d.port ? ':' + d.port : ''}/${d.database} ${d.local ? 'local' : 'NOT LOCAL'}`).join('; ') || 'none found'}`);
+    for (const c of r.components) console.log(`component ${c.name} (${c.kind}, ${c.root}): ${Object.entries(r.scripts[c.root] ?? {}).map(([k, v]) => `${k}=${v}`).join(', ') || 'no scripts'}`);
+    console.log(`tests: ${r.tests.files} test files → writeTests guess: ${r.tests.writeTestsGuess}`);
+    if (args.out) console.log(`full result: ${args.out}`);
+  },
+  'plan-check'(args) {
+    const work = args.work ?? args._[0];
+    if (!work) throw new Error('usage: plan-check <WORK> [--out-of-scope TC4,TC5]');
+    const brief = readFileSync(join(work, 'ticket-brief.md'), 'utf8');
+    const plan = readFileSync(join(work, 'plan.md'), 'utf8');
+    const r = planCheck({ brief, plan, outOfScopeCriteria: String(args['out-of-scope'] ?? '').split(',').filter(Boolean) });
+    console.log(`plan-check: ${r.verdict}`);
+    if (r.uncoveredCriteria.length) console.log(`criteria with no task: ${r.uncoveredCriteria.join(', ')}`);
+    if (r.missingMustPatch.length) console.log(`must-patch places not in the plan: ${r.missingMustPatch.join(', ')}`);
+    if (r.touchesForbidden.length) console.log(`plan touches do-not-touch places: ${r.touchesForbidden.join(', ')}`);
+    return r.verdict === 'pass' ? 0 : 1;
+  },
+  async sql(args) {
+    const ctx = projectContext(args);
+    if (!ctx.dbUrl) throw new Error('no DB settings in project.md (dbUrl or dbEnvFile)');
+    const query = args.file ? readFileSync(String(args.file), 'utf8') : args.query;
+    if (!query || query === true) throw new Error('usage: sql --project p --root dir (--query "…" | --file q.sql) [--write] [--out rows.json]');
+    const r = await runSql({ url: ctx.dbUrl, query: String(query), write: Boolean(args.write), dataDir: ctx.dataDir, confirmedLocalHosts: ctx.confirmedLocalHosts, maxRows: Number(args.max ?? 50) });
+    if (args.out) writeJson(args.out, r.rows);
+    if (!r.rows.length) return void console.log(`sql: no rows${r.affected != null ? ` (${r.affected} affected)` : ''}`);
+    console.log(`sql: ${r.total} row(s)${r.truncated ? `, first ${r.rows.length} kept` : ''}${args.out ? `, saved to ${args.out}` : ''}`);
+    console.log(r.rows.slice(0, 10).map((row) => JSON.stringify(row)).join('\n'));
+  },
+  'app-check'(args) {
+    const ports = [].concat(args.port ?? []).map(Number).filter(Boolean);
+    if (!ports.length) throw new Error('usage: app-check --port <n> [--port <n>] [--root <component dir>]');
+    const root = resolve(args.root ?? process.cwd());
+    let bad = 0;
+    for (const port of ports) {
+      const r = appCheck({ port, root });
+      if (r.status !== 'current') bad++;
+      console.log(`port ${port}: ${r.status}${r.pid ? ` (pid ${r.pid}${r.watching ? ', reloads on change' : ''})` : ''} — ${r.advice}`);
+    }
+    return bad ? 1 : 0;
   },
   'scan-leaks'(args) {
     const projectNames = projectNamesFrom(getDataDir());

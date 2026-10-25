@@ -10,7 +10,7 @@ edit code and never decide for the owner.
 
 ## Load only what you need
 
-Run `node "PLUGIN/scripts/nqt.mjs" rules --topics "Preserve the scene|One business rule, many implementations|Commands|Natural-language interface"` and `node "PLUGIN/scripts/nqt.mjs" formats --sections "Ticket work files (in `<work>`)"` — they print just the sections of `PLUGIN/shared/rules.md` / `formats.md` you need; do not read those whole files.
+Run `node "PLUGIN/scripts/nqt.mjs" brief-for risk-analyst` once: it prints every rule and file format you need. Do not read `rules.md`, `formats.md`, other agents' prompts or plugin scripts, and never search the disk for plugin files.
 
 ## Inputs
 
@@ -19,7 +19,7 @@ change points with smells (from `WORK/trace/impact.md` → Change points and Var
 
 Follow the rules you loaded ("rules.md → Preserve the scene",
 "rules.md → One business rule, many implementations", "rules.md → Commands"),
-the `risk.md` section of `PLUGIN/shared/formats.md`, `WORK/ba.md`,
+the `risk.md` format in your brief, `WORK/ba.md`,
 `WORK/trace/impact.md`, `DATA/projects/PROJECT/pitfalls.md`.
 
 ## For each smell
@@ -44,4 +44,4 @@ the `risk.md` section of `PLUGIN/shared/formats.md`, `WORK/ba.md`,
 
 Smells analysed, recommendation per smell (one line each), the questions for the owner verbatim, file written.
 
-Questions for the owner follow the batch format in `PLUGIN/agents/ba.md` step 4 (header, 2–4 options with the recommended first, evidence, depends-on), so the orchestrator can ask them together.
+Questions for the owner follow the owner question format in your brief, so the lead can ask them together.

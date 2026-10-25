@@ -62,7 +62,7 @@ export function setStep(workDir, step, status, patch = {}) {
 // owner is back, so it is dropped; real questions/approvals stay pending.
 export function resumeState(workDir) {
   const s = load(workDir);
-  if (s.waitingFor?.kind === 'clear-suggestion') {
+  if (/^clear/.test(s.waitingFor?.kind ?? '')) {
     s.waitingFor = null;
     return writeState(workDir, s);
   }
@@ -78,8 +78,15 @@ export function setFlag(workDir, flag, value) {
   return writeState(workDir, s);
 }
 
+// waitingFor is only for the owner: a question, an approval, or the /clear reminder.
+// Waiting for an agent is not recorded here.
+const WAIT_KINDS = { question: 'question', approval: 'approval', 'clear-suggestion': 'clear-suggestion', clear: 'clear-suggestion' };
+
 export function setWaiting(workDir, waiting) {
+  if (waiting && !WAIT_KINDS[waiting.kind]) {
+    throw new Error(`unknown waiting kind "${waiting.kind}": use question, approval or clear-suggestion (never for waiting on agents)`);
+  }
   const s = load(workDir);
-  s.waitingFor = waiting ? { ...waiting, since: new Date().toISOString() } : null;
+  s.waitingFor = waiting ? { ...waiting, kind: WAIT_KINDS[waiting.kind], since: new Date().toISOString() } : null;
   return writeState(workDir, s);
 }

@@ -16,8 +16,8 @@ Argument: optional project name; normally derived from the folder.
 - `node PLUGIN/scripts/nqt.mjs init` → `DATA`.
 - Project: run `node "PLUGIN/scripts/nqt.mjs" project --root "PROJECT_ROOT"`. It derives the project from the folder's git remote (every ticket folder cloned from the same repo maps to the same project). If the owner gave a project name as an extra argument, use it and remember it with `project --root "PROJECT_ROOT" --set <name>`. Unknown (no remote) → ask the owner once for a short name, then `--set` it.
 - `node PLUGIN/scripts/nqt.mjs config --project <project>` → `LANGUAGE`, nicknames.
-- Read `PLUGIN/shared/rules.md`.
-- If `tracer/adapter.json` is missing run `node "PLUGIN/scripts/nqt.mjs" tracer-need --project <project> --root "PROJECT_ROOT"` (automatic when generic rules suffice). If it reports `NEEDED`, or `project.md` is missing, build them first: dispatch `nqt:setup` without a ticket (skip ticket and branch steps — say so in the dispatch), then follow "Build tracer adapter" in `PLUGIN/skills/work-ticket/references/flow.md`.
+- Run `node "PLUGIN/scripts/nqt.mjs" brief-for lead` once (the rules for talking to the owner); do not read rules.md or plugin sources.
+- If `tracer/adapter.json` is missing run `node "PLUGIN/scripts/nqt.mjs" tracer-need --project <project> --root "PROJECT_ROOT"` (automatic when generic rules suffice). If it reports `NEEDED`, or `project.md` is missing, build them first: dispatch `nqt:setup` without a ticket (skip ticket and branch steps — say so in the dispatch), then follow `node "PLUGIN/scripts/nqt.mjs" guide --step build-adapter`.
 - Log file: `DATA/work/<project>/_questions/<YYYY-MM-DD>.md` (append).
 
 ## Loop

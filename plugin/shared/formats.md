@@ -45,14 +45,14 @@ commitConvention: <e.g. conventional commits, or "follow git log">
 runApp: <command(s) to start the app>
 runTests: <command to run the test suite, or none>
 writeTests: no                  # yes = the project requires automated tests for changes (write them its way); no = never add tests or test frameworks
-appUrl: http://localhost:5173
+appUrl: http://localhost:5173      # the web app; its port is checked with nqt.mjs app-check
+apiUrl: http://localhost:3101      # the server, when separate
 dbEngine: postgres | mysql | sqlserver
 dbUrl: <only if not taken from an env file>
 dbEnvFile: <path relative to project folder, e.g. api/.env, or src/App/appsettings.Development.json>
 dbConnectionName: DefaultConnection   # for appsettings JSON (ADO.NET connection string; SQL Server, Npgsql, MySQL)
 dbEnvVar: DATABASE_URL           # or omit and use DB_HOST/DB_PORT/... parts
 confirmedLocalHosts: []
-dbTool: <how to run queries: prisma, mysql client, docker exec …>
 loginAccount: <test account for the local app>
 graphify: off                    # on | off
 ---
@@ -95,9 +95,10 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 |---|---|---|
 | `ticket.md` | setup | ticket title, body, comments, labels, link (verbatim) |
 | `trace/impact.json` | code-tracer (script) | raw impact result |
-| `trace/impact.md` | code-tracer | Technical part: confirmed places with file:line, certainty, chains. Owner part: affected screens/functions in natural language with links; **Variants** (same rule implemented differently, with what differs); **Change points** (each fragment the ticket's behaviour lives in: must patch / do not touch / re-check, with link and radius); smells involved; "Not scanned" list; real example rows from the DB |
+| `trace/impact.md` | code-tracer | Technical part: confirmed places with file:line, certainty, chains. Owner part: affected screens/functions in natural language with links; **Variants** (same rule implemented differently, with what differs); **Change points** (each fragment the ticket's behaviour lives in: must patch / do not touch / re-check, with link and radius); smells involved; **What else this could break**; **Already in the system** (odd data or behaviour not caused by the ticket); "Not scanned" list; real example rows from the DB |
+| `trace/recheck-<n>.md` | code-tracer (re-check) | one doubted conclusion: right / wrong / why, with links |
 | `risk.md` | risk-analyst | per smell: owner part (what is fragmented, options A patch-and-preserve / B fix-the-smell / hybrid with immediate and later risk, recommendation) and technical part (measured signals per option, files touched, regression scenarios) |
-| `ba.md` | ba | requirement groups, source comparison table, contradictions, questions (ordered, each with recommendation) |
+| `ba.md` | ba | requirement groups, source comparison table, contradictions, side effects, questions (owner question format), draft criteria, UI touched, screen design needed (yes/no + reason), Need from tracer |
 | `screens.md` | screen-designer | screen flow (mermaid), per-screen content (tabs, filters, fields, buttons, messages, navigation), desktop + mobile layout, real data examples |
 | `mockup/index.html` | screen-designer | optional static clickable mockup |
 | `ticket-brief.md` | orchestrator (from ba/screens/trace + owner answers) | see below |
@@ -106,11 +107,13 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 | `architecture.md` | architect | Technical part: DB/migration changes, legacy data handling, API, flow, reuse, risks. Owner part: business-impacting decisions as questions |
 | `spec.md` | superpowers:brainstorming | design spec |
 | `plan.md` | superpowers:writing-plans | implementation plan |
-| `plan-check.md` | plan-checker | verdict pass/revise, uncovered TCs, out-of-scope work, unhandled cross-impacts, round number |
+| `plan-check.md` | plan-checker | verdict pass/revise, round, findings graded blocker / should / note, "needs owner" items |
+| `implementation-notes.md` | dev subagents | tasks done, commits per repo, self-check results, test data created and removed, contradictions with the brief, late change points |
+| `superpowers-review.md` | orchestrator | superpowers' code review of the branch: verdict and findings (≤20 lines) |
 | `review.md` | reviewer | findings (severity, business consequence, link), rules used or "no rules", Technical appendix |
-| `qa-report.md` | qa (+ ui-checker section) | per scenario pass/fail with evidence (data before/after, responses, screenshots) |
+| `qa-report.md` | qa (+ ui-checker section) | app-check result, per scenario pass/fail with evidence (data before/after, responses, screenshots), Test data (created / removed), not tested, Already in the system |
 | `ui/` + `ui/report.json` | ui-checker | screenshots per viewport and the script report |
-| `final-report.md` | orchestrator | what changed (natural language), TC → where implemented → which test proves it, review and QA results, not tested, Technical part: commits and diff summary |
+| `final-report.md` | orchestrator | what changed (natural language), TC → where implemented → which test proves it, review and QA results, not tested, **Already in the system before this ticket** (seen, not changed), Technical part: commits and diff summary |
 
 ### ticket-brief.md sections
 
@@ -123,6 +126,17 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 7. Fix mode — `Refactor allowed: yes/no` (from the ticket or the owner; default no) and, per smell, the chosen option from `risk.md`
 8. Owner answers (question → answer, dated)
 9. Open questions — must be empty before design
+
+## Owner questions
+
+Agents that need the owner's decision write each question as:
+
+- `Q<n>` · **header** (≤12 characters, e.g. "Vắng có phép") · the question in one sentence, with screens, fields and real data the owner recognises;
+- **options**: 2–4 short labels with one-line consequences; the **recommended option first**, marked "(Khuyên dùng)" / "(Recommended)"; a question with no sensible options is marked `open`;
+- **evidence**: one or two lines with real data and links (the lead shows them before asking);
+- **depends on**: `Q<k>` when it only makes sense after another answer, else `none`.
+
+The lead asks independent questions together (up to 4 per batch).
 
 ## pitfalls.md entry
 
