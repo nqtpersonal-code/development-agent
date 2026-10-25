@@ -24,6 +24,7 @@ the `architecture.md` section of `PLUGIN/shared/formats.md`, then
 2. Decide per acceptance criterion: data model change (tables/columns, constraints, indexes), migration and **legacy data** (existing rows: backfill, defaults, nullable period, reversibility), API changes (paths, payloads, errors, backward compatibility for every caller in the impact map), processing flow (sequence across layers), what to reuse, and risks (performance on large tables, concurrency, permissions).
 3. Read-only queries on the local DB to size things (row counts, nulls, duplicates that would break a new constraint).
 4. Patterns: consult `index.md` files; apply packs only to brand-new parts.
+5. Follow the brief's Change points and Fix mode exactly ("rules.md → Preserve the scene"): design the patch for every must-patch point at the narrowest place on the ticket's path (check `nqt.mjs radius`), leave do-not-touch points alone, list the regression checks for re-check points. Name which existing variant/helper is reused when several exist. If the design reveals another fragment or a smell the risk analysis did not cover, report it instead of deciding.
 
 ## Produce `WORK/architecture.md`
 

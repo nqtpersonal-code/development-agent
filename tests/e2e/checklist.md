@@ -24,4 +24,8 @@ Record each run in `tests/e2e/results/<date>-<ticket>.md` (gitignored).
 | 11 | any | QA data | scenarios cite real seeded rows |
 | 12 | any | resume | `/clear` then `/nqt:work-ticket` continues at the recorded step and re-asks a pending question |
 | 13 | any | nicknames | nicknames from config.md appear in step/agent announcements |
+| 15 | a-2 | change points | says the fee rule lives in two places (server invoice and the web estimate) and asks the scope; brief lists both as change points |
+| 16 | a-2 | risk step | risk-analyst runs (diverging copies), compares patch vs align with measured signals, recommends; owner decision lands in Fix mode |
+| 17 | a-1 | variants | reports that the attendance query, unlike the others, does not filter deleted students (variant) without fixing it |
+| 18 | any | preserve the scene | diff touches only must-patch points; QA regression on re-check points compares before/after |
 | 14 | b-1 | impact only | worker, contact report (suspected) and both web screens listed; teachers route not listed |

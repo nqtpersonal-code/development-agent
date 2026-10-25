@@ -10,6 +10,7 @@ override their defaults — state them explicitly when invoking each skill:
 - Local commits on the current feature branch are fine.
 - DB writes (migrations, seeds, test data) only after `node "PLUGIN/scripts/nqt.mjs" db-check --project <project> --root "PROJECT_ROOT"` passes; never touch a non-local DB.
 - Talk to the owner in natural language per `PLUGIN/shared/rules.md`; no technical questions to the owner.
+- Touch exactly the brief's **must patch** change points, never the **do not touch** ones, in the brief's Fix mode (preserve the scene unless the owner chose otherwise); patch at the narrowest point on the ticket's path.
 
 ## design (superpowers:brainstorming)
 
@@ -31,7 +32,7 @@ When brainstorming hands off to writing-plans, continue below. `S --set design=d
 
 Invoke `superpowers:writing-plans` with: spec `WORK/spec.md`; save the plan to
 `WORK/plan.md` (owner preference); Global Constraints must include "no work
-files in the repo, no worktree, no push, surgical changes only, DB writes only after db-check passes"; every plan task
+files in the repo, no worktree, no push, surgical changes only, DB writes only after db-check passes, change only the must-patch points in the brief's fix mode"; every plan task
 names the TCs it serves. Do not ask the owner to review the technical plan;
 the plan-checker reviews it. `S --set plan=done`.
 
@@ -50,6 +51,6 @@ self-ignored `.superpowers/sdd/` workspace in the repo — accepted). Tell it th
 execution method is subagent-driven (already chosen by the owner's workflow).
 
 Stop and come back to the owner when an implementer reports something that
-contradicts the brief, or when a DB/API change appears that the plan did not
+contradicts the brief, finds another fragment of the same behaviour (a late change point), or when a DB/API change appears that the plan did not
 contain — offer the architect step for it. When it finishes (its own final
 review included, but **not** finishing-a-development-branch), `S --set implement=done`.

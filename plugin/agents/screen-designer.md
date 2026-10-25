@@ -27,7 +27,8 @@ the `screens.md` section of `PLUGIN/shared/formats.md`, then `WORK/ba.md`,
    - per screen: URL, purpose, tabs, filters, fields (label, required, example value from real data), buttons and what each does, messages (success, validation, errors), where the user lands after each action;
    - existing screens: describe only what changes;
    - layout for desktop and for phones: grouping, collapsible sections, card lists instead of wide tables, sticky primary action, field priority — avoid every item in ui-defects.md;
-   - which model screen from ui.md each new screen imitates, and patterns used (with links).
+   - which model screen from ui.md each new screen imitates, and patterns used (with links);
+   - when the project has several variants of a component (copied tables, forms, modals), the one used by the model screens — never the odd one out; name the variants you saw.
 4. **Mockup** (only if `MOCKUP=yes`): one static `WORK/mockup/index.html` (inline CSS/JS, no external requests), clickable between screens, styled close to the project, filled with real example data. It is a picture to react to, not code to reuse.
 
 ## Return (≤15 lines)

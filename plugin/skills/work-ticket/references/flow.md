@@ -9,6 +9,7 @@ Default agent and step names when no nickname is configured:
 | setup | Chuẩn bị / Setup |
 | analysis | Phân tích ticket / Analysis |
 | screens | Thiết kế màn hình / Screen design |
+| risk | Phân tích rủi ro / Risk analysis |
 | brief | Chốt hồ sơ ticket / Ticket brief |
 | test-design | Viết kịch bản test / Test design |
 | free-qa | Hỏi đáp tự do / Free Q&A |
@@ -48,7 +49,7 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 2. Dispatch `nqt:code-tracer` with the start points. On `split-suggestion`, dispatch one per branch in parallel; merge their `impact.md` sections into `WORK/trace/impact.md` (dedupe places).
 3. Dispatch `nqt:ba`.
 4. Record whether UI is touched: `S --flag hasUI=true|false` (from ba.md).
-5. **Checkpoint 1** — show: what the ticket asks (short), how it works today (with links and real data), affected screens/functions, contradictions, then the first question. Loop: owner answers → append to brief "Owner answers" (create `ticket-brief.md` skeleton if needed) → re-dispatch `nqt:ba` → next question, until no `[GUESS]` remains.
+5. **Checkpoint 1** — show: what the ticket asks (short), how it works today (with links and real data; every variant when copies differ), affected screens/functions, the change points (say plainly when one change is really several places, and ask the scope: all of them for consistent results, or only what the ticket names), whether the ticket allows refactoring (ask if unclear; default no), contradictions, then the first question. Loop: owner answers → append to brief "Owner answers" (create `ticket-brief.md` skeleton if needed) → re-dispatch `nqt:ba` → next question, until no `[GUESS]` remains.
 6. `S --set analysis=done`.
 
 ## screens (only when the ticket touches UI; else `S --set screens=skipped`)
@@ -57,9 +58,16 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 2. **Checkpoint 2** — show the screen flow and each screen in words (and the mermaid diagram). Ask: "Do you want a clickable mockup to try in the browser?" Yes → re-dispatch with `MOCKUP=yes`, open `WORK/mockup/index.html` in the browser for the owner.
 3. Iterate on the owner's remarks. `S --set screens=done`.
 
+## risk (only when a change point touches a code smell; else `S --set risk=skipped`)
+
+1. Smells: diverging copies of one rule, a must-patch function with a wide radius (many routes/screens of stable features), copied components on the ticket's path.
+2. Dispatch `nqt:risk-analyst`.
+3. **Checkpoint 2b** — per smell, show the owner part of `risk.md` (what is fragmented, options with risks, recommendation) and ask which option; record the decision in the brief → Fix mode. If the owner chooses B, re-classify change points accordingly.
+4. `S --set risk=done`.
+
 ## brief
 
-1. Write `WORK/ticket-brief.md` (sections in formats.md) from ba.md, screens.md, impact.md and owner answers. Acceptance criteria name what users see.
+1. Write `WORK/ticket-brief.md` (sections in formats.md) from ba.md, screens.md, impact.md, risk.md and owner answers, including the Change points table and Fix mode. Acceptance criteria name what users see.
 2. **Checkpoint 3** — show the brief's summary and criteria; ask for approval. Open questions must be empty.
 3. `S --set brief=done`.
 

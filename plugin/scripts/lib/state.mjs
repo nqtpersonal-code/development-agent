@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { join } from 'node:path';
 
 export const STEPS = [
-  'setup', 'analysis', 'screens', 'brief', 'test-design', 'free-qa', 'architect',
+  'setup', 'analysis', 'screens', 'risk', 'brief', 'test-design', 'free-qa', 'architect',
   'design', 'plan', 'plan-check', 'implement', 'review', 'qa', 'report', 'done',
 ];
 const STATUSES = ['pending', 'running', 'waiting', 'done', 'skipped'];

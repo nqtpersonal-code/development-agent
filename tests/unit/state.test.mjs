@@ -12,6 +12,10 @@ test('a new state starts at setup with every step pending', () => {
   assert.ok(Object.values(s.steps).every((v) => v === 'pending'));
 });
 
+test('the risk step sits between screens and brief', () => {
+  assert.deepEqual(STEPS.slice(2, 5), ['screens', 'risk', 'brief']);
+});
+
 test('readState returns null when no state exists', () => {
   assert.equal(readState(tmp()), null);
 });
@@ -21,6 +25,7 @@ test('finishing a step moves current to the next open step, skipping skipped one
   writeState(d, newState('demo', '12'));
   setStep(d, 'setup', 'done');
   setStep(d, 'screens', 'skipped');
+  setStep(d, 'risk', 'skipped');
   const s = setStep(d, 'analysis', 'done');
   assert.equal(s.current, 'brief');
   assert.equal(readState(d).current, 'brief');

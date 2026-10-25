@@ -27,8 +27,9 @@ docs the ticket or tracer mention (label `[DOCS]`, may be stale).
 2. **Source comparison** — a table: statement · ticket says · code does (link from impact.md) · data shows · docs say. Mark each cell with its label.
 3. **Contradictions** — every place sources disagree. Never pick a side ("rules.md → Never guess").
 4. **Questions** — ordered most important first; one decision per question; phrased with screens, buttons, fields and real data the owner recognises (e.g. "In class L1 on 22/09, Lê Minh Châu was absent with permission — should that session count toward the fee?"); each with a recommended answer and why, when one is defensible.
-5. **Draft acceptance criteria** — `TC1…TCn`, each testable and labelled; any criterion that depends on an unanswered question is labelled `[GUESS]`.
-6. **UI touched?** — `yes/no` with the screens involved (drives the screen-designer step).
+5. **Variants and scope** — when the tracer found several implementations of the behaviour, say so plainly and ask which variant the new behaviour follows and whether all change points must be updated for consistent results or only what the ticket names. Ask whether the ticket allows refactoring when it does not say (default: no).
+6. **Draft acceptance criteria** — `TC1…TCn`, each testable and labelled; any criterion that depends on an unanswered question is labelled `[GUESS]`.
+7. **UI touched?** — `yes/no` with the screens involved (drives the screen-designer step).
 
 On later rounds, update `ba.md`, move answered items into criteria labelled
 `[OWNER]`, and keep asking until no `[GUESS]` remains.

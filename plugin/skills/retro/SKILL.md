@@ -22,7 +22,10 @@ UI defects found after build, steps that were slow or repeated, token-heavy
 moments, patterns that helped or got in the way.
 
 Compare the impact map with places discovered later (review, QA, implementation,
-owner remarks): every miss is a **tracer** finding.
+owner remarks): every miss is a **tracer** finding. Every late change point (a
+fragment of the same behaviour found after the brief) is both a **tracer** finding and
+a **project-pitfall** ("the fee rule also lives in the monthly report"); diverging
+copies found during the run become pitfalls too, so the next ticket knows from the start.
 
 ## Classify each finding
 

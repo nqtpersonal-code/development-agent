@@ -6,12 +6,13 @@ import { fileURLToPath } from 'node:url';
 import { parseFrontmatter } from '../../plugin/scripts/lib/frontmatter.mjs';
 
 const plugin = fileURLToPath(new URL('../../plugin/', import.meta.url));
-const AGENTS = ['setup', 'ba', 'code-tracer', 'screen-designer', 'system-explainer', 'architect', 'plan-checker', 'reviewer', 'qa', 'ui-checker'];
+const AGENTS = ['setup', 'ba', 'code-tracer', 'screen-designer', 'system-explainer', 'architect', 'risk-analyst', 'plan-checker', 'reviewer', 'qa', 'ui-checker'];
 const SKILLS = ['work-ticket', 'ask-system', 'retro', 'add-pattern'];
 const RULE_HEADINGS = [
   'Natural-language interface', 'Source labels', 'Never guess', 'Code and DB are truth', 'Surgical changes',
   'Repo hygiene', 'Local DB guard', 'Language and nicknames', 'Confidentiality', 'Pattern library priority',
   'When the owner doubts a conclusion', 'Token discipline', 'Commands',
+  'One business rule, many implementations', 'Preserve the scene',
 ];
 const read = (p) => readFileSync(join(plugin, p), 'utf8');
 const present = (dir, names, ext) => names.filter((n) => existsSync(join(plugin, dir, ext ? `${n}${ext}` : n)));

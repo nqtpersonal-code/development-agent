@@ -34,7 +34,7 @@ Follow [references/flow.md](references/flow.md) step by step — it says, for
 each step, which agent to dispatch, what to pass, what to show the owner,
 when to stop and ask, and how to update `state.json`. Order:
 
-`setup → analysis (code-tracer + ba) → screens (UI tickets) → brief →
+`setup → analysis (code-tracer + ba) → screens (UI tickets) → risk (risk-analyst, when a change point touches a code smell) → brief →
 test-design (qa) → free-qa (system-explainer) → architect (optional) →
 design (superpowers:brainstorming) → plan (superpowers:writing-plans) →
 plan-check (plan-checker, ≤3 rounds) → implement (superpowers:subagent-driven-development)
@@ -44,7 +44,7 @@ The superpowers steps follow [references/superpowers-bridge.md](references/super
 
 ## 3. Dispatching agents
 
-- Agents: `nqt:setup`, `nqt:ba`, `nqt:code-tracer`, `nqt:screen-designer`, `nqt:system-explainer`, `nqt:architect`, `nqt:plan-checker`, `nqt:reviewer`, `nqt:qa`, `nqt:ui-checker` (if your harness lists plugin agents without the `nqt:` prefix, use the bare name).
+- Agents: `nqt:setup`, `nqt:ba`, `nqt:code-tracer`, `nqt:screen-designer`, `nqt:system-explainer`, `nqt:architect`, `nqt:risk-analyst`, `nqt:plan-checker`, `nqt:reviewer`, `nqt:qa`, `nqt:ui-checker` (if your harness lists plugin agents without the `nqt:` prefix, use the bare name).
 - Every dispatch passes paths, not content: `PLUGIN`, `DATA`, `PROJECT`, `TICKET`, `PROJECT_ROOT`, `WORK`, `LANGUAGE`, plus step-specific inputs. Agents read the files themselves.
 - Agents cannot talk to the owner or start other agents. When an agent returns questions, you ask them; when it returns `split-suggestion`, you dispatch the branches in parallel and merge.
 - Independent agents may run in parallel (e.g. several code-tracer branches; qa design while the owner reads the brief is **not** allowed — design needs the agreed brief).
@@ -58,8 +58,9 @@ The superpowers steps follow [references/superpowers-bridge.md](references/super
 
 ## 5. Checkpoints (always stop for the owner)
 
-1. After analysis: understanding of the ticket, how it works today, contradictions, questions.
+1. After analysis: understanding of the ticket, how it works today (all variants), contradictions, the change points ("looks like one change, is really N places"), questions.
 2. Screens (UI tickets): approve the screen design; offer the clickable mockup.
+2b. Risk (when smells are involved): choose, per smell, patch-and-preserve or fix-the-smell, after the risk-analyst's recommendation.
 3. The ticket brief: approve it (no open questions left).
 4. Architect step: ask whether to run it, with your recommendation (rule in flow.md).
 5. Design (inside brainstorming): approve the design summary in natural language.

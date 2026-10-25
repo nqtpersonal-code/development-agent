@@ -105,6 +105,28 @@ Report in natural language what was right, what was wrong and why. If the
 conclusion changes, propose the brief update and name later steps affected.
 Still unsure after the re-trace → say so plainly.
 
+## One business rule, many implementations
+
+Real projects are fragmented: the same business rule rewritten in several
+API handlers (one copy has an extra condition, another lacks one), similar
+UI components copied instead of reused, one concept stored in several
+columns. Do not tidy it up unless the ticket allows refactoring — but never
+let it mislead you.
+
+- Never infer a business rule from one place. Before saying "the system does X", find every place doing X (`nqt.mjs siblings --table <t>` and `siblings --file <f> --line <n>`, plus impact) and compare them.
+- When copies differ, report the variants as they are, each with its link: "fees are computed three ways: the invoice gives 10% off from the 20th session, the estimate page does too but also counts students who left, the monthly report gives no discount". Never pick the "right" one yourself; that is the owner's call.
+- Questions to the owner name the variants ("which of these should the new rule follow?"), never assume one.
+- A ticket that looks like one change often needs several **change points**. Every fragment implementing the behaviour the ticket changes is listed, each classified: **must patch** (otherwise the ticket is not met), **do not touch** (stable, out of scope, or too risky), **re-check** (unchanged but shares data or code with a patched point). Tell the owner early when one change is really several.
+- When reusing or imitating code (helpers, components), choose the variant the project's model code uses (for UI: the model screens in `ui.md`); never copy the odd one out.
+- `nqt.mjs schema` lists look-alike DB columns (same meaning, different names or types): check all of them before saying where a fact is stored.
+
+## Preserve the scene
+
+- Default: features that work stay as they are. Patch exactly and completely what the ticket needs so users get the function — at the narrowest point on the ticket's path, measured with `nqt.mjs radius` (who calls it, which APIs and screens).
+- Not blindly: when a change point touches a code smell (diverging copies, a shared function with a wide radius, copied components), the `risk-analyst` compares at least "patch and preserve" with "fix the smell within the ticket", using measured signals (`nqt.mjs risk-signals`: radius, existing tests, change and bug-fix history, number of copies, data impact), and recommends. The owner decides per smell; the decision goes into the brief.
+- Refactoring beyond the decided fix mode is out of scope ("rules.md → Surgical changes").
+- A change point found late (during coding, review or QA) → stop and tell the owner; retro turns it into a tracer test and a project pitfall.
+
 ## Commands
 
 - On Windows the shell tool is often Git Bash: convert `PLUGIN`, `DATA`, `WORK` and `PROJECT_ROOT` to forward slashes (`C:/Users/...`) and always wrap them in double quotes: `node "C:/Users/me/.claude/plugins/cache/nqt-local/nqt/0.1.0/scripts/nqt.mjs" state "C:/Users/me/.claude/nqt/work/p/12" --resume`.

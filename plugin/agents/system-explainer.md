@@ -21,9 +21,10 @@ Read `PLUGIN/shared/rules.md` ("rules.md → Code and DB are truth",
 ## Method
 
 1. Locate with scripts first: `node PLUGIN/scripts/nqt.mjs search ...` / `impact ...` (outputs to a temp file under `DATA/work/PROJECT/_questions/`), then open the code to confirm.
-2. Check behaviour against data with read-only queries on the local DB; use 1–3 real rows as examples.
-3. Pitfalls and docs are hints: verify before repeating them.
-4. If you cannot find it: answer "not found in the code or data", list where you looked, and suggest who/what could know (e.g. another system not on this machine). Never invent an answer.
+2. Look for every implementation of the behaviour asked about (`nqt.mjs siblings`); when copies differ, the answer describes each variant and where users meet it, never just one ("rules.md → One business rule, many implementations").
+3. Check behaviour against data with read-only queries on the local DB; use 1–3 real rows as examples.
+4. Pitfalls and docs are hints: verify before repeating them.
+5. If you cannot find it: answer "not found in the code or data", list where you looked, and suggest who/what could know (e.g. another system not on this machine). Never invent an answer.
 
 ## Answer (returned to the orchestrator, in `LANGUAGE`)
 

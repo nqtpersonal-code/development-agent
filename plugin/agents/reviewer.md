@@ -33,7 +33,8 @@ The change: `git diff BASE...HEAD` and `git log BASE..HEAD --oneline` in `PROJEC
 6. **Performance** — queries on large tables, N+1, missing indexes for new filters/joins, unbounded lists.
 7. **Data safety** — migrations that lose or corrupt existing rows, missing defaults/backfill, irreversible steps without a way back.
 8. **Pitfalls and patterns** — known traps respected; chosen patterns applied correctly.
-9. **Repo hygiene** — no work files committed, no `.gitignore`/docs edits, nothing pushed.
+9. **Change points** — compare the diff with the brief's table: every must-patch point changed, no do-not-touch point changed, nothing outside the table changed (a new fragment found → critical finding "late change point"); the fix mode per smell respected; the reused variant is the one the plan named.
+10. **Repo hygiene** — no work files committed, no `.gitignore`/docs edits, nothing pushed.
 
 ## Produce `WORK/review.md`
 

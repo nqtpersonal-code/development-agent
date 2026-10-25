@@ -80,7 +80,7 @@ Components (front end, back end, workers) live in `tracer/adapter.json`.
   "planCheckRounds": 0, "files": { <name>: <path> }, "updatedAt" }
 ```
 
-Steps in order: `setup, analysis, screens, brief, test-design, free-qa,
+Steps in order: `setup, analysis, screens, risk, brief, test-design, free-qa,
 architect, design, plan, plan-check, implement, review, qa, report, done`.
 Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --set step=status | --flag hasUI=true | --wait kind text | --clear-wait`.
 
@@ -90,7 +90,8 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 |---|---|---|
 | `ticket.md` | setup | ticket title, body, comments, labels, link (verbatim) |
 | `trace/impact.json` | code-tracer (script) | raw impact result |
-| `trace/impact.md` | code-tracer | Technical part: confirmed places with file:line, certainty, chains. Owner part: affected screens/functions in natural language with links; "Not scanned" list; real example rows from the DB |
+| `trace/impact.md` | code-tracer | Technical part: confirmed places with file:line, certainty, chains. Owner part: affected screens/functions in natural language with links; **Variants** (same rule implemented differently, with what differs); **Change points** (each fragment the ticket's behaviour lives in: must patch / do not touch / re-check, with link and radius); smells involved; "Not scanned" list; real example rows from the DB |
+| `risk.md` | risk-analyst | per smell: owner part (what is fragmented, options A patch-and-preserve / B fix-the-smell / hybrid with immediate and later risk, recommendation) and technical part (measured signals per option, files touched, regression scenarios) |
 | `ba.md` | ba | requirement groups, source comparison table, contradictions, questions (ordered, each with recommendation) |
 | `screens.md` | screen-designer | screen flow (mermaid), per-screen content (tabs, filters, fields, buttons, messages, navigation), desktop + mobile layout, real data examples |
 | `mockup/index.html` | screen-designer | optional static clickable mockup |
@@ -112,9 +113,11 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 2. Requirements (grouped)
 3. Acceptance criteria — `TC1…TCn`, each with a source label; screens named by what the user sees
 4. Screens (from `screens.md`, or "no UI change")
-5. Impact summary (from `trace/impact.md`, owner part)
-6. Owner answers (question → answer, dated)
-7. Open questions — must be empty before design
+5. Impact summary (from `trace/impact.md`, owner part), including variants
+6. Change points — table: place (user-facing name + link) · category (must patch / do not touch / re-check) · sibling group · owner decision
+7. Fix mode — `Refactor allowed: yes/no` (from the ticket or the owner; default no) and, per smell, the chosen option from `risk.md`
+8. Owner answers (question → answer, dated)
+9. Open questions — must be empty before design
 
 ## pitfalls.md entry
 
