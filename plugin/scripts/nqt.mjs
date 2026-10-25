@@ -9,6 +9,14 @@ import { scanLeaks, projectNamesFrom } from './lib/leaks.mjs';
 import { walkFiles, readText, rel } from './lib/files.mjs';
 import { execFileSync } from 'node:child_process';
 import { doctor } from './lib/runtime.mjs';
+import { nameVariants } from './lib/names.mjs';
+import { searchCode } from './lib/search.mjs';
+import { mkdirSync, writeFileSync } from 'node:fs';
+
+function writeJson(file, data) {
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+}
 
 const pluginRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -65,6 +73,20 @@ const commands = {
     }
     if (!r.ok) console.log('fix: node <plugin>/scripts/nqt.mjs doctor --install (and install the superpowers plugin if missing)');
     return r.ok ? 0 : 1;
+  },
+  search(args) {
+    const roots = [].concat(args.root ?? []);
+    const terms = [].concat(args.term ?? []).flatMap((t) => (args.exact ? [t] : nameVariants(t)));
+    const contextTerms = [].concat(args.context ?? []).flatMap((t) => nameVariants(t));
+    if (!roots.length || !terms.length) throw new Error('usage: search --root <dir>... --term <name>... [--context <name>...] [--exact] [--out file.json]');
+    const r = searchCode({ roots, terms, contextTerms });
+    if (args.out) writeJson(args.out, r);
+    const byFile = {};
+    for (const h of r.hits) byFile[h.file] = (byFile[h.file] ?? 0) + 1;
+    const top = Object.entries(byFile).sort((a, b) => b[1] - a[1]);
+    console.log(`search: ${r.hits.length} hits in ${top.length} files (${r.filesScanned} scanned, ${r.droppedNoContext} dropped without context${r.truncated ? ', TRUNCATED' : ''})`);
+    for (const [f, n] of top.slice(0, 8)) console.log(`  ${n.toString().padStart(3)}  ${f}`);
+    if (top.length > 8) console.log(`  … ${top.length - 8} more files${args.out ? ` in ${args.out}` : ''}`);
   },
   'scan-leaks'(args) {
     const projectNames = projectNamesFrom(getDataDir());
