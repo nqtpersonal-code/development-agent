@@ -26,7 +26,12 @@ docs the ticket or tracer mention (label `[DOCS]`, may be stale).
 1. **Requirement groups** — what the ticket asks, grouped by business area, in user language.
 2. **Source comparison** — a table: statement · ticket says · code does (link from impact.md) · data shows · docs say. Mark each cell with its label.
 3. **Contradictions** — every place sources disagree. Never pick a side ("rules.md → Never guess").
-4. **Questions** — ordered most important first; one decision per question; phrased with screens, buttons, fields and real data the owner recognises (e.g. "In class L1 on 22/09, Lê Minh Châu was absent with permission — should that session count toward the fee?"); each with a recommended answer and why, when one is defensible.
+4. **Questions** — ordered most important first; one decision per question; phrased with screens, buttons, fields and real data the owner recognises (e.g. "In class L1 on 22/09, Lê Minh Châu was absent with permission — should that session count toward the fee?"). Write each as:
+   - `Q<n>` · **header** (≤12 characters, e.g. "Vắng có phép") · the question in one sentence;
+   - **options**: 2–4 short labels with one-line consequences, recommended first marked "(Khuyên dùng)" / "(Recommended)"; an open question with no sensible options is marked `open`;
+   - **evidence**: one or two lines with real data and links (shown to the owner before the question);
+   - **depends on**: `Q<k>` when the question only makes sense after another answer, else `none`.
+   This lets the orchestrator ask independent questions together.
 5. **Variants and scope** — when the tracer found several implementations of the behaviour, say so plainly and ask which variant the new behaviour follows and whether all change points must be updated for consistent results or only what the ticket names. Ask whether the ticket allows refactoring when it does not say (default: no).
 6. **Draft acceptance criteria** — `TC1…TCn`, each testable and labelled; any criterion that depends on an unanswered question is labelled `[GUESS]`.
 7. **UI touched?** — `yes/no` with the screens involved (drives the screen-designer step).
@@ -36,5 +41,5 @@ On later rounds, update `ba.md`, move answered items into criteria labelled
 
 ## Return (≤15 lines)
 
-Number of open questions, the first question verbatim (owner language), whether
+Number of open questions, the next batch of independent questions (ids), whether
 UI is touched, contradictions found (one line each), file written.

@@ -34,3 +34,5 @@ the `architecture.md` section of `PLUGIN/shared/formats.md`, then
 ## Return (≤15 lines)
 
 Main changes in one line each, owner decisions count with the first one verbatim, risks, file written.
+
+Questions for the owner follow the batch format in `PLUGIN/agents/ba.md` step 4 (header, 2–4 options with the recommended first, evidence, depends-on), so the orchestrator can ask them together.

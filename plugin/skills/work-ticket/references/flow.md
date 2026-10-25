@@ -39,7 +39,7 @@ Default agent and step names when no nickname is configured:
 
 Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 1. Detect: dispatch `nqt:code-tracer` with task "survey for adapter": components (folders, kind), data access style (ORM, query helper, raw SQL), how the front end calls the API (wrapper, base path), route declaration style, jobs/queues, dynamic SQL habits. It returns a draft adapter and its uncertainties.
-2. Brainstorm with the owner in natural language, one question at a time, only about what the survey could not settle (e.g. "I see the web app calls the server through one helper file; are there other apps (mobile, admin) that call the same server?"). Record answers.
+2. Brainstorm with the owner in natural language, in batches of independent questions with options (question tool), only about what the survey could not settle (e.g. "I see the web app calls the server through one helper file; are there other apps (mobile, admin) that call the same server?"). Record answers.
 3. Write `adapter.json` (format in formats.md) with `assumptions` for everything the adapter relies on. When the ticket folder holds several repos (`nqt.mjs repos`), declare each component by `remote` (+ `path`), not by folder name, so every later ticket folder works.
 4. Ask the owner for 1–2 flows they know well ("when the student name changes, where does it show?"). Write them as `tests.json`; run `nqt.mjs tracer-test --project <p> --root PROJECT_ROOT`. Adjust the adapter until they pass; if a test fails because the owner's expectation and the code disagree, show the evidence and let the owner decide.
 5. Save the health baseline: `node "PLUGIN/scripts/nqt.mjs" tracer-health --project <p> --root "PROJECT_ROOT" --save`.
@@ -52,7 +52,7 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 2. Dispatch `nqt:code-tracer` with the start points. On `split-suggestion`, dispatch one per branch in parallel; merge their `impact.md` sections into `WORK/trace/impact.md` (dedupe places).
 3. Dispatch `nqt:ba`.
 4. Record whether UI is touched: `S --flag hasUI=true|false` (from ba.md).
-5. **Checkpoint 1** — show: what the ticket asks (short), how it works today (with links and real data; every variant when copies differ), affected screens/functions, the change points (say plainly when one change is really several places, and ask the scope: all of them for consistent results, or only what the ticket names), whether the ticket allows refactoring (ask if unclear; default no), contradictions, then the first question. Loop: owner answers → append to brief "Owner answers" (create `ticket-brief.md` skeleton if needed) → re-dispatch `nqt:ba` → next question, until no `[GUESS]` remains.
+5. **Checkpoint 1** — show: what the ticket asks (short), how it works today (with links and real data; every variant when copies differ), affected screens/functions, the change points (say plainly when one change is really several places, and ask the scope: all of them for consistent results, or only what the ticket names), whether the ticket allows refactoring (ask if unclear; default no), contradictions, then the first batch of independent questions (up to 4, via the question tool). Loop: owner answers → append to brief "Owner answers" (create `ticket-brief.md` skeleton if needed) → re-dispatch `nqt:ba` only when answers open new questions or change the analysis → next batch, until no `[GUESS]` remains.
 6. `S --set analysis=done`.
 
 ## screens (only when the ticket touches UI; else `S --set screens=skipped`)

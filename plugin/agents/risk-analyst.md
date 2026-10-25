@@ -39,3 +39,5 @@ the `risk.md` section of `PLUGIN/shared/formats.md`, `WORK/ba.md`,
 ## Return (≤15 lines)
 
 Smells analysed, recommendation per smell (one line each), the questions for the owner verbatim, file written.
+
+Questions for the owner follow the batch format in `PLUGIN/agents/ba.md` step 4 (header, 2–4 options with the recommended first, evidence, depends-on), so the orchestrator can ask them together.

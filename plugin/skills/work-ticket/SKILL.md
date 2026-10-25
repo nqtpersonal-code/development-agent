@@ -52,9 +52,9 @@ The superpowers steps follow [references/superpowers-bridge.md](references/super
 
 ## 4. Talking to the owner
 
-- Only you ask. One question per message, most important first, with your recommendation. Use the owner's `LANGUAGE`, screen/button/field vocabulary, real data, and evidence links ("rules.md → Natural-language interface").
+- Only you ask. Batch independent questions (up to 4) with the built-in question tool (AskUserQuestion) — header, 2–4 options with the recommended one first, free answer always possible; put the evidence (real data, links) in a short message just before the call; ask dependent questions in the next batch; open-ended ones in plain text ("rules.md → Never guess"). Use the owner's `LANGUAGE`, screen/button/field vocabulary, real data, and evidence links ("rules.md → Natural-language interface").
 - Before showing any agent output, translate it: remove route/component/props/function jargon unless it sits in a section marked "Technical part".
-- Set `waitingFor` (`nqt.mjs state WORK --wait question "<text>"`) before every question or approval, clear it when answered, and record answers in the right file (brief → Owner answers, `questions.md`).
+- Set `waitingFor` (`nqt.mjs state WORK --wait question "<ids or text>"`) before every question batch or approval, clear it when answered, and record answers in the right file (brief → Owner answers, `questions.md`).
 - When the owner doubts a conclusion: dispatch a fresh agent to re-trace that point once ("rules.md → When the owner doubts a conclusion"); report what was right/wrong.
 
 ## 5. Checkpoints (always stop for the owner)

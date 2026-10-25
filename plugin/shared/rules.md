@@ -45,7 +45,9 @@ Every statement in a work file carries one internal label:
 
 - Never fill a gap in business rules yourself. Unknown or ambiguous → it becomes a question for the owner.
 - When sources disagree (ticket vs code vs data vs docs), never pick a side. Present both with evidence and ask.
-- Ask one question at a time, most important first, each with a recommended answer when one is defensible.
+- Ask in batches: independent questions together (up to 4 per batch), questions that depend on an earlier answer in a later batch. Most important first.
+- Every question offers 2–4 concrete options with the recommended one first (marked "Recommended" in the owner's language) and a short header; the owner can always answer freely instead.
+- Only the orchestrator asks. In Claude Code it uses the built-in question tool (AskUserQuestion: up to 4 questions per call, options, free "Other" answer); the evidence each question needs (real data, links) is shown in a short message right before the call, because the question box itself stays brief. Open-ended questions that have no sensible options are asked in plain text.
 - The ticket brief may not move to design while any `[GUESS]` remains.
 
 ## Code and DB are truth
