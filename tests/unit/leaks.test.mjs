@@ -52,6 +52,11 @@ test('internal urls and emails are caught, allowlisted ones are not', () => {
   assert.deepEqual(one('see https://github.com/anthropics/claude-code and http://localhost:3000 and noreply@anthropic.com'), []);
 });
 
+test('template URLs and reserved example subdomains are not leaks', () => {
+  assert.deepEqual(one('const url = `https://${host}/${repo}`;'), []);
+  assert.deepEqual(one('see https://code.example.org/org/app.git'), []);
+});
+
 test('emails at reserved example domains are allowed', () => {
   assert.deepEqual(one('git config user.email t@example.com and a@test.example.org'), []);
 });

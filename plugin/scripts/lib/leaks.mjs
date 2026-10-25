@@ -60,7 +60,9 @@ export function scanLeaks({ files, projectNames = [], extraTerms = [] }) {
       }
       for (const m of line.matchAll(URL_RE)) {
         const host = m[1].toLowerCase();
-        if (!URL_ALLOW.some((a) => host === a || host.startsWith(`${a}/`) || host.startsWith(`${a}:`))) add('url', m[0]);
+        const template = host.startsWith('${');
+        const example = /^(?:[\w-]+\.)*example\.(?:com|org|net)(?:[/:]|$)/.test(host);
+        if (!template && !example && !URL_ALLOW.some((a) => host === a || host.startsWith(`${a}/`) || host.startsWith(`${a}:`))) add('url', m[0]);
       }
       for (const m of line.matchAll(EMAIL_RE)) {
         const exampleDomain = /@(?:[\w-]+\.)*example\.(?:com|org|net)$/i.test(m[0]);

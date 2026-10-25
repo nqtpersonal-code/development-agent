@@ -35,8 +35,9 @@ Frontmatter (all optional except `name`); body holds free notes for agents.
 name: <display name>
 aliases: [<other names used for this project>]
 language: vi                     # override config language for this project
-gitHost: github | gitlab
-repo: <owner/repo>
+gitHost: github | gitlab           # from `nqt.mjs detect-host`
+gitHostname: <github.com, gitlab.com or the self-hosted name>
+repo: <owner/repo or group/subgroup/repo>
 baseBranch: dev                  # or main
 branchPattern: feature/{ticket}-{slug}
 commitConvention: <e.g. conventional commits, or "follow git log">

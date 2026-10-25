@@ -7,7 +7,7 @@ import { getDataDir, ensureDataDir, loadConfig, projectConfig } from './lib/conf
 import { STEPS, newState, readState, writeState, setStep, setWaiting, setFlag, resumeState } from './lib/state.mjs';
 import { scanLeaks, projectNamesFrom } from './lib/leaks.mjs';
 import { walkFiles, readText, rel } from './lib/files.mjs';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { doctor } from './lib/runtime.mjs';
 import { nameVariants } from './lib/names.mjs';
 import { searchCode } from './lib/search.mjs';
@@ -20,6 +20,7 @@ import { parseDbUrl, assertLocalDb } from './lib/localhost.mjs';
 import { findSiblings, tableVariants, columnVariants } from './lib/siblings.mjs';
 import { blastRadius, summarizeRadius } from './lib/radius.mjs';
 import { gitHistory, testCoverage } from './lib/risk.mjs';
+import { detectHost, fetchTicket } from './lib/githost.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
@@ -194,6 +195,34 @@ const commands = {
     for (const l of summarizeRadius(radius)) console.log(l);
     console.log(`history (${history.days} days): ${history.commits ?? 'unknown'} commits, ${history.fixCommits ?? 'unknown'} bug fixes, last ${history.lastChanged ?? 'unknown'}`);
     console.log(`tests mentioning it or its routes: ${tests.files.length ? tests.files.join(', ') : 'none'}`);
+  },
+  'detect-host'(args) {
+    const root = resolve(args.root ?? process.cwd());
+    const remote = spawnSync('git', ['remote', 'get-url', args.remote ?? 'origin'], { cwd: root, encoding: 'utf8' });
+    if (remote.status !== 0) {
+      console.log('detect-host: no git remote found; ask the owner where the code and tickets live');
+      return 1;
+    }
+    const r = detectHost(remote.stdout.trim());
+    console.log(JSON.stringify(r));
+    return r.host === 'unknown' ? 1 : 0;
+  },
+  'fetch-ticket'(args) {
+    if (!args.ticket || !args.out) throw new Error('usage: fetch-ticket --project p [--root dir] --ticket <id|#id|url> --out <file>');
+    const ctx = projectContext(args);
+    let info = ctx.fm.gitHost && ctx.fm.repo ? { host: ctx.fm.gitHost, hostname: ctx.fm.gitHostname, repo: ctx.fm.repo } : null;
+    if (!info) {
+      const remote = spawnSync('git', ['remote', 'get-url', 'origin'], { cwd: ctx.root, encoding: 'utf8' });
+      info = remote.status === 0 ? detectHost(remote.stdout.trim()) : { host: 'unknown' };
+    }
+    const r = fetchTicket(info, String(args.ticket));
+    if (!r.ok) {
+      console.log(`fetch-ticket: need-ticket-paste — ${r.reason}`);
+      return 3;
+    }
+    mkdirSync(dirname(args.out), { recursive: true });
+    writeFileSync(args.out, r.markdown, 'utf8');
+    console.log(`fetch-ticket: ${info.host} issue ${r.id} saved to ${args.out}`);
   },
   'db-check'(args) {
     const ctx = projectContext(args);
