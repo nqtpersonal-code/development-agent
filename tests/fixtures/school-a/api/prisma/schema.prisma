@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  fullName    String       @map("full_name")
+  birthDate   DateTime?    @map("birth_date")
+  phone       String?
+  address     String?
+  parentName  String?      @map("parent_name")
+  parentPhone String?      @map("parent_phone")
+  deletedAt   DateTime?    @map("deleted_at")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  enrollments Enrollment[]
+  fees        Fee[]
+
+  @@map("students")
+}
+
+model Teacher {
+  id       Int     @id @default(autoincrement())
+  fullName String  @map("full_name")
+  classes  Class[]
+
+  @@map("teachers")
+}
+
+model Class {
+  id          Int          @id @default(autoincrement())
+  name        String
+  teacherId   Int?         @map("teacher_id")
+  teacher     Teacher?     @relation(fields: [teacherId], references: [id])
+  enrollments Enrollment[]
+
+  @@map("classes")
+}
+
+model Enrollment {
+  id        Int     @id @default(autoincrement())
+  studentId Int     @map("student_id")
+  classId   Int     @map("class_id")
+  student   Student @relation(fields: [studentId], references: [id])
+  class     Class   @relation(fields: [classId], references: [id])
+
+  @@map("enrollments")
+}
+
+// enrollment_ref holds an enrollments.id but has no relation on purpose.
+model Attendance {
+  id            Int      @id @default(autoincrement())
+  enrollmentRef Int      @map("enrollment_ref")
+  date          DateTime @db.Date
+  status        String
+
+  @@map("attendance")
+}
+
+model Fee {
+  id          Int     @id @default(autoincrement())
+  studentId   Int     @map("student_id")
+  month       String
+  sessions    Int
+  pricePerDay Int     @map("price_per_day")
+  student     Student @relation(fields: [studentId], references: [id])
+
+  @@map("fees")
+}

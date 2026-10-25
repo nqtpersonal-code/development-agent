@@ -3,3 +3,4 @@ node_modules/
 tests/fixtures/**/node_modules/
 tests/fixtures/**/dist/
 tests/e2e/results/
+tests/fixtures/**/package-lock.json

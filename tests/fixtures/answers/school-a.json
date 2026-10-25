@@ -1,0 +1,40 @@
+{
+  "fixture": "school-a",
+  "note": "Fictional school app. Paths are relative to tests/fixtures/school-a.",
+  "components": [
+    { "name": "api", "root": "api", "kind": "be" },
+    { "name": "web", "root": "web", "kind": "fe" }
+  ],
+  "questions": [
+    {
+      "id": "A-Q1",
+      "question": "If the student name field (students.full_name) changes, which places are affected?",
+      "start": { "table": "students", "column": "full_name" },
+      "expectedPlaces": [
+        { "file": "api/src/students/students.service.ts", "kind": "api", "userFacing": "Danh sách học sinh và form tạo học sinh (kiểm tra trùng tên)" },
+        { "file": "web/src/pages/StudentsPage.tsx", "kind": "screen", "userFacing": "Trang học sinh (/students)" },
+        { "file": "web/src/pages/StudentNewPage.tsx", "kind": "screen", "userFacing": "Form tạo học sinh (/students/new)" },
+        { "file": "api/src/classes/classes.service.ts", "kind": "api", "userFacing": "Chi tiết lớp học trả về tên học sinh" },
+        { "file": "web/src/pages/ClassDetailPage.tsx", "kind": "screen", "userFacing": "Trang chi tiết lớp (/classes/:id)" },
+        { "file": "api/src/attendance/attendance.service.ts", "kind": "api", "userFacing": "Điểm danh theo ngày (SQL viết tay qua enrollment_ref, không có khoá ngoại)" },
+        { "file": "web/src/pages/AttendancePage.tsx", "kind": "screen", "userFacing": "Trang điểm danh (/attendance)" },
+        { "file": "api/src/fees/fees.service.ts", "kind": "api", "userFacing": "Hoá đơn học phí in tên học sinh" },
+        { "file": "web/src/pages/FeeInvoicePage.tsx", "kind": "screen", "userFacing": "Trang hoá đơn học phí (/fees/:studentId)" },
+        { "file": "api/src/reports/reports.service.ts", "kind": "export", "userFacing": "Xuất CSV danh sách học sinh (cột chọn động)", "certainty": "suspected" },
+        { "file": "api/src/jobs/fee-reminder.job.ts", "kind": "job", "userFacing": "Job nhắc học phí chạy mỗi tối" }
+      ],
+      "mustNotInclude": [
+        { "file": "api/src/classes/teacher.ts", "reason": "fullName here belongs to teachers, not students" }
+      ]
+    }
+  ],
+  "traps": [
+    { "id": "T1", "what": "students.full_name is used far away: attendance, invoice, CSV export, nightly job, class detail" },
+    { "id": "T2", "what": "attendance.enrollment_ref stores an enrollment id with no foreign key (implicit relation)", "file": "api/prisma/schema.prisma" },
+    { "id": "T3", "what": "fee total computed twice: api/src/fees/fees.service.ts and web/src/pages/fees/total.ts" },
+    { "id": "T4", "what": "dynamic SQL: $queryRawUnsafe with a column name from a variable", "file": "api/src/reports/reports.service.ts" },
+    { "id": "T5", "what": "docs/old-spec.md says duplicate student names are allowed; code rejects them", "file": "docs/old-spec.md" },
+    { "id": "T6", "what": "/students/new has 18 fields in a fixed 3-column grid with min-width 1200px (breaks at 375px)", "file": "web/src/pages/StudentNewPage.tsx" },
+    { "id": "T7", "what": "soft delete students.deleted_at is not filtered in the attendance query", "file": "api/src/attendance/attendance.service.ts" }
+  ]
+}
