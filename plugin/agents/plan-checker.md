@@ -23,9 +23,10 @@ and `WORK/spec.md` if present, `DATA/projects/PROJECT/pitfalls.md`.
 3. **Cross-impact** — every confirmed or suspected place in the impact map that the change can break: handled, explicitly tested, or explicitly argued unaffected. Silent → finding.
 4. **Scenarios** — every scenario in test-scenarios.md is executable after the plan (data, screens, endpoints exist).
 5. **Pitfalls** — each relevant trap is respected (after confirming it still holds in code).
-6. **Change points** — every must-patch point in the brief has a plan task; no task touches a do-not-touch point; each patch sits at the narrowest point (compare with `nqt.mjs radius`); every re-check point has a regression test; the fix mode per smell is respected.
-7. **Hygiene** — no work files in the repo, no worktree, no push, no `.gitignore` edits.
-8. **Hidden decisions** — any business choice made by the plan that the brief does not cover → finding marked "needs owner".
+6. **Tests** — with `writeTests: no` in project.md the plan adds no test files or frameworks and every task has a concrete run-it check; with `yes` tests follow the project's existing conventions.
+7. **Change points** — every must-patch point in the brief has a plan task; no task touches a do-not-touch point; each patch sits at the narrowest point (compare with `nqt.mjs radius`); every re-check point has a regression test; the fix mode per smell is respected.
+8. **Hygiene** — no work files in the repo, no worktree, no push, no `.gitignore` edits.
+9. **Hidden decisions** — any business choice made by the plan that the brief does not cover → finding marked "needs owner".
 
 ## Produce `WORK/plan-check.md`
 

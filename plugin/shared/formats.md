@@ -43,7 +43,8 @@ baseBranch: dev                  # or main
 branchPattern: feature/{ticket}-{slug}
 commitConvention: <e.g. conventional commits, or "follow git log">
 runApp: <command(s) to start the app>
-runTests: <command to run the test suite>
+runTests: <command to run the test suite, or none>
+writeTests: no                  # yes = the project requires automated tests for changes (write them its way); no = never add tests or test frameworks
 appUrl: http://localhost:5173
 dbEngine: postgres | mysql
 dbUrl: <only if not taken from an env file>

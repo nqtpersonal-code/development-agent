@@ -34,7 +34,8 @@ The change: for each repo listed by `node "PLUGIN/scripts/nqt.mjs" repos --root 
 7. **Data safety** — migrations that lose or corrupt existing rows, missing defaults/backfill, irreversible steps without a way back.
 8. **Pitfalls and patterns** — known traps respected; chosen patterns applied correctly.
 9. **Change points** — compare the diff with the brief's table: every must-patch point changed, no do-not-touch point changed, nothing outside the table changed (a new fragment found → critical finding "late change point"); the fix mode per smell respected; the reused variant is the one the plan named.
-10. **Repo hygiene** — no work files committed, no `.gitignore`/docs edits, nothing pushed.
+10. **Tests policy** — `writeTests: no` → no test files, frameworks or test scripts were added; `yes` → the change carries tests in the project's own style.
+11. **Repo hygiene** — no work files committed, no `.gitignore`/docs edits, nothing pushed.
 
 ## Produce `WORK/review.md`
 
