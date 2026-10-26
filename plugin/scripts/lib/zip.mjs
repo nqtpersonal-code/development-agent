@@ -4,7 +4,7 @@ import { deflateRawSync, crc32 } from 'node:zlib';
 import { scanLeaks } from './leaks.mjs';
 import { walkFiles, readText, rel } from './files.mjs';
 
-const INCLUDE = ['plugin', '.claude-plugin', 'README.md'];
+const INCLUDE = ['plugin', '.claude-plugin', 'README.md', 'LICENSE'];
 const UTF8_FLAG = 0x0800;
 
 function collect(repoRoot) {

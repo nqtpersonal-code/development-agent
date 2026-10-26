@@ -81,3 +81,7 @@ git config core.hooksPath .githooks        # turns on the leak scan before every
 ```
 
 This repo must never contain real project data (project names, ticket numbers, internal URLs, code, passwords…).
+
+## License
+
+Copyright (c) 2026 Tuan Nguyen Quoc. All rights reserved. Proprietary — no use, copying, modification or distribution without written permission; see [LICENSE](LICENSE).

@@ -1,12 +1,12 @@
 {
   "name": "nqt-local",
   "description": "Personal marketplace for the nqt agent team plugin",
-  "owner": { "name": "nqt" },
+  "owner": { "name": "Tuan Nguyen Quoc" },
   "plugins": [
     {
       "name": "nqt",
       "description": "Natural-language agent team for working on software tickets with code and DB evidence",
-      "version": "0.5.5",
+      "version": "0.5.6",
       "source": "./plugin"
     }
   ]
