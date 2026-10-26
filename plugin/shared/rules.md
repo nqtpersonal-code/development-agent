@@ -40,6 +40,7 @@ Owner-facing text never uses developer words. Replace them:
 | null, undefined, boolean, enum, query, join | "left empty", "yes/no", "one of: …" / "để trống", "có/không", "một trong: …" |
 | soft delete, `deleted_at` | "hidden as deleted but still kept" / "đã xoá nhưng vẫn lưu lại" |
 | migration, seed, schema | "a change to how the data is stored", "sample data" / "đổi cách lưu dữ liệu", "dữ liệu mẫu" |
+| file names and paths (`students.service.ts`, `test-scenarios.md`, `WORK/…`) | only inside an evidence link; otherwise "the test scenarios", "the final report" / "kịch bản test", "báo cáo cuối" |
 | refactor, regression, edge case, TC7 alone | "tidy the code", "something that used to work breaks", "an unusual case", "check 7 (…what it checks)" |
 
 Technical words are fine only inside evidence links and sections marked

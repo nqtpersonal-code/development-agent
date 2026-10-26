@@ -61,7 +61,7 @@ Nicknames from `start` replace these names.
 
 - nqt agents: `nqt:setup`, `nqt:ba`, `nqt:code-tracer`, `nqt:screen-designer`, `nqt:system-explainer`, `nqt:architect`, `nqt:risk-analyst`, `nqt:plan-checker`, `nqt:reviewer`, `nqt:qa`, `nqt:ui-checker` (bare names if your harness lists them without the prefix). Dev work goes to general-purpose subagents as the guide says.
 - Pass paths, not content: `PLUGIN`, `DATA`, `PROJECT`, `TICKET`, `PROJECT_ROOT`, `WORK`, `LANGUAGE` + step inputs. Agents read files and load their own rules.
-- Do not open the agents' work files to re-check them; read their ≤15-line return, and open a file only for the part you must show the owner.
+- Never open the agents' work files to re-check or recount them; read their ≤15-line return. Need more detail? Ask the agent to put it in its return next time. Open a file only for a part you must show the owner verbatim.
 - Independent agents run in parallel. While an agent runs, you simply wait: never record that as `waitingFor`.
 
 ## 3. Talking to the owner

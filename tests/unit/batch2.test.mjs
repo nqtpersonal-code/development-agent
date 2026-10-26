@@ -105,6 +105,10 @@ test('judgeApp tells a current app from a stale one or one from another folder',
   assert.equal(judgeApp({ port: 1, owner: { pid: 2, commandLine: 'node C:/work/ticket-2/api/dist/main.js', startedAt: '2026-01-01T00:00:00Z' }, root, newestChange: later }).status, 'other-folder');
   assert.equal(judgeApp({ port: 1, owner: { pid: 2, commandLine: 'node C:/work/ticket-3/api/dist/main.js', startedAt: '2026-01-01T00:00:00Z' }, root, newestChange: later }).status, 'stale');
   assert.equal(judgeApp({ port: 1, owner: { pid: 2, commandLine: 'node C:\\work\\ticket-3\\web\\node_modules\\vite\\bin\\vite.js', startedAt: '2026-01-01T00:00:00Z' }, root, newestChange: later }).status, 'current');
+  for (const commandLine of ['node dist/main.js', '"C:\\Program Files\\nodejs\\node.exe" dist/main.js']) {
+    assert.equal(judgeApp({ port: 1, owner: { pid: 2, commandLine, startedAt: '2026-01-01T00:00:00Z' }, root, newestChange: later }).status, 'unknown', commandLine);
+  }
+  assert.equal(judgeApp({ port: 1, owner: { pid: 2, commandLine: 'node dist/main.js', cwd: 'C:/work/ticket-3/api', startedAt: '2026-01-02T01:00:00Z' }, root, newestChange: later }).status, 'current');
 });
 
 test('state --set at a phase boundary tells the lead to stop for /clear', async () => {

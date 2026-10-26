@@ -42,7 +42,7 @@ repo: <owner/repo or group/subgroup/repo>   # where the issues live (with severa
 baseBranch: dev                  # or main
 branchPattern: feature/{ticket}-{slug}
 commitConvention: <e.g. conventional commits, or "follow git log">
-runApp: <command(s) to start the app>
+runApp: <command(s) to start each component, with absolute paths so app-check can tell which folder runs>
 runTests: <command to run the test suite, or none>
 writeTests: no                  # yes = the project requires automated tests for changes (write them its way); no = never add tests or test frameworks
 appUrl: http://localhost:5173      # the web app; its port is checked with nqt.mjs app-check

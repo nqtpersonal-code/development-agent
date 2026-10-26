@@ -86,9 +86,10 @@ When the owner doubts a conclusion at any step: dispatch **one** fresh `nqt:code
 
 ## qa
 
-1. Dispatch `nqt:qa` with `MODE=run`; for UI tickets dispatch `nqt:ui-checker` in parallel, only for the screens the ticket changed.
-2. Failures → show in user language; fix as in review; re-run only the failed scenarios.
-3. `S --set qa=done`.
+1. **The app first — your job, not QA's.** `nqt.mjs app-check --port <api port> --port <web port> --root "PROJECT_ROOT"` (ports from `apiUrl`/`appUrl` in project.md). Anything but `current` (`free`, `stale`, `other-folder`, `unknown`) → stop that process if it is this ticket's or an earlier test run's (ask the owner when you did not start it), start each component in the background with `runApp` from project.md **using absolute paths** (`node "PROJECT_ROOT/api/dist/main.js"`, `npm --prefix "PROJECT_ROOT/web" run dev`; build first when the server runs built code), and re-run `app-check` until every port is `current`.
+2. Then dispatch `nqt:qa` with `MODE=run` and, for UI tickets, `nqt:ui-checker` in parallel, only for the screens the ticket changed.
+3. Failures → show in user language; fix as in review; re-run only the failed scenarios.
+4. `S --set qa=done`.
 
 ## report
 
