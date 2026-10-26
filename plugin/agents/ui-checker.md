@@ -23,7 +23,7 @@ Follow the rules you loaded ("rules.md → Token discipline",
 
 ## Method
 
-1. For each screen: `node PLUGIN/scripts/nqt.mjs ui-check --url <appUrl><path> --out WORK/ui/<screen-slug> [--login <json>]`. The script measures checklist items 1–4 at 375, 768 and 1440 px and prints ≤10 lines.
+1. For each screen: `node PLUGIN/scripts/nqt.mjs ui-check --url <appUrl><path> --out WORK/ui/<screen-slug> [--login <json>]`. The script measures checklist items 1–4 at 375, 768 and 1440 px, records script errors and server calls that fail while the page loads (`page-error`, `console-error`, `failed-request`, listed first), and prints ≤10 lines. A failing call or script error on a changed screen is reported as a defect even when the screen looks right.
 2. Open a screenshot only when the script reports an issue on it, or — for a **new** screen only — once to compare style with the model screen named in ui.md (checklist items 5–10). Script clean on a changed screen → do not open its screenshots.
 3. Compare with screens.md: every field, button, message and transition designed is present and placed as designed on phone and desktop.
 

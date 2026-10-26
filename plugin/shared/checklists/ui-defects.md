@@ -1,7 +1,7 @@
 # UI defect checklist
 
 Used by screen-designer (to avoid), ui-checker (to detect) and reviewer.
-Items 1–4 are measured by `nqt.mjs ui-check`; the rest need a look at the
+Items 1–4 are measured by `nqt.mjs ui-check`, which also records script errors and failing server calls while the page loads; the rest need a look at the
 screenshots against `projects/<project>/ui.md` and the sibling screen.
 
 1. **Horizontal overflow** — the page scrolls sideways at 375px.

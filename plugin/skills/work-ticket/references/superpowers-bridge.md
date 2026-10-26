@@ -9,6 +9,7 @@ State these explicitly whenever you invoke a superpowers skill or dispatch a dev
 - Never run `superpowers:finishing-a-development-branch`; never push, merge or open PRs. Local commits on the feature branch are fine; with several repos, each task names its repo and git runs inside that repo.
 - Tests follow `writeTests` in project.md: `yes` → tests in the project's own style, TDD as superpowers works; `no` → no test files, frameworks or scripts; each task is checked by a **quick self-check** (it builds/compiles, one smallest call or page load shows the change) — not by re-running QA's scenarios.
 - Test data: the smallest possible, created only after `nqt.mjs db-check` passes, recorded and removed afterwards in `WORK/implementation-notes.md` ("rules.md → Local DB guard"). Non-ASCII text goes through UTF-8 files ("rules.md → Commands").
+- Use the library versions the project has installed ("rules.md → Surgical changes", point 5); add or upgrade no dependency the ticket does not need.
 - Touch exactly the brief's **must patch** points, never **do not touch** ones, in the brief's Fix mode, at the narrowest point on the ticket's path.
 - The plugin path is `PLUGIN`; never search the disk for it or read plugin sources.
 - No questions to the owner from dev subagents: they return them to the lead.

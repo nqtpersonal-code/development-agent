@@ -3,18 +3,27 @@ import { parseDbUrl, assertLocalDb } from './localhost.mjs';
 
 const READ = /^(select|with|show|explain|describe|desc|values|table)\b/i;
 
+const statementsOf = (query) => String(query).replace(/--.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '').split(';').map((s) => s.trim()).filter(Boolean);
+
 // 'read' only when every statement is a read; a CTE that writes counts as write.
 export function classifySql(query) {
-  const statements = String(query).replace(/--.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '').split(';').map((s) => s.trim()).filter(Boolean);
+  const statements = statementsOf(query);
   const writes = /\b(insert|update|delete|merge|drop|alter|create|truncate|grant|revoke|exec|execute|call)\b/i;
   return statements.length && statements.every((s) => READ.test(s) && !writes.test(s)) ? 'read' : 'write';
 }
 
+// TRUNCATE, and UPDATE / DELETE with no WHERE: they change every row of a table.
+export function wholeTableWrites(query) {
+  return statementsOf(query).filter((s) => /^truncate\b/i.test(s) || (/^(update|delete)\b/i.test(s) && !/\bwhere\b/i.test(s))).map((s) => s.slice(0, 80));
+}
+
 // Runs one query on the local DB taken from project settings, so agents never
 // put a connection string (or its password) on a command line.
-export async function runSql({ url, query, params = [], write = false, dataDir, confirmedLocalHosts = [], maxRows = 50 }) {
+export async function runSql({ url, query, params = [], write = false, allRows = false, dataDir, confirmedLocalHosts = [], maxRows = 50 }) {
   assertLocalDb(url, confirmedLocalHosts);
   if (classifySql(query) === 'write' && !write) throw new Error('this query changes data; pass --write after the owner or the flow allows it');
+  const whole = wholeTableWrites(query);
+  if (whole.length && !allRows) throw new Error(`refusing to change every row (no WHERE): ${whole.join(' | ')}; add a WHERE, or pass --all-rows only when the owner asked for the whole table`);
   const { engine } = parseDbUrl(url);
   let rows, affected;
   if (engine === 'postgres') {

@@ -74,6 +74,16 @@ test('classifySql tells reads from writes', () => {
   assert.equal(classifySql('select 1; delete from students'), 'write');
 });
 
+test('wholeTableWrites flags writes that would touch every row', async () => {
+  const { wholeTableWrites } = await import('../../plugin/scripts/lib/sql.mjs');
+  assert.deepEqual(wholeTableWrites("DELETE FROM students WHERE id = 7"), []);
+  assert.deepEqual(wholeTableWrites("UPDATE students SET phone = NULL WHERE id IN (7, 8)"), []);
+  assert.equal(wholeTableWrites('delete from students').length, 1);
+  assert.equal(wholeTableWrites("update students set phone = null; delete from fees where id = 1").length, 1);
+  assert.equal(wholeTableWrites('TRUNCATE attendance').length, 1);
+  assert.deepEqual(wholeTableWrites('select * from students'), []);
+});
+
 test('runSql reads the fixture DB without exposing the connection string', async (t) => {
   let r;
   try {

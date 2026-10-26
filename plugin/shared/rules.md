@@ -95,6 +95,7 @@ Each finding becomes a change point or a question for the owner.
 2. Simplicity first: the smallest change that satisfies the acceptance criteria.
 3. Touch only what the ticket needs: no unrelated refactors, renames or reformatting.
 4. Goal-driven: every change maps to an acceptance criterion (TCn) and a test that proves it.
+5. Code against the library versions the project has installed, not the newest ones you remember: check the version in the manifest or lockfile (`package.json`, `*.csproj`, …) and, when unsure about a function, its typings or docs inside the installed package (`node_modules/<lib>/…d.ts`, the NuGet package's XML docs). Never add or upgrade a dependency the ticket does not need.
 
 ## Repo hygiene
 
@@ -171,6 +172,7 @@ let it mislead you.
 - On Windows the shell tool is often Git Bash: convert `PLUGIN`, `DATA`, `WORK` and `PROJECT_ROOT` to forward slashes (`C:/Users/...`) and always wrap them in double quotes: `node "C:/Users/me/.claude/plugins/cache/nqt-local/nqt/0.1.0/scripts/nqt.mjs" state "C:/Users/me/.claude/nqt/work/p/12" --resume`.
 - Pass DB access through the project (`--project <p> --root "<PROJECT_ROOT>"`) instead of putting connection strings with passwords on the command line.
 - Before any DB write (migration, seed, test data), run `node "<PLUGIN>/scripts/nqt.mjs" db-check --project <p> --root "<PROJECT_ROOT>"`; a non-zero exit means stop and ask the owner.
+- Changing every row of a table (UPDATE/DELETE with no WHERE) is refused even with `--write`; `--all-rows` only when the owner asked for it.
 - Query the DB with `nqt.mjs sql --project <p> --root "<PROJECT_ROOT>" --query "…"` (or `--file q.sql`); it reads the connection from the project, refuses non-local hosts and needs `--write` to change data. Never call psql/mysql/sqlcmd with a password.
 - Text with non-ASCII characters (Vietnamese names…) sent to the app or DB goes through a UTF-8 file (`curl --data-binary @body.json -H "Content-Type: application/json; charset=utf-8"`, `sql --file`), never inline on a Windows command line, which mangles it.
 - The plugin path is given in your instructions. Never search the disk for `nqt.mjs` or other plugin files, and never read plugin sources (scripts, other agents' prompts): run the commands and read their output.

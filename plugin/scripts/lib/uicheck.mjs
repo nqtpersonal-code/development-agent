@@ -66,6 +66,15 @@ export async function uiCheck({ url, outDir, viewports = DEFAULT_VIEWPORTS, logi
   try {
     const context = await browser.newContext();
     const page = await context.newPage();
+    // Errors the screen hides from users: script errors and server calls that fail.
+    const runtime = new Map();
+    const note = (type, detail) => {
+      if (!runtime.has(`${type}|${detail}`)) runtime.set(`${type}|${detail}`, { viewport: 'any', type, selector: '-', detail: detail.slice(0, 200) });
+    };
+    page.on('console', (m) => { if (m.type() === 'error') note('console-error', m.text()); });
+    page.on('pageerror', (e) => note('page-error', e.message));
+    page.on('response', (r) => { if (r.status() >= 400 && !/favicon\.ico$/.test(r.url())) note('failed-request', `${r.request().method()} ${r.url()} → ${r.status()}`); });
+    page.on('requestfailed', (r) => note('failed-request', `${r.method()} ${r.url()} → ${r.failure()?.errorText ?? 'failed'}`));
     if (login) {
       await page.goto(login.url);
       for (const s of login.steps ?? []) {
@@ -86,6 +95,7 @@ export async function uiCheck({ url, outDir, viewports = DEFAULT_VIEWPORTS, logi
       await page.screenshot({ path: shot, fullPage: true });
       screenshots.push(shot);
     }
+    issues.unshift(...runtime.values());
   } finally {
     await browser.close();
   }

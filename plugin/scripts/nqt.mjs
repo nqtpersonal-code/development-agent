@@ -436,8 +436,8 @@ const commands = {
     const ctx = projectContext(args);
     if (!ctx.dbUrl) throw new Error('no DB settings in project.md (dbUrl or dbEnvFile)');
     const query = args.file ? readFileSync(String(args.file), 'utf8') : args.query;
-    if (!query || query === true) throw new Error('usage: sql --project p --root dir (--query "…" | --file q.sql) [--write] [--out rows.json]');
-    const r = await runSql({ url: ctx.dbUrl, query: String(query), write: Boolean(args.write), dataDir: ctx.dataDir, confirmedLocalHosts: ctx.confirmedLocalHosts, maxRows: Number(args.max ?? 50) });
+    if (!query || query === true) throw new Error('usage: sql --project p --root dir (--query "…" | --file q.sql) [--write [--all-rows]] [--out rows.json]');
+    const r = await runSql({ url: ctx.dbUrl, query: String(query), write: Boolean(args.write), allRows: Boolean(args['all-rows']), dataDir: ctx.dataDir, confirmedLocalHosts: ctx.confirmedLocalHosts, maxRows: Number(args.max ?? 50) });
     if (args.out) writeJson(args.out, r.rows);
     if (!r.rows.length) return void console.log(`sql: no rows${r.affected != null ? ` (${r.affected} affected)` : ''}`);
     console.log(`sql: ${r.total} row(s)${r.truncated ? `, first ${r.rows.length} kept` : ''}${args.out ? `, saved to ${args.out}` : ''}`);
