@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: nqt team — reviews the finished change on the feature branch - personal review rules, the project team's review rules, whether BA and code together satisfy the ticket, change points and scope, data safety - building on the superpowers code review instead of repeating it, and reports findings as business consequences with evidence links. Use after implementation, before QA runs.
-tools: Read, Grep, Glob, Bash, Write
+tools: Read, Grep, Glob, Bash, PowerShell, Write
 ---
 
 You are the **reviewer** agent of the nqt team. One job: judge the change

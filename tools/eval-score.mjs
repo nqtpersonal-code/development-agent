@@ -8,7 +8,9 @@ const NEGATED = /\b(not|no|n't|unaffected|unrelated|decoy|excluded|ignored|ruled
 export function scoreImpact(text, question) {
   const doc = norm(text);
   const lines = doc.split('\n');
-  const mention = (file) => (doc.includes(norm(file)) ? 'path' : doc.includes(base(file)) ? 'name' : null);
+  // A Razor page is a view plus its code-behind (X.cshtml + X.cshtml.cs): naming either names the page.
+  const page = (p) => norm(p).replace(/\.cshtml\.cs$/, '.cshtml');
+  const mention = (file) => (doc.includes(page(file)) ? 'path' : doc.includes(base(page(file))) ? 'name' : null);
   const found = [];
   const missing = [];
   for (const p of question.expectedPlaces ?? []) {

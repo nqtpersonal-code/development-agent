@@ -169,6 +169,7 @@ let it mislead you.
 
 ## Commands
 
+- Use whichever shell tool you have — `Bash` or `PowerShell` (a Windows terminal session may have only PowerShell); the nqt commands are the same in both. In PowerShell 5.1 chain with `;` (not `&&`), set variables as `$P = "C:/..."`, and pass a file body to curl with `curl.exe --data-binary "@file.json"`. Never fall back to reading code by hand because a shell seems missing: check both tools first.
 - On Windows the shell tool is often Git Bash: convert `PLUGIN`, `DATA`, `WORK` and `PROJECT_ROOT` to forward slashes (`C:/Users/...`) and always wrap them in double quotes: `node "C:/Users/me/.claude/plugins/cache/nqt-local/nqt/0.1.0/scripts/nqt.mjs" state "C:/Users/me/.claude/nqt/work/p/12" --resume`.
 - Pass DB access through the project (`--project <p> --root "<PROJECT_ROOT>"`) instead of putting connection strings with passwords on the command line.
 - Before any DB write (migration, seed, test data), run `node "<PLUGIN>/scripts/nqt.mjs" db-check --project <p> --root "<PROJECT_ROOT>"`; a non-zero exit means stop and ask the owner.

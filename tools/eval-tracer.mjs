@@ -84,14 +84,17 @@ function runTracer({ plugin, dataDir, project, root, tmp, question, model, budge
   const work = join(dataDir, 'work', project, `eval-${question.id}`);
   mkdirSync(work, { recursive: true });
   const start = Object.entries(question.start).map(([k, v]) => `${k} ${v}`).join(', ');
-  const prompt = [
+  const brief = [
     `PLUGIN="${slash(plugin)}"`, `DATA="${slash(dataDir)}"`, `PROJECT=${project}`, `PROJECT_ROOT="${slash(root)}"`,
     `WORK="${slash(work)}"`, 'LANGUAGE=en', 'TASK=trace',
     `Ticket question: ${question.question}`, `Start points: ${start}.`,
     'Trace it as your instructions say, write WORK/trace/impact.md and return your summary.',
   ].join('\n');
-  const cmd = ['claude', '-p', '--agent', 'nqt:code-tracer', '--model', model, '--output-format', 'json',
-    '--allowedTools', '"Bash Read Grep Glob Write"', '--add-dir', `"${slash(tmp)}"`, '--max-budget-usd', String(budget)].join(' ');
+  // Dispatched by a thin session, as the lead does: an agent started with --agent
+  // has no shell tool and could not run the nqt scripts.
+  const prompt = `Dispatch the nqt:code-tracer agent (Agent tool) once with exactly the brief between the lines. Do nothing else yourself; when it returns, reply with its summary.\n---\n${brief}\n---`;
+  const cmd = ['claude', '-p', '--model', model, '--output-format', 'json',
+    '--allowedTools', '"Agent Bash PowerShell Read Grep Glob Write"', '--add-dir', `"${slash(tmp)}"`, '--max-budget-usd', String(budget)].join(' ');
   const t0 = Date.now();
   const r = spawnSync(cmd, { shell: true, cwd: root, input: prompt, encoding: 'utf8', maxBuffer: 1 << 26, timeout: 30 * 60 * 1000, env: { ...process.env, NQT_DATA_DIR: dataDir } });
   let meta = {};

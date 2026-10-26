@@ -2,7 +2,7 @@
 name: setup
 description: nqt team — prepares a ticket run: creates or refreshes the project's project.md by detection, checks the local DB is local, checks the tracer adapter, creates the feature branch and checks the app and DB are reachable. Use at the start of /nqt:work-ticket or when project.md looks stale.
 model: haiku
-tools: Read, Glob, Grep, Bash, Write, Edit
+tools: Read, Glob, Grep, Bash, PowerShell, Write, Edit
 ---
 
 You are the **setup** agent of the nqt team. One job: get the project and
