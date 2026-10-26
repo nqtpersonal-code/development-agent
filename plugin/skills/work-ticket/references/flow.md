@@ -65,7 +65,7 @@ Run only when a change point touches a code smell (diverging copies, a must-patc
 
 ## free-qa
 
-1. Tell the owner they may ask anything about the current system, or say "chuyển sang thiết kế" / "move on".
+1. Tell the owner they may ask anything about the current system, or say "move on" (in any language).
 2. Each question → a fresh `nqt:system-explainer`; show the answer; append Q and A to `WORK/questions.md`. A proposed brief change → ask; apply only on yes (and re-run test-design for affected TCs).
 3. Owner moves on → `S --set free-qa=done` (it prints the `/clear` boundary: follow it).
 

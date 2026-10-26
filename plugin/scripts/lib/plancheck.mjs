@@ -2,6 +2,7 @@
 // must-patch file is in the plan, no do-not-touch file is. Regression checks
 // belong to QA's scenarios, not to the plan, so they are not required here.
 const FILE_RE = /(?:\]\(|`)([\w./-]+\.[A-Za-z]{1,5})(?:#[^)`]*)?[)`]/g;
+// Briefs may be written in the owner's language: match the Vietnamese labels too.
 const MUST = /must patch|phải vá/i;
 const FORBID = /do not touch|không được đụng/i;
 

@@ -30,17 +30,18 @@ conclusion and opens an evidence link. Mark such sections "Technical part".
 
 ## Owner-facing words
 
-Owner-facing text never uses developer words. Replace them:
+Owner-facing text never uses developer words. Replace them with what the
+owner sees, written in the configured language (examples below are English):
 
-| Do not write | Write instead (en / vi) |
+| Do not write | Write instead |
 |---|---|
-| API, endpoint, route, request, payload, 409/500 | "when you press Save, the system…" / "khi bấm Lưu, hệ thống…" |
-| service, controller, component, hook, handler, DTO | the screen or action it serves / tên màn hình, thao tác |
-| table, column, row, record, FK, unique constraint, index | "the list of students", "a student's name", "no two students may share a name" / "danh sách học sinh", "tên học sinh", "không cho trùng tên" |
-| null, undefined, boolean, enum, query, join | "left empty", "yes/no", "one of: …" / "để trống", "có/không", "một trong: …" |
-| soft delete, `deleted_at` | "hidden as deleted but still kept" / "đã xoá nhưng vẫn lưu lại" |
-| migration, seed, schema | "a change to how the data is stored", "sample data" / "đổi cách lưu dữ liệu", "dữ liệu mẫu" |
-| file names and paths (`students.service.ts`, `test-scenarios.md`, `WORK/…`) | only inside an evidence link; otherwise "the test scenarios", "the final report" / "kịch bản test", "báo cáo cuối" |
+| API, endpoint, route, request, payload, 409/500 | "when you press Save, the system…" |
+| service, controller, component, hook, handler, DTO | the screen or action it serves |
+| table, column, row, record, FK, unique constraint, index | "the list of students", "a student's name", "no two students may share a name" |
+| null, undefined, boolean, enum, query, join | "left empty", "yes/no", "one of: …" |
+| soft delete, `deleted_at` | "hidden as deleted but still kept" |
+| migration, seed, schema | "a change to how the data is stored", "sample data" |
+| file names and paths (`students.service.ts`, `test-scenarios.md`, `WORK/…`) | only inside an evidence link; otherwise "the test scenarios", "the final report" |
 | refactor, regression, edge case, TC7 alone | "tidy the code", "something that used to work breaks", "an unusual case", "check 7 (…what it checks)" |
 
 Technical words are fine only inside evidence links and sections marked
@@ -52,14 +53,14 @@ configured language.
 
 Every statement in a work file carries one internal label:
 
-| Label | Meaning | How to say it to the owner (vi / en) |
+| Label | Meaning | How to say it to the owner (in the configured language) |
 |---|---|---|
-| `[CODE]` | seen in code, with file:line | "đã kiểm tra trong hệ thống" + link / "checked in the system" + link |
-| `[DB]` | seen in the local database | "theo dữ liệu hiện có" / "according to current data" |
-| `[TICKET]` | stated in the ticket or its comments | "ticket ghi" / "the ticket says" |
-| `[DOCS]` | stated in documentation (may be stale) | "tài liệu ghi (có thể đã cũ)" / "the docs say (may be outdated)" |
-| `[OWNER]` | confirmed by the owner in this ticket | "bạn đã xác nhận" / "you confirmed" |
-| `[GUESS]` | inference not verified | "tôi đoán — cần bạn xác nhận" / "my guess — please confirm" |
+| `[CODE]` | seen in code, with file:line | "checked in the system" + link |
+| `[DB]` | seen in the local database | "according to current data" |
+| `[TICKET]` | stated in the ticket or its comments | "the ticket says" |
+| `[DOCS]` | stated in documentation (may be stale) | "the docs say (may be outdated)" |
+| `[OWNER]` | confirmed by the owner in this ticket | "you confirmed" |
+| `[GUESS]` | inference not verified | "my guess — please confirm" |
 
 ## Never guess
 

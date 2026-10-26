@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { walkFiles, readText, rel } from './files.mjs';
 
+// Commit messages may be Vietnamese ("sửa lỗi" = bug fix).
 const FIX = /^(fix|hotfix|bugfix)(\(|:|!|\s)|\b(fix(es|ed)?|bug|hotfix|sửa lỗi)\b/i;
 
 // How often a file changed and how many of those changes were bug fixes.

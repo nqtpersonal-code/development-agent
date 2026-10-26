@@ -20,7 +20,7 @@ export function runtimeRequire(dataDir, pkg) {
   } catch {
     throw new NqtMissingRuntime(
       `Missing runtime package "${pkg}". Run: node <plugin>/scripts/nqt.mjs doctor --install ` +
-      `(installs into ${dir}). / Thiếu gói "${pkg}", hãy chạy lệnh trên một lần.`,
+      `(installs into ${dir}); it is needed once.`,
     );
   }
 }

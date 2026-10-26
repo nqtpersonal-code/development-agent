@@ -33,29 +33,29 @@ bind you. Do not read `rules.md`, `formats.md`, agent prompts or plugin scripts.
 
 1. `waiting` shows a question or approval → ask it again first (it survived a `/clear`).
 2. `start` already printed the current step's instructions, and every `state --set <step>=done|skipped` prints the next step's instructions in the same call — follow them; there is no separate call per step. Use `guide --step <step>` only for a step you have not been shown (e.g. `build-adapter`, `doubt`). Never read the whole flow.
-3. Announce each step to the owner with its name and position, e.g. "Bước Phân tích ticket (2/15)".
+3. Announce each step to the owner with its name (in `LANGUAGE`) and position, e.g. "Step Analysis (2/15)".
 
 Order: setup → analysis → screens → risk → brief → test-design → free-qa → architect → design → plan → plan-check → implement → review → qa → report.
 
-| step | vi | en |
-|---|---|---|
-| setup | Chuẩn bị | Setup |
-| analysis | Phân tích ticket | Analysis |
-| screens | Thiết kế màn hình | Screen design |
-| risk | Phân tích rủi ro | Risk analysis |
-| brief | Chốt hồ sơ ticket | Ticket brief |
-| test-design | Viết kịch bản test | Test design |
-| free-qa | Hỏi đáp tự do | Free Q&A |
-| architect | Thiết kế kỹ thuật | Technical design |
-| design | Dev: brainstorming (tuỳ chọn) | Dev: brainstorming (optional) |
-| plan | Lập kế hoạch | Planning |
-| plan-check | Soát kế hoạch | Plan check |
-| implement | Viết code | Implementation |
-| review | Review | Review |
-| qa | Kiểm thử | QA |
-| report | Báo cáo | Report |
+| step | display name |
+|---|---|
+| setup | Setup |
+| analysis | Analysis |
+| screens | Screen design |
+| risk | Risk analysis |
+| brief | Ticket brief |
+| test-design | Test design |
+| free-qa | Free Q&A |
+| architect | Technical design |
+| design | Dev: brainstorming (optional) |
+| plan | Planning |
+| plan-check | Plan check |
+| implement | Implementation |
+| review | Review |
+| qa | QA |
+| report | Report |
 
-Nicknames from `start` replace these names.
+Show these names translated into `LANGUAGE`; nicknames from `start` replace them.
 
 ## 2. Dispatching
 
@@ -67,7 +67,7 @@ Nicknames from `start` replace these names.
 ## 3. Talking to the owner
 
 - Everything the owner reads follows "Owner-facing words" and is in `LANGUAGE` — including the short progress lines between tool calls.
-- Only you ask. Up to 4 independent questions per AskUserQuestion call; **the recommended option is always the first one**, marked "(Khuyên dùng)" / "(Recommended)"; evidence (real data, links) in a short message just before the call; dependent questions in the next batch.
+- Only you ask. Up to 4 independent questions per AskUserQuestion call; **the recommended option is always the first one**, marked "(Recommended)" in `LANGUAGE`; evidence (real data, links) in a short message just before the call; dependent questions in the next batch.
 - `S` = `node "PLUGIN/scripts/nqt.mjs" state "WORK"`. Before a question batch or approval: `S --wait question "<ids>"` or `S --wait approval "<what>"`; after the answer: `S --clear-wait`. These and `clear` are the only wait kinds.
 - Owner doubts a conclusion → `guide --step doubt`.
 
@@ -80,7 +80,7 @@ After analysis · screens (when run) · risk choices · brief approval · whethe
 When `state --set` prints `boundary:` (after free-qa, plan-check and implement):
 run `S --wait clear "<next step>"`, tell the owner they may type `/clear` and
 then `/nqt:work-ticket <ticket>` to continue in a fresh, cheaper session (or
-just say "tiếp tục" / "continue" to go on here), and **end your turn**. Do not
+just say "continue" (in any language) to go on here), and **end your turn**. Do not
 start the next step in the same turn.
 
 ## 6. Never

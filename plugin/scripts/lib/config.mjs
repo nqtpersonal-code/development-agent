@@ -6,26 +6,26 @@ import { parseFrontmatter } from './frontmatter.mjs';
 const DIRS = ['projects', 'work', 'patterns', 'review-rules', 'runtime'];
 
 const DEFAULT_CONFIG = `---
-# Ngôn ngữ trao đổi với bạn: vi (tiếng Việt) hoặc en (tiếng Anh).
+# Language the team uses with you: vi (Vietnamese) or en (English).
 language: vi
-# Thư mục quy tắc review CÁ NHÂN (đọc mọi file .md bên trong). Để trống = mặc định <thư mục dữ liệu>/review-rules
+# Folder of your PERSONAL review rules (every .md inside is read). Empty = <data dir>/review-rules
 reviewRules:
   personal:
-# Thư mục mã nguồn plugin (repo git) để /nqt:retro đề xuất sửa agent/workflow vào đúng chỗ. Để trống: retro sẽ hỏi.
+# The plugin's source folder (git repo), so /nqt:retro proposes agent/workflow fixes in the right place. Empty: retro asks.
 pluginSourceDir:
-# Biệt danh cho agent và bước (chỉ dùng khi nói chuyện với bạn). Bỏ trống = tên mặc định.
+# Nicknames for agents and steps (used only when talking to you). Empty = default names.
 nicknames:
   agents:
-    # ba: Mai
-    # qa: Tùng
+    # ba: Anna
+    # qa: Tom
   steps:
-    # analysis: Soi ticket
+    # analysis: Ticket deep-dive
 ---
 
-# Cấu hình nqt
+# nqt configuration
 
-Sửa các giá trị ở phần đầu file (giữa hai dòng ---). Quy tắc review của team đặt trong
-projects/<tên-dự-án>/review-rules/.
+Edit the values at the top of this file (between the two --- lines). Team review rules
+go in projects/<project-name>/review-rules/.
 `;
 
 export function getDataDir() {

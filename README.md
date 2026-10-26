@@ -1,82 +1,83 @@
-# nqt — đội agent làm ticket bằng ngôn ngữ tự nhiên
+# nqt — a natural-language agent team for tickets
 
-Plugin cho Claude Code. Bạn mô tả bằng lời, đội agent lo phần kỹ thuật:
-đọc ticket, lần theo code và DB thật, hỏi bạn khi chưa rõ, thiết kế màn hình,
-viết kịch bản test, code (qua superpowers), review, kiểm thử và báo cáo. Không bao giờ tự push.
+A Claude Code plugin. You describe things in plain words; the agent team handles the
+technical side: reads the ticket, traces the real code and database, asks you when
+something is unclear, designs screens, writes test scenarios, codes (through
+superpowers), reviews, tests and reports. It never pushes.
 
-## Hỗ trợ
+## Supported
 
-- JavaScript/TypeScript: NestJS, Express, React, Vue, Angular, Prisma, SQL viết tay.
-- .NET: ASP.NET Core (controller, minimal API, MVC, Razor Pages), Blazor, EF Core, Dapper, stored procedure, chuỗi kết nối trong `appsettings*.json`; giao diện Angular/React đi kèm.
-- DB đọc được cấu trúc: PostgreSQL, MySQL, SQL Server (kể cả stored procedure, view, trigger). Loại khác vẫn chạy bằng tìm kiếm văn bản.
+- JavaScript/TypeScript: NestJS, Express, React, Vue, Angular, Prisma, hand-written SQL.
+- .NET: ASP.NET Core (controllers, minimal APIs, MVC, Razor Pages), Blazor, EF Core, Dapper, stored procedures, connection strings in `appsettings*.json`; Angular/React front ends alongside.
+- Databases whose structure is read: PostgreSQL, MySQL, SQL Server (including stored procedures, views and triggers). Other engines still work through text search.
 
-## Cần có
+## Requirements
 
-- Claude Code, Node.js 20+ (khuyên 24), Git.
-- Plugin **superpowers** đã cài.
-- Docker (không bắt buộc, chỉ cần khi DB local chạy bằng Docker).
-- `gh` / `glab` (không bắt buộc; không có thì dán nội dung ticket vào).
+- Claude Code, Node.js 20+ (24 recommended), Git.
+- The **superpowers** plugin installed.
+- Docker (optional; only when the local DB runs in Docker).
+- `gh` / `glab` (optional; without them you paste the ticket text).
 
-## Cài đặt (chỉ cài ở cấp người dùng)
+## Install (user scope only)
 
-**Cách 1 — từ thư mục trên máy (hoặc từ file zip đã giải nén):**
+**Option 1 — from a folder on this machine (or an unzipped export):**
 
 ```
-claude plugin marketplace add "<đường-dẫn-tới-thư-mục-plugin>"
+claude plugin marketplace add "<path-to-the-plugin-folder>"
 claude plugin install nqt@nqt-local --scope user
 ```
 
-**Cách 2 — từ repo GitHub private:** máy cần đăng nhập GitHub (`gh auth login` hoặc SSH key), rồi
+**Option 2 — from a private GitHub repo:** the machine must be logged in to GitHub (`gh auth login` or an SSH key), then
 
 ```
-claude plugin marketplace add <tài-khoản>/<repo>
+claude plugin marketplace add <account>/<repo>
 claude plugin install nqt@nqt-local --scope user
 ```
 
-Không cài ở cấp dự án (`--scope project`): cách đó ghi vào `.claude/settings.json` trong repo của team.
+Do not install at project scope (`--scope project`): that writes into the team repo's `.claude/settings.json`.
 
-**Sau khi cài, chạy một lần** để cài thư viện phụ trợ (pg, mysql2, Playwright + Chromium) vào thư mục dữ liệu:
+**After installing, run once** to install the helper libraries (pg, mysql2, mssql, Playwright + Chromium) into the data folder:
 
 ```
-node "<thư-mục-plugin-đã-cài>/scripts/nqt.mjs" doctor --install
+node "<installed-plugin-folder>/scripts/nqt.mjs" doctor --install
 ```
 
-(Thư mục plugin đã cài thường là `~/.claude/plugins/cache/nqt-local/nqt/<phiên-bản>/`.)
+(The installed plugin folder is usually `~/.claude/plugins/cache/nqt-local/nqt/<version>/`.)
 
-## Dùng
+## Use
 
-Mở Claude Code **trong folder project của ticket**, rồi:
+Open Claude Code **in the ticket's project folder**, then:
 
-| Lệnh | Việc |
+| Command | What it does |
 |---|---|
-| `/nqt:work-ticket <số-ticket>` | làm trọn một ticket (số issue, có hoặc không có dấu `#`, hoặc dán link issue) |
-| `/nqt:ask-system` | hỏi đáp về hệ thống hiện tại |
-| `/nqt:retro <số-ticket>` | rút kinh nghiệm sau một ticket (nên mở phiên mới) |
-| `/nqt:add-pattern <thư-mục>` | thêm một bộ mẫu best practice vào thư viện |
+| `/nqt:work-ticket <ticket>` | works a whole ticket (issue number, with or without `#`, or the issue link) |
+| `/nqt:ask-system` | answers questions about the current system |
+| `/nqt:retro <ticket>` | lessons learned after a ticket (best in a fresh session) |
+| `/nqt:add-pattern <folder>` | adds a best-practice pattern pack to the library |
 
-Tên dự án được tự suy ra từ `git remote` của folder: mọi folder ticket clone từ cùng một repo dùng chung một hồ sơ dự án. Muốn đặt tên khác (ví dụ gộp repo FE và BE vào một hồ sơ) thì gõ thêm tên trước số ticket: `/nqt:work-ticket shop 123`, tên đó được ghi nhớ.
+The project name comes from the folder's `git remote`: every ticket folder cloned from the same repo shares one project profile. To use another name (for example to group the front-end and back-end repos under one profile), put it before the ticket: `/nqt:work-ticket shop 123`; the name is remembered.
 
-Lần đầu với một dự án, đội agent sẽ tự dò và hỏi bạn vài câu để tạo hồ sơ dự án
-và "bộ chuyển đổi truy vết" (kèm bài kiểm tra) — các lần sau dùng lại.
+The first time with a project, the team detects what it can and asks you a few questions to build the project profile and, when needed, a tracer adapter (with its own tests); later tickets reuse them.
 
-## Dữ liệu của bạn ở đâu
+## Where your data lives
 
-Tất cả nằm ngoài plugin và ngoài repo dự án, ở `~/.claude/nqt/`:
+Everything stays outside the plugin and outside the project repos, in `~/.claude/nqt/`:
 
-- `config.md` — ngôn ngữ (`vi`/`en`), thư mục quy tắc review cá nhân, biệt danh cho agent và bước.
-- `review-rules/` — quy tắc review cá nhân (mọi file `.md`).
-- `patterns/` — thư viện mẫu dùng chung (có sẵn 2 bộ khởi đầu).
-- `projects/<dự-án>/` — `project.md`, `ui.md`, `pitfalls.md`, `review-rules/` (quy tắc của team), `patterns/`, `tracer/`.
-- `work/<dự-án>/<ticket>/` — mọi kết quả khi làm ticket (hồ sơ ticket, kịch bản test, báo cáo, ảnh chụp…).
+- `config.md` — language (`vi`/`en`), personal review rules folder, nicknames for agents and steps.
+- `review-rules/` — your personal review rules (every `.md`).
+- `patterns/` — the shared pattern library (two starter packs included).
+- `projects/<project>/` — `project.md`, `ui.md`, `pitfalls.md`, `review-rules/` (team rules), `patterns/`, `tracer/`.
+- `work/<project>/<ticket>/` — everything produced while working a ticket (ticket brief, test scenarios, reports, screenshots…).
 
-Cập nhật hay cài lại plugin không làm mất dữ liệu này.
+Updating or reinstalling the plugin keeps this data.
 
-## Cho người sửa plugin
+## For plugin maintainers
 
 ```
-npm test                    # chạy test (cần Docker cho 2 dự án mẫu: tests/fixtures/school-a, school-b-api)
-node tools/export-zip.mjs   # tạo dist/nqt-plugin-<phiên-bản>.zip (chặn nếu phát hiện dữ liệu dự án)
-git config core.hooksPath .githooks   # bật chốt quét bảo mật trước mỗi commit
+npm test                                   # unit tests (Docker for the fixture DBs: tests/fixtures/school-a, school-b-api, clinic)
+node tools/eval-tracer.mjs --fixture all   # code-tracer accuracy and cost against the answer keys (installed plugin, fixture DBs running)
+node tools/export-zip.mjs                  # builds dist/nqt-plugin-<version>.zip (blocked if project data is found)
+git config core.hooksPath .githooks        # turns on the leak scan before every commit
 ```
 
-Repo này không bao giờ được chứa dữ liệu dự án thật (tên dự án, số ticket, URL nội bộ, code, mật khẩu…).
+This repo must never contain real project data (project names, ticket numbers, internal URLs, code, passwords…).

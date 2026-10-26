@@ -3,6 +3,7 @@
 // decoys it wrongly names as affected, which DB procedures it found.
 const norm = (s) => String(s).replace(/\\/g, '/').toLowerCase();
 const base = (p) => norm(p).split('/').pop();
+// Impact maps may be written in Vietnamese: "không" = not, "loại trừ" = excluded.
 const NEGATED = /\b(not|no|n't|unaffected|unrelated|decoy|excluded|ignored|ruled out|false positive|belongs to|(?:an)?other table|different table)\b|không|loại trừ/i;
 
 export function scoreImpact(text, question) {

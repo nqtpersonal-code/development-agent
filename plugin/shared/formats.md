@@ -131,8 +131,8 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 
 Agents that need the owner's decision write each question as:
 
-- `Q<n>` · **header** (≤12 characters, e.g. "Vắng có phép") · the question in one sentence, with screens, fields and real data the owner recognises;
-- **options**: 2–4 short labels with one-line consequences; the **recommended option first**, marked "(Khuyên dùng)" / "(Recommended)"; a question with no sensible options is marked `open`;
+- `Q<n>` · **header** (≤12 characters, e.g. "Excused") · the question in one sentence, with screens, fields and real data the owner recognises;
+- **options**: 2–4 short labels with one-line consequences; the **recommended option first**, marked "(Recommended)" in the configured language; a question with no sensible options is marked `open`;
 - **evidence**: one or two lines with real data and links (the lead shows them before asking);
 - **depends on**: `Q<k>` when it only makes sense after another answer, else `none`.
 
