@@ -30,7 +30,7 @@ import { setupDetect } from './lib/setup.mjs';
 import { runSql } from './lib/sql.mjs';
 import { appCheck } from './lib/appcheck.mjs';
 import { parseTicketRef } from './lib/githost.mjs';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
   const dataDir = getDataDir();
@@ -112,6 +112,7 @@ const commands = {
     if (!workDir) throw new Error('usage: state <workDir> [--init project ticket] [--resume] [--set step=status] [--wait kind text] [--clear-wait]');
     if (args.init) writeState(workDir, newState(args.init, args._[1] ?? ''));
     if (args.resume) resumeState(workDir);
+    const before = readState(workDir)?.current;
     let boundary = false;
     for (const pair of [].concat(args.set ?? [])) {
       const [step, status] = String(pair).split('=');
@@ -130,6 +131,8 @@ const commands = {
     console.log(`ticket ${s.project}/${s.ticket}: step ${s.current} (${done}/${STEPS.length} done)`);
     console.log(s.waitingFor ? `waiting: ${s.waitingFor.kind}: ${s.waitingFor.text}` : 'waiting: nothing');
     if (boundary) console.log('boundary: suggest /clear now — run state --wait clear, tell the owner how to continue, and END your turn (do not start the next step)');
+    // A finished step hands over the next step's instructions in the same call.
+    else if (args.set && s.current !== before && s.current !== 'done') console.log(`\n${stepGuide(pluginRoot, s.current)}`);
   },
   doctor(args) {
     const dataDir = getDataDir();
@@ -398,7 +401,12 @@ const commands = {
     console.log(`project.md: ${existsSync(join(dataDir, 'projects', project, 'project.md')) ? 'present' : 'missing (setup will detect it)'}`);
     console.log(`step: ${s.current} (${done}/${STEPS.length} done); waiting: ${s.waitingFor ? `${s.waitingFor.kind}: ${s.waitingFor.text}` : 'nothing'}`);
     console.log(ticketLine);
-    console.log(`next: guide --step ${s.current}`);
+    const fm = cfg.project;
+    const facts = ['baseBranch', 'writeTests', 'appUrl', 'apiUrl', 'runApp'].filter((k) => fm[k] !== undefined).map((k) => `${k}=${typeof fm[k] === 'object' ? JSON.stringify(fm[k]) : fm[k]}`);
+    if (facts.length) console.log(`project facts: ${facts.join('; ')}`);
+    const files = existsSync(work) ? readdirSync(work).filter((f) => f !== 'state.json') : [];
+    console.log(`work files: ${files.join(', ') || 'none yet'}`);
+    if (s.current !== 'done') console.log(`\n${stepGuide(pluginRoot, s.current)}`);
   },
   guide(args) {
     const step = args.step ?? args._[0];

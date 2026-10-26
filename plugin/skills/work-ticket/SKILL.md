@@ -22,7 +22,7 @@ It prepares the data dir, checks prerequisites, finds the project from the git
 remote, loads the config, creates or resumes `state.json` (dropping a used
 `/clear` reminder), fetches the ticket when missing, and prints `PLUGIN`,
 `DATA`, `PROJECT`, `PROJECT_ROOT`, `WORK`, `LANGUAGE`, nicknames, the current
-step and what is waiting. Use those values as printed (forward slashes, quoted).
+step and what is waiting, the project facts (base branch, app URLs, how to run the app), the work files that exist, and the current step's instructions. Use those values as printed (forward slashes, quoted); do not list or grep the work folder or project.md to find them again.
 - `MISSING …` → tell the owner in plain words what to install; stop.
 - `need-project` → ask the owner for a short project name; re-run with `--project`.
 
@@ -32,7 +32,7 @@ bind you. Do not read `rules.md`, `formats.md`, agent prompts or plugin scripts.
 ## 1. Each step
 
 1. `waiting` shows a question or approval → ask it again first (it survived a `/clear`).
-2. `node "PLUGIN/scripts/nqt.mjs" guide --step <current>` prints just that step's instructions. Follow them; when the step is done, `guide` the next one. Never read the whole flow.
+2. `start` already printed the current step's instructions, and every `state --set <step>=done|skipped` prints the next step's instructions in the same call — follow them; there is no separate call per step. Use `guide --step <step>` only for a step you have not been shown (e.g. `build-adapter`, `doubt`). Never read the whole flow.
 3. Announce each step to the owner with its name and position, e.g. "Bước Phân tích ticket (2/15)".
 
 Order: setup → analysis → screens → risk → brief → test-design → free-qa → architect → design → plan → plan-check → implement → review → qa → report.

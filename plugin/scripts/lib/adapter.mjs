@@ -97,7 +97,7 @@ export function resolveDbUrl(projectRoot, fm = {}) {
   if (fm.dbEnvVar) return env[fm.dbEnvVar] ?? null;
   const p = (k) => env[`${fm.dbEnvPrefix ?? 'DB_'}${k}`];
   if (!p('HOST')) return env.DATABASE_URL ?? null;
-  const engine = fm.dbEngine === 'mysql' ? 'mysql' : 'postgresql';
+  const engine = { mysql: 'mysql', sqlserver: 'sqlserver' }[fm.dbEngine] ?? 'postgresql';
   const auth = p('USER') ? `${encodeURIComponent(p('USER'))}${p('PASSWORD') ? ':' + encodeURIComponent(p('PASSWORD')) : ''}@` : '';
   return `${engine}://${auth}${p('HOST')}${p('PORT') ? ':' + p('PORT') : ''}/${p('NAME') ?? ''}`;
 }

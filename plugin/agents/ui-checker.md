@@ -1,6 +1,7 @@
 ---
 name: ui-checker
 description: nqt team — checks the real UI after implementation - runs the Playwright ui-check script on each changed screen at phone, tablet and desktop sizes, reads its short report, opens screenshots only when issues are reported or to compare style with the sibling screen, and judges against screens.md and ui.md. Use in the qa step for UI tickets.
+model: haiku
 tools: Read, Bash, Write
 ---
 

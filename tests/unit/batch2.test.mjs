@@ -67,6 +67,12 @@ test('setupDetect gathers DB candidates, scripts, components and test habits in 
   assert.equal(r.tests.writeTestsGuess, 'no');
 });
 
+test('setupDetect guesses the engine of DB_HOST/PORT/NAME settings from the project\'s DB driver', () => {
+  const db = setupDetect(join(fx, 'school-b-api')).db.find((x) => x.file === '.env');
+  assert.equal(db.engine, 'mysql');
+  assert.equal(db.project.dbEngine, 'mysql');
+});
+
 test('classifySql tells reads from writes', () => {
   assert.equal(classifySql('SELECT * FROM students'), 'read');
   assert.equal(classifySql('  with x as (select 1) select * from x'), 'read');
