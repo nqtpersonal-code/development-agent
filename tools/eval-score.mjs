@@ -3,7 +3,7 @@
 // decoys it wrongly names as affected, which DB procedures it found.
 const norm = (s) => String(s).replace(/\\/g, '/').toLowerCase();
 const base = (p) => norm(p).split('/').pop();
-const NEGATED = /\b(not|no|n't|unaffected|unrelated|decoy|excluded|ignored|ruled out|false positive|belongs to)\b|không|loại trừ/i;
+const NEGATED = /\b(not|no|n't|unaffected|unrelated|decoy|excluded|ignored|ruled out|false positive|belongs to|(?:an)?other table|different table)\b|không|loại trừ/i;
 
 export function scoreImpact(text, question) {
   const doc = norm(text);
