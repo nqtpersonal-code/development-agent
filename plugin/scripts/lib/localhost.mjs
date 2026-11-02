@@ -1,4 +1,4 @@
-const LOCAL = new Set(['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0', 'host.docker.internal']);
+const LOCAL = new Set(['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']);
 
 export function isLocalHost(host, confirmedLocalHosts = []) {
   const h = String(host || '').trim().toLowerCase();

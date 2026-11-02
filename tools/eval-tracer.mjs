@@ -5,7 +5,7 @@
 //
 //   node tools/eval-tracer.mjs --fixture school-a|school-b|clinic|all [--question A-Q1] [--model sonnet] [--budget 3] [--keep]
 //
-// Needs the fixture's DB container running (docker compose in the fixture folder).
+// Needs the fixture's local DB running (see the fixture folder).
 import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
@@ -19,9 +19,9 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fixtures = join(repoRoot, 'tests', 'fixtures');
 // Folders copied per fixture, and the project root inside the copy (answer paths are relative to it).
 const FIXTURES = {
-  'school-a': { dirs: ['school-a'], root: 'school-a', db: 'tests/fixtures/school-a (docker compose up -d)' },
-  'school-b': { dirs: ['school-b-api', 'school-b-web'], root: '.', db: 'tests/fixtures/school-b-api (docker compose up -d)' },
-  clinic: { dirs: ['clinic'], root: 'clinic', db: 'tests/fixtures/clinic (docker compose up -d)' },
+  'school-a': { dirs: ['school-a'], root: 'school-a', db: 'tests/fixtures/school-a (local PostgreSQL)' },
+  'school-b': { dirs: ['school-b-api', 'school-b-web'], root: '.', db: 'tests/fixtures/school-b-api (local MySQL)' },
+  clinic: { dirs: ['clinic'], root: 'clinic', db: 'tests/fixtures/clinic (local SQL Server)' },
 };
 const SKIP = new Set(['node_modules', 'dist', 'bin', 'obj', '.vs', 'package-lock.json']);
 

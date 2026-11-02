@@ -74,7 +74,6 @@ export function doctor(dataDir, { install = false, pluginsFile } = {}) {
     { name: 'git', required: true, ok: Boolean(has('git')), detail: has('git') ?? 'not found' },
     { name: 'superpowers', required: true, ok: superpowersInstalled(file), detail: 'Claude Code plugin' },
     ...RUNTIME_PACKAGES.map((p) => ({ name: `runtime:${p}`, required: true, ok: pkgOk(p), detail: runtimeDir(dataDir) })),
-    { name: 'docker', required: false, ok: Boolean(has('docker')), detail: has('docker') ?? 'not found' },
     { name: 'gh', required: false, ok: Boolean(has('gh')), detail: has('gh') ?? 'not found (ticket can be pasted)' },
     { name: 'glab', required: false, ok: Boolean(has('glab')), detail: has('glab') ?? 'not found (ticket can be pasted)' },
   ];

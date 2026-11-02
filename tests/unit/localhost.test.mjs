@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { isLocalHost, parseDbUrl, assertLocalDb } from '../../plugin/scripts/lib/localhost.mjs';
 
 test('local hosts are recognised', () => {
-  for (const h of ['localhost', '127.0.0.1', '::1', '0.0.0.0', 'host.docker.internal', 'LOCALHOST']) {
+  for (const h of ['localhost', '127.0.0.1', '::1', '0.0.0.0', 'LOCALHOST']) {
     assert.equal(isLocalHost(h), true, h);
   }
 });

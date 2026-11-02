@@ -106,7 +106,7 @@ Each finding becomes a change point or a question for the owner.
 
 ## Local DB guard
 
-- Writes (insert/update/delete, migrations, seeds) are allowed only on the ticket's local database: host `localhost`, `127.0.0.1`, `::1`, `host.docker.internal`, a local Docker container, or a host listed in `confirmedLocalHosts` in `project.md`.
+- Writes (insert/update/delete, migrations, seeds) are allowed only on the ticket's local database: host `localhost`, `127.0.0.1`, `::1`, or a host listed in `confirmedLocalHosts` in `project.md`.
 - Any other host, or several connections where it is unclear which is local: stop and ask the owner. Record the answer in `project.md`.
 - Reading for analysis is fine on the local DB; never connect to shared/staging/production databases.
 - Test data an agent creates is recorded (what, which rows) in the work file named in its instructions (implementation-notes.md for developers, qa-report.md for QA) and removed afterwards unless the owner wants to keep it. A developer's self-check uses the smallest data possible and never repeats QA's scenarios.

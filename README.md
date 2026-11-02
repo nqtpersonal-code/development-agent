@@ -16,7 +16,6 @@ superpowers), reviews, tests and reports. It never pushes.
 
 - Claude Code, Node.js 20+ (24 recommended), Git.
 - The **superpowers** plugin installed.
-- Docker (optional; only when the local DB runs in Docker).
 - `gh` / `glab` (optional; without them you paste the ticket text).
 
 Check everything at once: `node "<installed-plugin-folder>/scripts/nqt.mjs" doctor`.
@@ -106,7 +105,7 @@ never read into any file; the real connection string (with credentials) is
 re-read from that file only at the moment a query actually runs.
 
 **Local-only guard**: every DB call refuses any host that isn't
-`localhost` / `127.0.0.1` / `::1` / `0.0.0.0` / `host.docker.internal`,
+`localhost` / `127.0.0.1` / `::1` / `0.0.0.0`,
 unless you add it to `confirmedLocalHosts:` in `project.md`.
 
 If several connection candidates are found, or a .NET project keeps its
@@ -172,7 +171,7 @@ plugin repository itself.
 ## For plugin maintainers
 
 ```
-npm test                                   # unit tests (Docker for the fixture DBs: tests/fixtures/school-a, school-b-api, clinic)
+npm test                                   # unit tests (tests that need a fixture DB are skipped when it is not reachable)
 node tools/eval-tracer.mjs --fixture all   # code-tracer accuracy and cost against the answer keys (installed plugin, fixture DBs running)
 node tools/export-zip.mjs                  # builds dist/nqt-plugin-<version>.zip (blocked if project data is found)
 git config core.hooksPath .githooks        # turns on the leak scan before every commit

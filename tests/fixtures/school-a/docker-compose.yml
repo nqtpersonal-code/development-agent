@@ -1,9 +1,0 @@
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: school
-      POSTGRES_PASSWORD: school
-      POSTGRES_DB: school_a
-    ports:
-      - "55432:5432"

@@ -3,7 +3,7 @@
 Prepare **outside the plugin repo** (runs create branches and commits, and run names must not appear in the repo):
 1. Copy `tests/fixtures/school-a` to e.g. `C:/nqt-e2e/run-a` (without `node_modules`), `git init`, commit everything on a `dev` branch.
 2. Use a run-only project name that never appears in the plugin repo, e.g. `e2e-alpha` (`/nqt:work-ticket e2e-alpha a-1`).
-3. `docker compose up -d` there; `cd api && npm install && npm run db:push && npm run seed && npm run build && node --env-file=.env dist/main.js`; `cd web && npm install && npx vite --port 5173`.
+3. Start a local database for the fixture (schema and seed in its `db/` folder or `api/prisma/`); `cd api && npm install && npm run db:push && npm run seed && npm run build && node --env-file=.env dist/main.js`; `cd web && npm install && npx vite --port 5173`.
 4. Open Claude Code **in a fresh session** inside the copy. Same for school-b (`school-b-api` + `school-b-web` side by side, name `e2e-beta`).
 5. Afterwards delete `<data dir>/projects/e2e-*` and `<data dir>/work/e2e-*` if you no longer need them.
 

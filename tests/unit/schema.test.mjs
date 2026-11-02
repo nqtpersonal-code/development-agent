@@ -12,7 +12,7 @@ async function load(url, t) {
   try {
     return await readSchema(url, dataDir);
   } catch (e) {
-    t.skip(`fixture DB not reachable (${e.message}); run docker compose up in the fixture`);
+    t.skip(`fixture DB not reachable (${e.message}); start the fixture's local DB`);
     return null;
   }
 }
