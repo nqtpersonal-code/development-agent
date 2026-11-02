@@ -26,6 +26,7 @@ import { listRepos, resolveComponents } from './lib/workspace.mjs';
 import { snapshot, compareSnapshots, detectComponents, adapterNeeded } from './lib/health.mjs';
 import { ruleSections, agentBrief, stepGuide } from './lib/docs.mjs';
 import { planCheck } from './lib/plancheck.mjs';
+import { briefSkeleton, parseAnswers, addOwnerAnswers } from './lib/brief.mjs';
 import { setupDetect } from './lib/setup.mjs';
 import { runSql } from './lib/sql.mjs';
 import { appCheck } from './lib/appcheck.mjs';
@@ -439,6 +440,19 @@ const commands = {
     if (r.missingMustPatch.length) console.log(`must-patch places not in the plan: ${r.missingMustPatch.join(', ')}`);
     if (r.touchesForbidden.length) console.log(`plan touches do-not-touch places: ${r.touchesForbidden.join(', ')}`);
     return r.verdict === 'pass' ? 0 : 1;
+  },
+  answer(args) {
+    const work = args._[0];
+    if (!work) throw new Error('usage: answer <WORK> (--q Q1 --a "answer")... | --file answers.txt');
+    const qs = [].concat(args.q ?? []);
+    const as = [].concat(args.a ?? []);
+    const answers = qs.map((q, i) => ({ q: String(q), a: as[i] === undefined || as[i] === true ? '' : String(as[i]) }));
+    if (args.file) answers.push(...parseAnswers(readFileSync(String(args.file), 'utf8')));
+    if (!answers.length || answers.some((x) => !x.a)) throw new Error('every --q needs an --a, or the file needs "Q1: answer" lines');
+    const file = join(work, 'ticket-brief.md');
+    const text = existsSync(file) ? readFileSync(file, 'utf8') : briefSkeleton();
+    writeFileSync(file, addOwnerAnswers(text, answers, new Date().toISOString().slice(0, 10)), 'utf8');
+    console.log(`owner answers: ${answers.map((x) => x.q).join(', ')} added to ${slash(file)}`);
   },
   async sql(args) {
     const ctx = projectContext(args);

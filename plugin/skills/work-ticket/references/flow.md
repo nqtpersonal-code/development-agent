@@ -18,20 +18,19 @@ dispatch passes `PLUGIN`, `DATA`, `PROJECT`, `TICKET`, `PROJECT_ROOT`, `WORK`, `
 ## build-adapter
 
 Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
-1. Dispatch `nqt:code-tracer` with `TASK=survey for adapter` (or `survey changes` + the drift details when outdated). It returns a draft adapter and what it could not settle.
-2. Ask the owner only what the survey could not settle, in one batch with options ("The web app calls the server through one helper file; do other apps (mobile, admin) call the same server?").
-3. Write `adapter.json` (formats.md → tracer/adapter.json) with `assumptions`. Several repos in the folder → declare components by `remote` (+ `path`).
-4. Ask for 1–2 flows the owner knows well; write them as `tests.json`; `nqt.mjs tracer-test --project <p> --root "PROJECT_ROOT"`; adjust until they pass. Owner expectation vs code disagree → show the evidence, the owner decides.
-5. `nqt.mjs tracer-health --project <p> --root "PROJECT_ROOT" --save`.
+1. Dispatch `nqt:code-tracer` with `TASK=survey for adapter` (or `survey changes` + the drift details when outdated). It writes `WORK/trace/adapter-draft.json` and returns what it could not settle.
+2. One batch to the owner: what the survey could not settle, with options ("The web app calls the server through one helper file; do other apps (mobile, admin) call the same server?"), plus 1–2 flows they know well ("a student's name: where is it entered and on which screens does it show?").
+3. Dispatch `nqt:code-tracer` with `TASK=build adapter`, `ANSWERS` and `FLOWS` (the owner's words). It writes the adapter and tests, runs them, adjusts the adapter and saves the health snapshot.
+4. `owner-decides` items (owner expectation vs code disagree) → show the evidence; the owner decides; re-dispatch `build adapter` with the decision.
 
 ## analysis
 
 1. From `ticket.md`, pick start points (tables/columns, screens, API paths). Unclear → dispatch `nqt:code-tracer` with `TASK=find start points` first.
-2. Dispatch `nqt:code-tracer` with the start points. On `split-suggestion`, dispatch one per branch **in parallel** and merge their sections into `WORK/trace/impact.md`.
+2. Dispatch `nqt:code-tracer` with the start points. On `split-suggestion`, dispatch one per branch (`BRANCH=<name>`) **in parallel**, then one `nqt:code-tracer` with `TASK=merge`; `conflict` items go to the owner at Checkpoint 1.
 3. Dispatch `nqt:ba`.
 4. `S --flag hasUI=true|false` from ba.md ("UI touched").
 5. **Checkpoint 1** — show: what the ticket asks (short); how it works today (links, real data, every variant); the change points ("looks like one change, is really N places"); what the change could break elsewhere (from impact and "rules.md → When a rule is relaxed"); existing data the change will show or hide; contradictions; then the first batch of up to 4 independent questions (question tool, recommended option first).
-6. Loop: answers → `WORK/ticket-brief.md` → Owner answers (create the skeleton if needed). Re-dispatch `nqt:ba` only when answers open new questions or change scope; collect **all** answers of a round before re-dispatching any agent. Until no `[GUESS]` remains.
+6. Loop: record answers with `nqt.mjs answer "WORK" --q Q1 --a "<answer>" [--q Q2 --a "…"]` (non-ASCII answers: write them as `Q1: <answer>` lines to a new UTF-8 file in `WORK/` and pass `--file`); it adds them to `WORK/ticket-brief.md` → Owner answers, creating the skeleton if needed. Never open the brief to do this. Re-dispatch `nqt:ba` only when answers open new questions or change scope; collect **all** answers of a round before re-dispatching any agent. Until no `[GUESS]` remains.
 7. `S --set analysis=done`.
 
 ## screens
@@ -53,8 +52,8 @@ Run only when a change point touches a code smell (diverging copies, a must-patc
 
 ## brief
 
-1. Write `WORK/ticket-brief.md` (formats.md → Ticket work files) from ba.md, screens.md, impact.md, risk.md and the owner answers, with the Change points table and Fix mode. Criteria name what users see.
-2. **Checkpoint 3** — summary and criteria; ask for approval. Open questions must be empty.
+1. Dispatch `nqt:ba` with `MODE=brief`. It writes `WORK/ticket-brief.md` from ba.md, screens.md, impact.md, risk.md and the owner answers, with the Change points table and Fix mode.
+2. **Checkpoint 3** — show its returned summary and criteria; ask for approval. Open questions must be empty (any → ask them, record with `answer`, re-dispatch). Corrections → record them as owner answers and re-dispatch once.
 3. `S --set brief=done`.
 
 ## test-design
@@ -93,8 +92,8 @@ When the owner doubts a conclusion at any step: dispatch **one** fresh `nqt:code
 
 ## report
 
-1. Write `WORK/final-report.md` (formats.md).
-2. **Checkpoint 7** — what changed for users; TC → proof table; review and QA results (screenshots for UI); what was not tested; **already in the system before this ticket** (problems or odd data the team saw but did not change, e.g. a deleted student still listed on another page — from impact.md, review.md and qa-report.md); then a "Technical part" with commits per repo (`git log BASE..HEAD --oneline` in each repo from `nqt.mjs repos`). The owner pushes; suggest `/nqt:retro <ticket>` in a fresh session.
+1. Dispatch `nqt:reporter` with `BASE` (as in review). It writes `WORK/final-report.md`.
+2. **Checkpoint 7** — show its returned summary: what changed for users; criteria passed; review and QA results (screenshots for UI); what was not tested; **already in the system before this ticket** (problems or odd data the team saw but did not change, e.g. a deleted student still listed on another page); and the path of the full report with its technical part. The owner pushes; suggest `/nqt:retro <ticket>` in a fresh session.
 3. `S --set report=done`.
 
 ## done

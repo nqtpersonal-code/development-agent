@@ -15,9 +15,11 @@ Run `node "PLUGIN/scripts/nqt.mjs" brief-for code-tracer` once: it prints every 
 ## Inputs
 
 `PLUGIN`, `DATA`, `PROJECT`, `PROJECT_ROOT`, `WORK`, `LANGUAGE`, and `TASK`:
-- `trace` (default) with the **start points** (tables/columns, screens or API paths), optionally a `BRANCH`;
+- `trace` (default) with the **start points** (tables/columns, screens or API paths), optionally a `BRANCH` (then every file you write carries the branch name: `WORK/trace/impact-<BRANCH>.md`, `impact-<BRANCH>.json`, …);
+- `merge` — after branch traces: merge every `WORK/trace/impact-*.md` into `WORK/trace/impact.md` (below);
 - `find start points` — return only the start points for the ticket (≤10 lines);
 - `survey for adapter` / `survey changes` — how the project is built (see the end);
+- `build adapter` — write, test and save the tracer adapter (see the end);
 - `re-check` — one doubted sentence with its links and impact rows: confirm or correct only that point in `WORK/trace/recheck-<n>.md`; do not redo the analysis.
 
 Read `DATA/projects/PROJECT/pitfalls.md` if present: each trap is a place to check, not a fact.
@@ -44,8 +46,24 @@ Read `DATA/projects/PROJECT/pitfalls.md` if present: each trap is a place to che
 
 ## Survey (TASK=survey for adapter / survey changes)
 
-Components (folders, kind), data access style (ORM, query helper, raw SQL), how the front end calls the server (wrapper, base path), route declaration style, jobs/queues, dynamic SQL habits. Return a draft `adapter.json` (format in your brief) and what you could not settle. For `survey changes`, look only at the drift you were given.
+Components (folders, kind), data access style (ORM, query helper, raw SQL), how the front end calls the server (wrapper, base path), route declaration style, jobs/queues, dynamic SQL habits. Write a draft `adapter.json` (format in your brief) to `WORK/trace/adapter-draft.json` and return what you could not settle, each as an owner question. For `survey changes`, look only at the drift you were given.
+
+## Build adapter (TASK=build adapter)
+
+Inputs: `WORK/trace/adapter-draft.json`, `ANSWERS` (the owner's answers to the survey questions) and `FLOWS` (1–2 flows the owner knows well, in their words).
+
+1. Apply the answers to the draft; write `DATA/projects/PROJECT/tracer/adapter.json` with `assumptions`. Several repos in the folder → components by `remote` (+ `path`).
+2. Turn each flow into a `tests.json` entry (start table/column, the files the owner's screens and services live in). The flow is the owner's expectation: never edit a test to make it pass.
+3. `nqt.mjs tracer-test --project PROJECT --root "PROJECT_ROOT"`; adjust the **adapter** and re-run until every test passes (≤ 5 rounds).
+4. A test that fails because the code does not do what the owner expects → stop it there and return it as `owner-decides` with the evidence (file:line, what the code does).
+5. All pass → `nqt.mjs tracer-health --project PROJECT --root "PROJECT_ROOT" --save`.
+
+## Merge (TASK=merge)
+
+Read every `WORK/trace/impact-*.md` and write one `WORK/trace/impact.md` in the same format: places appearing in several branches once (keep every chain), one **Change points** table, one **What else this could break**, **Already in the system** and **Not scanned** list without repeats. A conflict between branches (one says must patch, another do not touch) → keep both and mark it `conflict` for the owner. Do not re-trace.
 
 ## Return (≤15 lines)
 
 Counts by layer, change points by category, smells (one line each), suspected places, not scanned, already-in-the-system items, `split-suggestion` if any, files written.
+
+`build adapter`: tests passed / total, rounds, `owner-decides` items (one line each with evidence), health saved. `merge`: the same counts as a trace, plus `conflict` items.

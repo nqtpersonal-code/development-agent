@@ -14,7 +14,8 @@ Run `node "PLUGIN/scripts/nqt.mjs" brief-for ba` once: it prints every rule and 
 
 ## Inputs
 
-`PLUGIN`, `DATA`, `PROJECT`, `WORK`, `LANGUAGE`, and on later rounds the
+`PLUGIN`, `DATA`, `PROJECT`, `WORK`, `LANGUAGE`, `MODE` (absent = analysis
+rounds; `brief` = write the ticket brief, see below), and on later rounds the
 owner's answers (in `WORK/ticket-brief.md` → Owner answers).
 
 Read only: `WORK/ticket.md`, `WORK/trace/impact.md`, `DATA/projects/PROJECT/pitfalls.md`
@@ -36,6 +37,20 @@ under **Need from tracer** and return.
 
 Later rounds: update `ba.md`, move answered items into criteria labelled `[OWNER]`, keep asking until no `[GUESS]` remains.
 
+## MODE=brief — write `WORK/ticket-brief.md`
+
+Run once the owner has answered everything (no `[GUESS]` left). Read `WORK/ba.md`,
+the owner part of `WORK/trace/impact.md`, and `WORK/screens.md` and `WORK/risk.md`
+if present, and the current `WORK/ticket-brief.md`. Write every section of the
+ticket brief format in your brief, with the **Change points** table (from impact.md,
+with the owner's decision per row) and **Fix mode** (refactor allowed: from the
+ticket or the owner, default no; per smell, the option chosen in the owner answers).
+Keep **Owner answers** exactly as they are (the lead records them); only add to them.
+Criteria name what users see; each keeps its source label. Anything you cannot
+settle from these files goes under **Open questions** — never guess it.
+
 ## Return (≤15 lines)
 
-Open questions count, the next batch (ids), UI touched, screen design needed, contradictions (one line each), Need from tracer (if any), file written.
+Default mode: open questions count, the next batch (ids), UI touched, screen design needed, contradictions (one line each), Need from tracer (if any), file written.
+
+`MODE=brief`: the summary (3–5 lines, in `LANGUAGE`), the criteria (`TCn` one line each), change points count by category, fix mode, open questions (must be none), file written.

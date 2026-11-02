@@ -29,6 +29,7 @@ export const AGENT_SECTIONS = {
   'plan-checker': { rules: ['Surgical changes', 'Never guess', 'Preserve the scene', 'Repo hygiene', 'Commands', 'Token discipline'], formats: [] },
   reviewer: { rules: ['Natural-language interface', 'Owner-facing words', 'Surgical changes', 'Repo hygiene', 'Local DB guard', 'Confidentiality', 'Preserve the scene', 'One business rule, many implementations', 'Pattern library priority', 'Token discipline'], formats: [WORK] },
   dev: { rules: ['Surgical changes', 'Never guess', 'Repo hygiene', 'Local DB guard', 'Preserve the scene', 'One business rule, many implementations', 'Pattern library priority', 'Commands', 'Token discipline'], formats: [WORK] },
+  reporter: { rules: ['Natural-language interface', 'Owner-facing words', 'Source labels', 'Repo hygiene', 'Confidentiality', 'Commands', 'Token discipline'], formats: [WORK] },
   qa: { rules: ['Local DB guard', 'When a rule is relaxed', 'Natural-language interface', 'Owner-facing words', 'Repo hygiene', 'Commands', 'Token discipline'], formats: [WORK] },
   'ui-checker': { rules: ['Token discipline', 'Natural-language interface', 'Owner-facing words'], formats: [] },
   lead: { rules: ['Natural-language interface', 'Owner-facing words', 'Never guess', 'Language and nicknames', 'When the owner doubts a conclusion', 'Repo hygiene', 'Commands'], formats: [ASK] },
