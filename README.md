@@ -182,4 +182,4 @@ This repo must never contain real project data (project names, ticket numbers, i
 
 ## License
 
-Copyright (c) 2026 Tuan Nguyen Quoc. All rights reserved. Proprietary — no use, copying, modification or distribution without written permission; see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).

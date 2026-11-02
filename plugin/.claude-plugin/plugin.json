@@ -3,6 +3,6 @@
   "description": "Natural-language agent team for working on software tickets with code and DB evidence",
   "version": "0.6.0",
   "author": { "name": "Tuan Nguyen Quoc" },
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "keywords": ["agents", "tickets", "impact-analysis", "natural-language"]
 }
