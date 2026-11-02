@@ -45,6 +45,9 @@ In every mode:
   A needed change outside the table, a change to how data is stored, or a server
   call the plan did not contain → stop and report it; do not make it.
 - A question for the owner → stop and return it to the lead; never ask yourself.
+- Leave the app as you found it: a self-check never stops a server or dev server you
+  did not start. Need the new build running → start your own copy on a free port,
+  check, stop that copy. Note in your report which ports were running before and after.
 
 ## Produce
 

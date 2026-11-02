@@ -115,7 +115,7 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 | `review.md` | reviewer | findings (severity, business consequence, link), rules used or "no rules", Technical appendix |
 | `qa-report.md` | qa (+ ui-checker section) | app-check result, per scenario pass/fail with evidence (data before/after, responses, screenshots), Test data (created / removed), not tested, Already in the system |
 | `ui/` + `ui/report.json` | ui-checker | screenshots per viewport and the script report |
-| `final-report.md` | reporter | what changed (natural language), TC → where implemented → which test proves it, review and QA results, not tested, **Already in the system before this ticket** (seen, not changed), Technical part: commits and diff summary |
+| `final-report.md` | orchestrator | what changed (natural language), TC → where implemented → which test proves it, review and QA results, not tested, **Already in the system before this ticket** (seen, not changed), Technical part: commits and diff summary |
 
 ### ticket-brief.md sections
 

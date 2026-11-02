@@ -51,7 +51,7 @@ Dispatch **one general-purpose subagent** (not this session) with:
 
 ## implement
 
-Pick by size (the plan-check rule above); tell the owner in one sentence which and why.
+Pick by the plan, not the plan-check rule: **Small** when the plan has ≤ 4 tasks and no smell is rated `full` (whether the architect step ran does not matter here); otherwise **Large or risky**. Tell the owner in one sentence which and why.
 
 - **Small** → dispatch `nqt:dev` with `MODE=plan` (it runs `superpowers:executing-plans` on `WORK/plan.md` under the dev rules and writes `WORK/implementation-notes.md`).
   Then invoke `superpowers:requesting-code-review` in this session for the whole branch (its reviewer is a subagent); apply its fixes through `nqt:dev` with `MODE=fix` if needed. Save its verdict and findings (≤20 lines) to `WORK/superpowers-review.md`.

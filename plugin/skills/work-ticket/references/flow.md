@@ -92,8 +92,8 @@ When the owner doubts a conclusion at any step: dispatch **one** fresh `nqt:code
 
 ## report
 
-1. Dispatch `nqt:reporter` with `BASE` (as in review). It writes `WORK/final-report.md`.
-2. **Checkpoint 7** — show its returned summary: what changed for users; criteria passed; review and QA results (screenshots for UI); what was not tested; **already in the system before this ticket** (problems or odd data the team saw but did not change, e.g. a deleted student still listed on another page); and the path of the full report with its technical part. The owner pushes; suggest `/nqt:retro <ticket>` in a fresh session.
+1. Write `WORK/final-report.md` (formats.md).
+2. **Checkpoint 7** — what changed for users; TC → proof table; review and QA results (screenshots for UI); what was not tested; **already in the system before this ticket** (problems or odd data the team saw but did not change, e.g. a deleted student still listed on another page — from impact.md, review.md and qa-report.md); then a "Technical part" with commits per repo (`git log BASE..HEAD --oneline` in each repo from `nqt.mjs repos`). The owner pushes; suggest `/nqt:retro <ticket>` in a fresh session.
 3. `S --set report=done`.
 
 ## done
