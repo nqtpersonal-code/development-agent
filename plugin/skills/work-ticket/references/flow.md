@@ -81,7 +81,7 @@ When the owner doubts a conclusion at any step: dispatch **one** fresh `nqt:code
 ## review
 
 1. Dispatch `nqt:reviewer` with `BASE` (from project.md; `origin/<baseBranch>` if present) and `SP_REVIEW=WORK/superpowers-review.md` when it exists.
-2. Critical/important findings → show them in plain words; fix them through one general-purpose subagent (see `guide --step implement`, "Fixes"), then re-run the reviewer once on those findings only. Minor → list in the report.
+2. Critical/important findings → show them in plain words; fix them through `nqt:dev` with `MODE=fix` (see `guide --step implement`, "Fixes"), then re-run the reviewer once on those findings only. Minor → list in the report.
 3. `S --set review=done`.
 
 ## qa

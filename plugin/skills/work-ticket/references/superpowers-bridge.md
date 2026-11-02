@@ -53,13 +53,12 @@ Dispatch **one general-purpose subagent** (not this session) with:
 
 Pick by size (the plan-check rule above); tell the owner in one sentence which and why.
 
-- **Small** → dispatch one general-purpose subagent:
-  > Use the superpowers:executing-plans skill on `WORK/plan.md` (spec `WORK/spec.md`), following the owner preferences printed by `node "PLUGIN/scripts/nqt.mjs" guide --step dev-rules`. The execution method is already chosen. You cannot dispatch subagents: when the skill asks for a review subagent, stop there. Write `WORK/implementation-notes.md` (tasks done, commits, self-check results, test data created and removed, anything that contradicts the brief, any other place with the same behaviour you found). Return ≤10 lines.
-  Then invoke `superpowers:requesting-code-review` in this session for the whole branch (its reviewer is a subagent); apply its fixes through one more general-purpose subagent if needed. Save its verdict and findings (≤20 lines) to `WORK/superpowers-review.md`.
-- **Large or risky** → invoke `superpowers:subagent-driven-development` in this session with plan, spec and dev-rules; the execution method is chosen. When it finishes (its own final review included), save that review's verdict and findings to `WORK/superpowers-review.md`.
+- **Small** → dispatch `nqt:dev` with `MODE=plan` (it runs `superpowers:executing-plans` on `WORK/plan.md` under the dev rules and writes `WORK/implementation-notes.md`).
+  Then invoke `superpowers:requesting-code-review` in this session for the whole branch (its reviewer is a subagent); apply its fixes through `nqt:dev` with `MODE=fix` if needed. Save its verdict and findings (≤20 lines) to `WORK/superpowers-review.md`.
+- **Large or risky** → invoke `superpowers:subagent-driven-development` in this session with plan, spec and dev-rules; the execution method is chosen. Dispatch every implementer (first dispatch and fresh fix-round implementers) as `nqt:dev` with `MODE=task` and the nqt inputs, keeping the skill's implementer prompt as the task; reviewers stay as the skill dispatches them. When it finishes (its own final review included), save that review's verdict and findings to `WORK/superpowers-review.md`.
 
 Stop and come back to the owner when a subagent reports something that contradicts the brief, another place with the same behaviour (a late change point), or a change to how data is stored or a server call the plan did not contain — offer the architect step for it.
 
-**Fixes** (from review or QA): one general-purpose subagent with the findings, "run `node "PLUGIN/scripts/nqt.mjs" guide --step dev-rules` and follow it", and "fix exactly these, self-check each, commit, append to `WORK/implementation-notes.md`".
+**Fixes** (from review or QA): dispatch `nqt:dev` with `MODE=fix` and `FINDINGS=<the findings>`.
 
 `S --set implement=done` (it prints the `/clear` boundary: follow it).

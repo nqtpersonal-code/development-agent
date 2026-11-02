@@ -1,7 +1,7 @@
 {
   "name": "nqt",
   "description": "Natural-language agent team for working on software tickets with code and DB evidence",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "author": { "name": "Tuan Nguyen Quoc" },
   "license": "SEE LICENSE IN LICENSE",
   "keywords": ["agents", "tickets", "impact-analysis", "natural-language"]
