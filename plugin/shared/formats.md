@@ -91,6 +91,13 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 
 ## Ticket work files (in `<work>`)
 
+Scripts read these files (`nqt.mjs check-work`, `plan-check`), so whatever the
+owner's language: **section headings keep their English name** (a translation may
+come first: "Điểm cần thay đổi (Change points)"), **categories are written in
+English** (`must patch`, `do not touch`, `re-check`), criteria are `TC1…TCn`, and
+every must-patch row names its file (`path/to/file.ext:line` or a link). The text
+under the headings is in the owner's language. An empty section says "none".
+
 | File | Written by | Content |
 |---|---|---|
 | `ticket.md` | setup | ticket title, body, comments, labels, link (verbatim) |
@@ -100,11 +107,11 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 | `trace/impact.md` | code-tracer | Technical part: confirmed places with file:line, certainty, chains. Owner part: affected screens/functions in natural language with links; **Variants** (same rule implemented differently, with what differs); **Change points** (each fragment the ticket's behaviour lives in: must patch / do not touch / re-check, with link and radius); smells involved; **What else this could break**; **Already in the system** (odd data or behaviour not caused by the ticket); "Not scanned" list; real example rows from the DB |
 | `trace/recheck-<n>.md` | code-tracer (re-check) | one doubted conclusion: right / wrong / why, with links |
 | `risk.md` | risk-analyst | per smell: owner part (what is fragmented, options A patch-and-preserve / B fix-the-smell / hybrid with immediate and later risk, recommendation) and technical part (measured signals per option, files touched, regression scenarios) |
-| `ba.md` | ba | requirement groups, source comparison table, contradictions, side effects, questions (owner question format), draft criteria, UI touched, screen design needed (yes/no + reason), Need from tracer |
+| `ba.md` | ba | requirement groups, source comparison table, contradictions, side effects, questions (owner question format), draft criteria, Ticket kind (bug / change / feature), UI touched, screen design needed (yes/no + reason), Need from tracer |
 | `screens.md` | screen-designer | screen flow (mermaid), per-screen content (tabs, filters, fields, buttons, messages, navigation), desktop + mobile layout, real data examples |
 | `mockup/index.html` | screen-designer | optional static clickable mockup |
 | `ticket-brief.md` | ba (`MODE=brief`, from ba/screens/trace/risk + owner answers); Owner answers added by `nqt.mjs answer` | see below |
-| `test-scenarios.md` | qa (design mode) | per scenario: id (TCn / Xn / Rn), steps in user language with real data, expected result, **Verify by** (`code` / `api` / `browser`) with one-line reason; TCs that cannot be verified; count per method |
+| `test-scenarios.md` | qa (design mode) | per scenario: id (TCn / Xn / Rn / Pn = reproduction of a bug, run before the fix), steps in user language with real data, expected result, **Verify by** (`code` / `api` / `browser`) with one-line reason; TCs that cannot be verified; count per method |
 | `questions.md` | orchestrator | free Q&A log: question, answer (natural language + links), proposed brief changes and owner decision |
 | `architecture.md` | architect | Technical part: DB/migration changes, legacy data handling, API, flow, reuse, risks. Owner part: business-impacting decisions as questions |
 | `spec.md` | superpowers:brainstorming | design spec |
@@ -124,7 +131,7 @@ Manage it with `nqt.mjs state <work> --init <project> <ticket> | --resume | --se
 3. Acceptance criteria — `TC1…TCn`, each with a source label; screens named by what the user sees
 4. Screens (from `screens.md`, or "no UI change")
 5. Impact summary (from `trace/impact.md`, owner part), including variants
-6. Change points — table: place (user-facing name + link) · category (must patch / do not touch / re-check) · sibling group · owner decision
+6. Change points — table: place (user-facing name + file link) · category (`must patch` / `do not touch` / `re-check`, in English) · sibling group · owner decision
 7. Fix mode — `Refactor allowed: yes/no` (from the ticket or the owner; default no) and, per smell, the chosen option from `risk.md`
 8. Owner answers (question → answer, dated)
 9. Open questions — must be empty before design

@@ -82,18 +82,33 @@ export function scanLeaks({ files, projectNames = [], extraTerms = [] }) {
   return findings;
 }
 
-export function projectNamesFrom(dataDir) {
+// Names of the owner's projects, to be kept out of the plugin repo. Test runs on
+// the repo's own fictional fixtures (tests/fixtures/<name>) may borrow a fixture's
+// name; that part is not a project name and is dropped.
+export function projectNamesFrom(dataDir, { fictional = [] } = {}) {
   const dir = join(dataDir, 'projects');
   if (!existsSync(dir)) return [];
   const names = new Set();
+  const add = (raw) => {
+    let n = String(raw);
+    for (const f of fictional) n = n.split(f).join(' ');
+    n = n.replace(/[()[\]\s]+/g, ' ').trim();
+    if (n) names.add(n);
+  };
   for (const p of readdirSync(dir)) {
     if (!statSync(join(dir, p)).isDirectory()) continue;
-    names.add(p);
+    add(p);
     const f = join(dir, p, 'project.md');
     if (!existsSync(f)) continue;
     const fm = parseFrontmatter(readFileSync(f, 'utf8'));
-    if (typeof fm.name === 'string' && fm.name) names.add(fm.name);
-    for (const a of [].concat(fm.aliases ?? [])) if (a) names.add(String(a));
+    if (typeof fm.name === 'string' && fm.name) add(fm.name);
+    for (const a of [].concat(fm.aliases ?? [])) if (a) add(a);
   }
   return [...names];
+}
+
+// Fixture folder names of the plugin repo at root (fictional by definition).
+export function fixtureNames(root) {
+  const dir = join(root, 'tests', 'fixtures');
+  return existsSync(dir) ? readdirSync(dir).filter((n) => statSync(join(dir, n)).isDirectory()) : [];
 }

@@ -28,6 +28,7 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 1. From `ticket.md`, pick start points (tables/columns, screens, API paths). Unclear → dispatch `nqt:code-tracer` with `TASK=find start points` first.
 2. Dispatch `nqt:code-tracer` with the start points. On `split-suggestion`, dispatch one per branch (`BRANCH=<name>`) **in parallel**, then one `nqt:code-tracer` with `TASK=merge`; `conflict` items go to the owner at Checkpoint 1.
 3. Dispatch `nqt:ba`.
+   Then `nqt.mjs check-work "WORK" --step analysis` — problems → re-dispatch the same agent once with the problem list; still problems → tell the owner what is missing.
 4. `S --flag hasUI=true|false` from ba.md ("UI touched").
 5. **Checkpoint 1** — show: what the ticket asks (short); how it works today (links, real data, every variant); the change points ("looks like one change, is really N places"); what the change could break elsewhere (from impact and "rules.md → When a rule is relaxed"); existing data the change will show or hide; contradictions; then the first batch of up to 4 independent questions (question tool, recommended option first).
 6. Loop: record answers with `nqt.mjs answer "WORK" --q Q1 --a "<answer>" [--q Q2 --a "…"]` (non-ASCII answers: write them as `Q1: <answer>` lines to a new UTF-8 file in `WORK/` and pass `--file`); it adds them to `WORK/ticket-brief.md` → Owner answers, creating the skeleton if needed. Never open the brief to do this. Re-dispatch `nqt:ba` only when answers open new questions or change scope; collect **all** answers of a round before re-dispatching any agent. Until no `[GUESS]` remains.
@@ -53,12 +54,14 @@ Run only when a change point touches a code smell (diverging copies, a must-patc
 ## brief
 
 1. Dispatch `nqt:ba` with `MODE=brief`. It writes `WORK/ticket-brief.md` from ba.md, screens.md, impact.md, risk.md and the owner answers, with the Change points table and Fix mode.
+   Then `nqt.mjs check-work "WORK" --step brief` — problems → re-dispatch the same agent once with the problem list; still problems → tell the owner what is missing.
 2. **Checkpoint 3** — show its returned summary and criteria; ask for approval. Open questions must be empty (any → ask them, record with `answer`, re-dispatch). Corrections → record them as owner answers and re-dispatch once.
 3. `S --set brief=done`.
 
 ## test-design
 
 1. Dispatch `nqt:qa` with `MODE=design`.
+   Then `nqt.mjs check-work "WORK" --step test-design` — problems → re-dispatch the same agent once with the problem list; still problems → tell the owner what is missing.
 2. "Cannot verify" items → back to `nqt:ba`; update the brief.
 3. Show the scenario list in user words with how each is checked and the totals (no approval needed unless the brief changed). `S --set test-design=done`.
 
@@ -80,6 +83,7 @@ When the owner doubts a conclusion at any step: dispatch **one** fresh `nqt:code
 ## review
 
 1. Dispatch `nqt:reviewer` with `BASE` (from project.md; `origin/<baseBranch>` if present) and `SP_REVIEW=WORK/superpowers-review.md` when it exists.
+   Then `nqt.mjs check-work "WORK" --step review` — problems → re-dispatch the same agent once with the problem list; still problems → tell the owner what is missing.
 2. Critical/important findings → show them in plain words; fix them through `nqt:dev` with `MODE=fix` (see `guide --step implement`, "Fixes"), then re-run the reviewer once on those findings only. Minor → list in the report.
 3. `S --set review=done`.
 
@@ -87,6 +91,7 @@ When the owner doubts a conclusion at any step: dispatch **one** fresh `nqt:code
 
 1. **The app first — your job, not QA's.** `nqt.mjs app-check --port <api port> --port <web port> --root "PROJECT_ROOT"` (ports from `apiUrl`/`appUrl` in project.md). Anything but `current` (`free`, `stale`, `other-folder`, `unknown`) → stop that process if it is this ticket's or an earlier test run's (ask the owner when you did not start it), start each component in the background with `runApp` from project.md **using absolute paths** (`node "PROJECT_ROOT/api/dist/main.js"`, `npm --prefix "PROJECT_ROOT/web" run dev`; build first when the server runs built code), and re-run `app-check` until every port is `current`.
 2. Then dispatch `nqt:qa` with `MODE=run` and, for UI tickets, `nqt:ui-checker` in parallel, only for the screens the ticket changed.
+   Then `nqt.mjs check-work "WORK" --step qa` — problems → re-dispatch the same agent once with the problem list; still problems → tell the owner what is missing.
 3. Failures → show in user language; fix as in review; re-run only the failed scenarios.
 4. `S --set qa=done`.
 

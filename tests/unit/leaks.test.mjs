@@ -90,3 +90,15 @@ test('projectNamesFrom reads directory names and aliases from project.md', () =>
   writeFileSync(join(d, 'projects', 'acme-erp', 'project.md'), '---\nname: Acme ERP\naliases: [acmex, ae-portal]\n---\n');
   assert.deepEqual(projectNamesFrom(d).sort(), ['Acme ERP', 'acme-erp', 'acmex', 'ae-portal'].sort());
 });
+
+test('projectNamesFrom drops the names of the repo fixtures that test projects borrow', async () => {
+  const { projectNamesFrom } = await import('../../plugin/scripts/lib/leaks.mjs');
+  const { mkdirSync: mk, writeFileSync: wf } = await import('node:fs');
+  const { join: j } = await import('node:path');
+  const { tmp: t } = await import('../helpers/tmp.mjs');
+  const d = t();
+  mk(j(d, 'projects', 'ab-run'), { recursive: true });
+  wf(j(d, 'projects', 'ab-run', 'project.md'), '---\nname: ab-run (school-a)\naliases: [school-a, shop]\n---\n');
+  const names = projectNamesFrom(d, { fictional: ['school-a', 'clinic'] });
+  assert.deepEqual(names.sort(), ['ab-run', 'shop']);
+});

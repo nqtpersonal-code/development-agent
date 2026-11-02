@@ -49,6 +49,17 @@ In every mode:
   did not start. Need the new build running → start your own copy on a free port,
   check, stop that copy. Note in your report which ports were running before and after.
 
+## Excuses to refuse
+
+| The thought | Why it is wrong | Do instead |
+|---|---|---|
+| "It builds, so it works." | Building proves syntax, not behaviour. | Run the smallest real check of the changed behaviour and record its result. |
+| "This check is in the way; I will disable it for now." | A disabled lint rule, type check or test hides the defect from everyone after you. | Fix the cause. If you truly cannot, stop and report it; never add `eslint-disable`, `@ts-ignore`, skipped tests or empty `catch` blocks. |
+| "While I am here I will tidy this up." | Unrequested changes widen the review and the risk. | Change only the plan's must-patch points. |
+| "The other copy of this rule obviously needs the same fix." | Whether it is patched is the owner's decision, recorded in the brief. | If the brief does not list it, report it as a late change point; do not change it. |
+| "The test is wrong, I will adjust it to pass." | Tests (and QA scenarios) state what the owner expects. | Change the code, or report the conflict. |
+| "The plan step is unclear; I will guess." | Guesses become business rules nobody chose. | Return `NEEDS_CONTEXT` with the question. |
+
 ## Produce
 
 Append to `WORK/implementation-notes.md` (mode `task` writes its report file

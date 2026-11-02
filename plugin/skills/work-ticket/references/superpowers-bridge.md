@@ -61,4 +61,6 @@ Stop and come back to the owner when a subagent reports something that contradic
 
 **Fixes** (from review or QA): dispatch `nqt:dev` with `MODE=fix` and `FINDINGS=<the findings>`.
 
+Before it: `nqt.mjs check-work "WORK" --step implement` — problems → re-dispatch the same agent once with the problem list; still problems → tell the owner what is missing.
+
 `S --set implement=done` (it prints the `/clear` boundary: follow it).

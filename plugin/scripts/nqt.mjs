@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { getDataDir, ensureDataDir, loadConfig, projectConfig } from './lib/config.mjs';
 import { STEPS, newState, readState, writeState, setStep, setWaiting, setFlag, resumeState } from './lib/state.mjs';
-import { scanLeaks, projectNamesFrom } from './lib/leaks.mjs';
+import { scanLeaks, projectNamesFrom, fixtureNames } from './lib/leaks.mjs';
 import { walkFiles, readText, rel } from './lib/files.mjs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { doctor } from './lib/runtime.mjs';
@@ -26,6 +26,8 @@ import { listRepos, resolveComponents } from './lib/workspace.mjs';
 import { snapshot, compareSnapshots, detectComponents, adapterNeeded } from './lib/health.mjs';
 import { ruleSections, agentBrief, stepGuide } from './lib/docs.mjs';
 import { planCheck } from './lib/plancheck.mjs';
+import { checkWork, CHECKED_STEPS } from './lib/workcheck.mjs';
+import { findSilenced } from './lib/silenced.mjs';
 import { briefSkeleton, parseAnswers, addOwnerAnswers } from './lib/brief.mjs';
 import { setupDetect } from './lib/setup.mjs';
 import { runSql } from './lib/sql.mjs';
@@ -477,8 +479,34 @@ const commands = {
     }
     return bad ? 1 : 0;
   },
+  'check-work'(args) {
+    const work = args._[0];
+    const step = args.step ?? args._[1];
+    if (!work || !step) throw new Error(`usage: check-work <WORK> --step <${CHECKED_STEPS.join('|')}>`);
+    const r = checkWork(work, String(step));
+    if (!r.problems.length) return void console.log(`check-work ${r.step}: complete`);
+    console.log(`check-work ${r.step}: ${r.problems.length} problem(s) — send them back to the agent that wrote the files`);
+    for (const x of r.problems.slice(0, 12)) console.log(`  - ${x}`);
+    return 1;
+  },
+  silenced(args) {
+    const root = resolve(args.root ?? process.cwd());
+    const base = args.base;
+    if (!base || base === true) throw new Error('usage: silenced --root <PROJECT_ROOT> --base <base branch or commit>');
+    const repos = listRepos(root);
+    const hits = [];
+    for (const r of repos.length ? repos : [{ dir: '.' }]) {
+      const g = spawnSync('git', ['diff', '-U0', `${base}...HEAD`], { cwd: join(root, r.dir), encoding: 'utf8', maxBuffer: 1 << 26 });
+      if (g.status !== 0) throw new Error(`git diff failed in ${r.dir}: ${(g.stderr || '').trim().slice(0, 200)}`);
+      for (const h of findSilenced(g.stdout)) hits.push({ repo: r.dir, ...h });
+    }
+    if (!hits.length) return void console.log('silenced: none — no check was switched off in the change');
+    console.log(`silenced: ${hits.length} line(s) switch a check off instead of satisfying it`);
+    for (const h of hits.slice(0, 12)) console.log(`  ${h.repo === '.' ? '' : `${h.repo}/`}${h.file}:${h.line} [${h.kind}] ${h.text}`);
+    return 1;
+  },
   'scan-leaks'(args) {
-    const projectNames = projectNamesFrom(getDataDir());
+    const projectNames = projectNamesFrom(getDataDir(), { fictional: fixtureNames(process.cwd()) });
     let files;
     if (args.staged) {
       const names = execFileSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACMR'], { encoding: 'utf8' })

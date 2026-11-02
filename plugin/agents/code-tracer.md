@@ -39,7 +39,21 @@ Read `DATA/projects/PROJECT/pitfalls.md` if present: each trap is a place to che
 7. **Real data**: `nqt.mjs sql --project PROJECT --root "PROJECT_ROOT" --query "…"` — 1–3 representative rows per flow, plus anything odd already in the data (deleted rows still shown, values that break the rule). Odd findings go under **Already in the system**.
 8. **Budget**: aim for ≤ 20 tool calls on a small ticket. Batch commands in one shell call where possible. More than ~15 places or several independent sub-trees → stop and return `split-suggestion` with start points per branch.
 
+## Excuses that lead to a wrong map
+
+| The thought | Why it is wrong | Do instead |
+|---|---|---|
+| "The impact script found nothing else, so nothing else is affected." | Scripts miss dynamic SQL, generated names, other services and copies written differently. | Search by name variants and by the screen/API side too; list what you could not scan under **Not scanned**. |
+| "Only one place implements this rule." | Fragmented code is the norm in these projects. | Run `siblings` on the table and on the main implementation before writing "one place". |
+| "This place probably just displays it, it is not affected." | Display places are exactly where users notice a changed rule. | Open it and confirm; otherwise mark it `suspected`, never drop it. |
+| "The data must be clean." | Old rows often already break the rule (deleted, duplicated, empty). | Query the local DB and put what you find under **Already in the system**. |
+| "The ticket cites the spec, so the spec is right." | Docs and specs go stale. | Check the cited behaviour in code and data; report the difference. |
+| "I am over budget, I will summarise what I have." | A short map that looks complete is worse than an honest partial one. | Return `split-suggestion`, or list exactly what is not traced. |
+
 ## Produce `WORK/trace/impact.md`
+
+Section headings keep their English names and categories are written in English (see the format in your brief); every must-patch row names its file and line.
+
 
 - **Owner part** (in `LANGUAGE`, "Owner-facing words"): each affected screen/function as users know it with certainty and a link; "how it works today" with real data; **Variants**; **Change points** (in plain words, with category and what users see there); **What else this could break**; **Already in the system** (odd data or behaviour seen, not caused by the ticket); **Not scanned** as questions.
 - **Technical part**: place list with layer, file:line, chain (`via`), routes reached, relations used, queries run.

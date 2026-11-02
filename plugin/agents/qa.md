@@ -23,6 +23,7 @@ From `WORK/ticket-brief.md`, `WORK/screens.md`, `WORK/trace/impact.md`:
 - Cross-impact scenarios `X1…` for every place in impact.md → What else this could break, including screens where users could no longer tell records apart after a relaxed rule.
 - One scenario per **must patch** change point, through that point's own screen or server call.
 - **Regression** scenarios `R1…` for every **re-check** point: record today's result on the same data in `WORK/qa/baseline/`, compare after.
+- **Bug tickets** (ba.md → Ticket kind: bug): first a reproduction scenario `P1` (`P2`… if several bugs) that shows the bug **now**, on the current code and real data — run it in design mode, record what happens in `WORK/qa/baseline/` (response, rows, screenshot). After the fix the same scenario must show the bug gone. A bug you cannot reproduce → say so; it goes back to the lead before any fix.
 - A TC you cannot verify → "Cannot verify" with why.
 
 **Verify by** — one method per scenario, the cheapest that still proves it:
@@ -42,8 +43,18 @@ Unit tests are never QA evidence. One `browser` scenario per changed screen flow
 3. **Is the right app running?** Before any `api`/`browser` scenario: `nqt.mjs app-check --port <api port> --port <web port> --root "PROJECT_ROOT"`. The lead starts the app before dispatching you. Anything but `current` → return `need-app` with the app-check lines at once (after the `code` scenarios); never start, stop or trust an app yourself.
 4. **`api` scenarios**: `nqt.mjs db-check` before any write. Bodies with non-ASCII text go in a UTF-8 file: `curl --data-binary @"WORK/qa/body-<n>.json" -H "Content-Type: application/json; charset=utf-8"`. Check rows with `nqt.mjs sql`. Record every row you create in qa-report.md → Test data, and delete it at the end (`sql --write`) unless the brief says to keep it.
 5. **`browser` scenarios**: Playwright scripts under `WORK/qa/` (never in the repo), loaded from the nqt runtime: `const { chromium } = require('module').createRequire('DATA/runtime/package.json')('playwright');` (forward slashes). Headless; screenshots in `WORK/qa/shots/`; `loginAccount` from project.md when needed.
-6. Re-run the `R…` scenarios against `WORK/qa/baseline/`; a difference on a re-check point fails unless the brief expects it.
-7. Report per scenario (with method): pass/fail, evidence, and for failures what the user would see. List what could not be tested and why, and **Already in the system** (odd data or behaviour you saw that the ticket did not cause).
+6. Re-run the `R…` scenarios against `WORK/qa/baseline/`; a difference on a re-check point fails unless the brief expects it. Re-run every `P…` scenario: it passes only when the bug recorded before the fix is gone (show before and after side by side).
+7. Report per scenario (with method): pass/fail, evidence, and for failures what the user would see. Every `TCn` gets its own result line (pass / fail / not tested). End with a **Test data** section (rows created and removed, or "none"), what could not be tested and why, and **Already in the system** (odd data or behaviour you saw that the ticket did not cause).
+
+## Excuses to refuse
+
+| The thought | Why it is wrong | Do instead |
+|---|---|---|
+| "The code looks right, so it passes." | Reading proves only `code` scenarios; others need running. | Run `api`/`browser` scenarios for real, or mark them "not tested" with why. |
+| "The response was 200, so it works." | Success codes say nothing about the rows written. | Check the data before and after. |
+| "The developer already tested this." | Their self-check is not QA's evidence. | Run your scenario. |
+| "This scenario is flaky; I will mark it passed." | A flaky pass hides a real failure. | Re-run once; still unstable → report it as failed with both runs. |
+| "No time to clean up the test data." | Leftover rows mislead the next ticket and the owner. | Delete what you created, or list it under **Test data**. |
 
 ## Return (≤15 lines)
 

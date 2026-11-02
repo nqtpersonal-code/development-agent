@@ -6,7 +6,7 @@
 //   node tools/eval-tracer.mjs --fixture school-a|school-b|clinic|all [--question A-Q1] [--model sonnet] [--budget 3] [--keep]
 //
 // Needs the fixture's DB container running (docker compose in the fixture folder).
-import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -80,6 +80,50 @@ function cleanup({ tmp, dataDir }) {
   rmSync(tmp, { recursive: true, force: true });
 }
 
+// The tracer's own steps, read from its transcript: the method says scripts
+// first, then code and data, and the output must pass the analysis check.
+const STEPS_EXPECTED = [
+  ['rules loaded', (cmds) => cmds.some((c) => /brief-for code-tracer/.test(c))],
+  ['impact script', (cmds) => cmds.some((c) => /nqt\.mjs"?\s+impact\b/.test(c))],
+  ['siblings', (cmds) => cmds.some((c) => /nqt\.mjs"?\s+siblings\b/.test(c))],
+  ['real data', (cmds) => cmds.some((c) => /nqt\.mjs"?\s+sql\b/.test(c))],
+  ['code opened', (cmds, reads) => reads > 0],
+];
+
+function processOf(root, work) {
+  // Claude Code keeps a project's transcripts in a folder named after its path.
+  // (the drive letter's case varies, so match the folder name case-insensitively).
+  const projects = join(homedir(), '.claude', 'projects');
+  const want = root.replace(/[:\\/.]/g, '-').toLowerCase();
+  const name = existsSync(projects) ? readdirSync(projects).find((n) => n.toLowerCase() === want) : null;
+  const dir = name ? join(projects, name) : join(projects, want);
+  const cmds = [];
+  let reads = 0;
+  if (existsSync(dir)) {
+    for (const s of readdirSync(dir).filter((f) => !f.endsWith('.jsonl'))) {
+      const sub = join(dir, s, 'subagents');
+      if (!existsSync(sub)) continue;
+      for (const f of readdirSync(sub).filter((x) => x.endsWith('.jsonl'))) {
+        for (const line of readFileSync(join(sub, f), 'utf8').split('\n')) {
+          let j;
+          try { j = JSON.parse(line); } catch { continue; }
+          for (const c of j.type === 'assistant' ? j.message?.content ?? [] : []) {
+            if (c.type !== 'tool_use') continue;
+            if (c.input?.command) cmds.push(String(c.input.command));
+            if (c.name === 'Read' && !/[\\/]_data[\\/]/.test(String(c.input?.file_path ?? ''))) reads++;
+          }
+        }
+      }
+    }
+  }
+  const steps = STEPS_EXPECTED.map(([name, ok]) => ({ name, ok: ok(cmds, reads) }));
+  const check = spawnSync(process.execPath, [join(repoRoot, 'plugin', 'scripts', 'nqt.mjs'), 'check-work', work, '--step', 'analysis'], { encoding: 'utf8' });
+  const problems = check.stdout.split('\n').filter((l) => l.startsWith('  - ')).map((l) => l.slice(4))
+    // the eval runs the tracer alone: no ba.md is expected
+    .filter((p) => !/^ba\.md/.test(p));
+  return { steps, outputProblems: problems };
+}
+
 function runTracer({ plugin, dataDir, project, root, tmp, question, model, budget }) {
   const work = join(dataDir, 'work', project, `eval-${question.id}`);
   mkdirSync(work, { recursive: true });
@@ -108,6 +152,7 @@ function runTracer({ plugin, dataDir, project, root, tmp, question, model, budge
   const u = meta.usage ?? {};
   return {
     score: impact ? scoreImpact(impact, question) : { id: question.id, recall: 0, missing: question.expectedPlaces.map((p) => p.file), found: [], falsePositives: [], procedures: [], note: 'no impact.md written' },
+    process: processOf(root, work),
     turns: meta.num_turns ?? null,
     costUsd: meta.total_cost_usd ?? null,
     tokens: { input: u.input_tokens ?? 0, cacheRead: u.cache_read_input_tokens ?? 0, cacheWrite: u.cache_creation_input_tokens ?? 0, output: u.output_tokens ?? 0 },
@@ -137,6 +182,8 @@ for (const name of names) {
     console.log(`${q.id}: recall ${s.recall}% (${s.found.length}/${s.found.length + s.missing.length}), wrong places ${s.falsePositives.length}, procedures ${s.procedures.filter((p) => p.found).length}/${s.procedures.length}, turns ${r.turns}, cost $${r.costUsd?.toFixed(2) ?? '?'}, ${r.seconds}s${r.error ? ` — error: ${r.error}` : ''}`);
     for (const m of s.missing) console.log(`   missing: ${m}`);
     for (const f of s.falsePositives) console.log(`   wrongly affected: ${f.file} — "${f.line}"`);
+    console.log(`   process: ${r.process.steps.map((x) => `${x.name} ${x.ok ? 'yes' : 'NO'}`).join(', ')}`);
+    for (const p of r.process.outputProblems) console.log(`   output: ${p}`);
   }
   if (!args.keep) cleanup(env);
   else console.log(`${name}: kept ${env.tmp}`);

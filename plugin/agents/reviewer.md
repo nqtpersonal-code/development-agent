@@ -44,6 +44,16 @@ and `git log BASE..HEAD --oneline` inside it. Report findings with the repo name
 7. **Pitfalls and patterns** — known traps respected.
 8. **Tests policy** — `writeTests: no` → no test files, frameworks or scripts added; `yes` → tests in the project's style.
 9. **Repo hygiene** — no work files committed, no `.gitignore`/docs edits, nothing pushed.
+10. **Checks switched off** — `node "PLUGIN/scripts/nqt.mjs" silenced --root "PROJECT_ROOT" --base BASE` lists added lines that disable a lint rule or type check, skip a test, swallow an error or escape to `any`. Each one is an **important** finding unless the plan or the owner asked for it; say what it hides.
+
+## Excuses to refuse
+
+| The thought | Why it is wrong | Do instead |
+|---|---|---|
+| "The superpowers review passed, so it is fine." | It reviewed code quality, not the ticket, the owner's rules or the change points. | Do checks 1–10 yourself. |
+| "It is a small diff; a quick look is enough." | Small diffs miss whole places that should have changed. | Compare the diff with the Change points table row by row. |
+| "That rule is just style." | The owner wrote it down because it matters to them. | Report every violated rule, with its severity. |
+| "This finding would mean a lot of rework." | Cost of the fix does not change whether it is wrong. | Report it; the owner decides. |
 
 ## Produce `WORK/review.md`
 

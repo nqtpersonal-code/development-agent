@@ -33,7 +33,8 @@ under **Need from tracer** and return.
 5. **Questions** — most important first; one decision each; with screens, fields and real data the owner recognises; in the owner question format from your brief (header, 2–4 options with the recommended one **first**, evidence, depends-on).
 6. **Variants and scope** — several implementations → ask which one the new behaviour follows and whether all change points are updated or only what the ticket names; ask whether refactoring is allowed when the ticket does not say (default: no).
 7. **Draft acceptance criteria** — `TC1…TCn`, testable, labelled; a criterion that depends on an open question is `[GUESS]`.
-8. **UI touched?** — `yes/no` with the screens. **Screen design needed?** — `yes` only for a new screen, a new or moved section, a changed flow between screens or a layout change; `no` for text, messages, one field or behaviour on an existing screen. One line of reason.
+8. **Ticket kind** — `bug` (something that should already work does not), `change` (existing behaviour changes on purpose) or `feature` (something new). A bug ticket gets a reproduction scenario before the fix.
+9. **UI touched?** — `yes/no` with the screens. **Screen design needed?** — `yes` only for a new screen, a new or moved section, a changed flow between screens or a layout change; `no` for text, messages, one field or behaviour on an existing screen. One line of reason.
 
 Later rounds: update `ba.md`, move answered items into criteria labelled `[OWNER]`, keep asking until no `[GUESS]` remains.
 
