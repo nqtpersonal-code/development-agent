@@ -103,7 +103,7 @@ Each finding becomes a change point or a question for the owner.
 ## Surgical changes
 
 1. Think before coding: state assumptions and trade-offs first.
-2. Simplicity first: the smallest change that satisfies the acceptance criteria.
+2. Simplicity first **in existing code**: the smallest change that satisfies the acceptance criteria. For the new code a ticket adds, "Design for extension" below decides the shape.
 3. Touch only what the ticket needs: no unrelated refactors, renames or reformatting.
 4. Goal-driven: every change maps to an acceptance criterion (TCn) and a test that proves it.
 5. Code against the library versions the project has installed, not the newest ones you remember: check the version in the manifest or lockfile (`package.json`, `*.csproj`, …) and, when unsure about a function, its typings or docs inside the installed package (`node_modules/<lib>/…d.ts`, the NuGet package's XML docs). Never add or upgrade a dependency the ticket does not need.
@@ -133,6 +133,17 @@ Each finding becomes a change point or a question for the owner.
 - Examples in plugin prompts use fictional, generic data only (students, classes…).
 - Proposed changes to plugin prompts are generalised first; project specifics go to the project's own files in the data dir.
 - Send nothing to external services except Claude itself.
+
+## Design for extension
+
+`designBias` (config.md, overridable in project.md; printed by `start`) is `extensible` by default: **new code is shaped so that it is easy to extend later**. With `minimal` this section is off and the smallest change wins. Decide in this order for each piece of **new** code a ticket adds:
+
+1. **The project already has a way to do this kind of thing** (a registry of rules, a strategy per kind, a handler per message, a service interface): use exactly that. Never add a second mechanism beside it.
+2. **Touch-risk gate: existing logic stays as it is.** Existing code changes only at the brief's must-patch points and only as far as the ticket needs. Do not move, extract, rename, re-route or re-signature existing logic to make room for a pattern: that is a refactor, and only the brief's fix mode allows one. When the pattern would need it, put the new code behind the seam, leave the old path alone, and note "old path X can move behind this seam when a ticket allows refactoring". New behaviour added to a chain of branches in a must-patch function is written as its own unit behind the seam and called from one new branch.
+3. **Otherwise lean towards an extensible shape.** Find the axis along which the new code will likely grow (another kind, rule, channel, provider, step) and give it the **lightest** structure that fits: a table of functions or a delegate first, then an interface with implementations behind the project's own dependency wiring, then a named pattern (`extensibility` pack, `choosing.md`). At most one layer of indirection; every abstraction has the current implementation behind it and a stated axis of growth.
+4. **Direct code is right** for glue and one-off steps, where no axis of growth is visible, and where the project's style would make a pattern look foreign. Say "direct" and why.
+
+Every new class, interface or function table gets one line in the design (`architecture.md` → Structure decision, or the plan's task): the pattern or "direct", the axis of extension, and, for step 2, the migration note. A missing seam on an obvious axis is a **minor** review suggestion; existing logic restructured outside the must-patch points is **critical**.
 
 ## Pattern library priority
 

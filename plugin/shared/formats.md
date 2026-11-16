@@ -36,6 +36,7 @@ Frontmatter (all optional except `name`); body holds free notes for agents.
 name: <display name>
 aliases: [<other names used for this project>]
 language: vi                     # override config language for this project
+designBias: extensible           # extensible | minimal; overrides config.md for this project (rules.md → Design for extension)
 gitHost: github | gitlab           # from `nqt.mjs detect-host`
 gitHostname: <github.com, gitlab.com or the self-hosted name>
 repo: <owner/repo or group/subgroup/repo>   # where the issues live (with several repos: the one holding issues)

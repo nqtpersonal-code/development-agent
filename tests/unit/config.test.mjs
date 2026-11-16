@@ -49,9 +49,9 @@ test('loadConfig defaults to vi and parses nicknames', () => {
 test('project language override wins', () => {
   const d = tmp();
   ensureDataDir(d, root);
-  mkdirSync(join(d, 'projects', 'demo'), { recursive: true });
-  writeFileSync(join(d, 'projects', 'demo', 'project.md'), '---\nlanguage: en\n---\n# demo\n');
-  assert.equal(projectConfig(d, 'demo').language, 'en');
+  mkdirSync(join(d, 'projects', 'sample'), { recursive: true });
+  writeFileSync(join(d, 'projects', 'sample', 'project.md'), '---\nlanguage: en\n---\n# sample\n');
+  assert.equal(projectConfig(d, 'sample').language, 'en');
   assert.equal(projectConfig(d, 'missing').language, 'vi');
 });
 
@@ -60,4 +60,20 @@ test('the default config carries no machine-specific paths', () => {
   ensureDataDir(d, root);
   assert.equal(loadConfig(d).pluginSourceDir, '');
   assert.doesNotMatch(readFileSync(join(d, 'config.md'), 'utf8'), /[A-Za-z]:\\Users|\/home\//);
+});
+
+test('designBias defaults to extensible, accepts minimal, and a project can override it', async () => {
+  const { loadConfig, projectConfig } = await import('../../plugin/scripts/lib/config.mjs');
+  const { mkdirSync: mk, writeFileSync: wf } = await import('node:fs');
+  const { join: j } = await import('node:path');
+  const { tmp: t } = await import('../helpers/tmp.mjs');
+  const d = t();
+  assert.equal(loadConfig(d).designBias, 'extensible');
+  wf(j(d, 'config.md'), '---\ndesignBias: minimal\n---\n');
+  assert.equal(loadConfig(d).designBias, 'minimal');
+  mk(j(d, 'projects', 'p'), { recursive: true });
+  wf(j(d, 'projects', 'p', 'project.md'), '---\ndesignBias: extensible\n---\n');
+  assert.equal(projectConfig(d, 'p').designBias, 'extensible');
+  wf(j(d, 'config.md'), '---\ndesignBias: nonsense\n---\n');
+  assert.equal(loadConfig(d).designBias, 'extensible');
 });

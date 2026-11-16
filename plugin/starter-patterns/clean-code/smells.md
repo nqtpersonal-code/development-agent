@@ -13,7 +13,7 @@ The standard names (from Fowler's catalogue) let the tracer, the risk analyst, t
 | **Data Clumps / Long Parameter List** | The same group of values travels together through many signatures. | Note; a parameter object only where the project's code does that. |
 | **Switch / if-chain on a type** | A branch per kind that grows with every new kind. | Add the new case in the existing place; every other `switch` on the same kind is a change point. |
 | **Message Chains** | `a.b().c().d()` reaching through objects. | New code: avoid; old code: leave. |
-| **Speculative Generality** | Hooks, flags and layers for needs that do not exist. | New code: do not add them (the smallest change that satisfies the criteria). |
+| **Speculative Generality** | Hooks, flags and layers for needs that do not exist. | A seam on a **named axis of growth** with the current implementation behind it is expected under `designBias: extensible` (rules.md → Design for extension). Hooks with no axis, or layers nobody uses, are the smell: do not add them. |
 | **Dead Code** | Unused functions, branches or files. | **Report, never delete** unless the ticket says so; before calling it dead, search for dynamic uses (reflection, names built from strings, other repos). |
 | **Magic Numbers** | A bare literal that carries a business rule. | Name it the way the project names such values; a copy of the same number elsewhere is a change point. |
 | **Comments hiding bad code** | A long comment explaining a tangled block. | Note it; do not rewrite the block. |

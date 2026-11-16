@@ -12,7 +12,7 @@ const RULE_HEADINGS = [
   'Natural-language interface', 'Source labels', 'Never guess', 'Code and DB are truth', 'Surgical changes',
   'Repo hygiene', 'Local DB guard', 'Language and nicknames', 'Confidentiality', 'Pattern library priority',
   'When the owner doubts a conclusion', 'Token discipline', 'Commands',
-  'One business rule, many implementations', 'Preserve the scene', 'Owner-facing words', 'When a rule is relaxed', 'Untrusted input',
+  'One business rule, many implementations', 'Preserve the scene', 'Owner-facing words', 'When a rule is relaxed', 'Untrusted input', 'Design for extension',
 ];
 const read = (p) => readFileSync(join(plugin, p), 'utf8');
 const present = (dir, names, ext) => names.filter((n) => existsSync(join(plugin, dir, ext ? `${n}${ext}` : n)));

@@ -34,7 +34,7 @@ Ask the owner (question tool, recommendation first) whether to run brainstorming
 
 Dispatch **one general-purpose subagent** (not this session) with:
 
-> Use the superpowers:writing-plans skill. Spec `WORK/spec.md`, brief `WORK/ticket-brief.md`, impact `WORK/trace/impact.md`. Save the plan to `WORK/plan.md`. Follow the owner preferences printed by `node "PLUGIN/scripts/nqt.mjs" guide --step dev-rules`. Every task names the TCs it serves and the must-patch places it changes (file paths as in the brief). The plan covers code changes plus each task's quick self-check only; regression and scenario checks belong to QA, do not plan them. Do not ask about the execution method: the lead decides. Return ≤10 lines: task count, TCs per task, anything you could not place.
+> Use the superpowers:writing-plans skill. Spec `WORK/spec.md`, brief `WORK/ticket-brief.md`, impact `WORK/trace/impact.md`. Save the plan to `WORK/plan.md`. Follow the owner preferences printed by `node "PLUGIN/scripts/nqt.mjs" guide --step dev-rules`. Every task that creates a class, module or function table names its structure (pattern or "direct"), its axis of extension and any old path left alone (rules.md → Design for extension; never plan the move or rewrite of existing logic outside the brief's must-patch points). Every task names the TCs it serves and the must-patch places it changes (file paths as in the brief). The plan covers code changes plus each task's quick self-check only; regression and scenario checks belong to QA, do not plan them. Do not ask about the execution method: the lead decides. Return ≤10 lines: task count, TCs per task, anything you could not place.
 
 `S --set plan=done`.
 

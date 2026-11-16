@@ -8,6 +8,9 @@ const DIRS = ['projects', 'work', 'patterns', 'review-rules', 'runtime'];
 const DEFAULT_CONFIG = `---
 # Language the team uses with you: vi (Vietnamese) or en (English).
 language: vi
+# How new code is shaped: extensible = give it a seam (a pattern on its likely axis of growth) so it is easy to extend,
+# but never touch existing logic to do so; minimal = the smallest change only. A project can override it in project.md.
+designBias: extensible
 # Folder of your PERSONAL review rules (every .md inside is read). Empty = <data dir>/review-rules
 reviewRules:
   personal:
@@ -66,6 +69,8 @@ function readFm(path) {
 
 const asMap = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
 const asLang = (v) => (v === 'en' ? 'en' : 'vi');
+// extensible (default): new code gets a seam for future growth; minimal: the smallest change only.
+const asBias = (v) => (v === 'minimal' ? 'minimal' : 'extensible');
 
 export function loadConfig(dataDir) {
   const fm = readFm(join(dataDir, 'config.md'));
@@ -74,6 +79,7 @@ export function loadConfig(dataDir) {
     : join(dataDir, 'review-rules');
   return {
     language: asLang(fm.language),
+    designBias: asBias(fm.designBias),
     reviewRules: { personal },
     pluginSourceDir: typeof fm.pluginSourceDir === 'string' && fm.pluginSourceDir ? fm.pluginSourceDir : '',
     nicknames: {
@@ -90,6 +96,7 @@ export function projectConfig(dataDir, project) {
     ...base,
     project: fm,
     language: fm.language ? asLang(fm.language) : base.language,
+    designBias: fm.designBias ? asBias(fm.designBias) : base.designBias,
     teamReviewRules: join(dataDir, 'projects', project, 'review-rules'),
   };
 }

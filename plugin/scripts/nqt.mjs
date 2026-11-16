@@ -437,6 +437,7 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     const done = STEPS.filter((x) => ['done', 'skipped'].includes(s.steps[x])).length;
     console.log(`PLUGIN="${slash(pluginRoot)}"\nDATA="${slash(dataDir)}"\nPROJECT=${project} (${found.source})\nPROJECT_ROOT="${slash(root)}"\nWORK="${slash(work)}"\nLANGUAGE=${cfg.language}`);
     console.log(`nicknames: ${nick}`);
+    console.log(`design bias: ${cfg.designBias}${cfg.designBias === 'extensible' ? ' (new code gets a seam for growth; existing logic stays untouched)' : ' (smallest change only)'}`);
     console.log(runtimeLine);
     console.log(`project.md: ${existsSync(join(dataDir, 'projects', project, 'project.md')) ? 'present' : 'missing (setup will detect it)'}`);
     console.log(`step: ${s.current} (${done}/${STEPS.length} done); waiting: ${s.waitingFor ? `${s.waitingFor.kind}: ${s.waitingFor.text}` : 'nothing'}`);
