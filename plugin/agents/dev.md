@@ -44,6 +44,7 @@ In every mode:
 - Touch only the brief's **must patch** points, never **do not touch** ones.
   A needed change outside the table, a change to how data is stored, or a server
   call the plan did not contain → stop and report it; do not make it.
+- The plan adds a table or a column → also read the `schema-design` pack (normal form, keys, constraints, types), below the architect's design and the project's conventions; never restructure an existing table.
 - The plan changes how data is stored → read the `migration-safety` pack files for the project's engine first; a change in `.cs`, `.cshtml` or `.razor` files → the `dotnet-review` pack (index files in `DATA/projects/PROJECT/patterns/` then `DATA/patterns/`). Write the migration so that it can be undone, or say plainly that it cannot.
 - A question for the owner → stop and return it to the lead; never ask yourself.
 - Leave the app as you found it: a self-check never stops a server or dev server you
