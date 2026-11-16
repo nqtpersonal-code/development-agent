@@ -32,6 +32,7 @@ import { findSilenced } from './lib/silenced.mjs';
 import { scanUntrusted } from './lib/untrusted.mjs';
 import { checkLinks } from './lib/links.mjs';
 import { lintRepo } from './lib/lintchanged.mjs';
+import { addChoice } from './lib/choices.mjs';
 import { briefSkeleton, parseAnswers, addOwnerAnswers } from './lib/brief.mjs';
 import { setupDetect } from './lib/setup.mjs';
 import { runSql } from './lib/sql.mjs';
@@ -437,7 +438,7 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     const done = STEPS.filter((x) => ['done', 'skipped'].includes(s.steps[x])).length;
     console.log(`PLUGIN="${slash(pluginRoot)}"\nDATA="${slash(dataDir)}"\nPROJECT=${project} (${found.source})\nPROJECT_ROOT="${slash(root)}"\nWORK="${slash(work)}"\nLANGUAGE=${cfg.language}`);
     console.log(`nicknames: ${nick}`);
-    console.log(`design bias: ${cfg.designBias}${cfg.designBias === 'extensible' ? ' (new code gets a seam for growth; existing logic stays untouched)' : ' (smallest change only)'}`);
+    console.log(`design bias: ${cfg.designBias}${{ ask: ' (new code gets a seam for growth; the owner decides the structure choices that matter; existing logic stays untouched)', extensible: ' (new code gets a seam for growth; existing logic stays untouched)', minimal: ' (smallest change only)' }[cfg.designBias]}`);
     console.log(runtimeLine);
     console.log(`project.md: ${existsSync(join(dataDir, 'projects', project, 'project.md')) ? 'present' : 'missing (setup will detect it)'}`);
     console.log(`step: ${s.current} (${done}/${STEPS.length} done); waiting: ${s.waitingFor ? `${s.waitingFor.kind}: ${s.waitingFor.text}` : 'nothing'}`);
@@ -542,6 +543,15 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     console.log(`silenced: ${hits.length} line(s) switch a check off instead of satisfying it`);
     for (const h of hits.slice(0, 12)) console.log(`  ${h.repo === '.' ? '' : `${h.repo}/`}${h.file}:${h.line} [${h.kind}] ${h.text}`);
     return 1;
+  },
+  // structure-choice --project <p> --ticket <n> --area "..." --choice "..." [--why "..."]: records the
+  // owner's decision about the structure of new code, so the architect does not ask it again.
+  'structure-choice'(args) {
+    const project = args.project;
+    if (!project || project === true || !args.area || !args.choice) throw new Error('usage: structure-choice --project <p> --ticket <n> --area "<what kind of change>" --choice "<pattern or direct, in a few words>" [--why "<reason>"]');
+    const r = addChoice({ dataDir: getDataDir(), project: String(project), ticket: args.ticket === true || args.ticket === undefined ? '-' : args.ticket, area: String(args.area), choice: String(args.choice), why: args.why === true ? '' : args.why });
+    console.log(`structure-choice: recorded in ${slash(r.file)}
+  ${r.line}`);
   },
   // lint-changed --root <PROJECT_ROOT> --base <base> [--dotnet]: findings of the linter the project
   // already uses, only on lines this change added. Nothing is installed or configured.

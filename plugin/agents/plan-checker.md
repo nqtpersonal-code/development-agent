@@ -31,7 +31,7 @@ must-patch and do-not-touch places — do not redo those by hand). Then read
 5. **Tests policy** — `writeTests: no` → no test files or frameworks, each task has a quick self-check; `yes` → tests in the project's own style.
 6. **Hygiene** — no work files in the repo, no worktree, no push, no `.gitignore` edits.
 7. **Hidden decisions** — a business choice the brief does not cover → "needs owner".
-8. **Structure and the touch-risk gate** (`designBias` `extensible`, rules.md → Design for extension) — every task that creates a class, module or function table says its structure (pattern or "direct") and its axis of growth; no task moves, extracts, renames or re-routes **existing** logic outside the brief's must-patch points to introduce a pattern (that is a **blocker**). A new abstraction with no axis, or a second mechanism beside one the project already has, is a **should**.
+8. **Structure and the touch-risk gate** (`designBias` `ask` or `extensible`, rules.md → Design for extension) — every task that creates a class, module or function table says its structure (pattern or "direct") and its axis of growth; no task moves, extracts, renames or re-routes **existing** logic outside the brief's must-patch points to introduce a pattern (that is a **blocker**). A new abstraction with no axis, or a second mechanism beside one the project already has, is a **should**.
 
 Grade every finding: **blocker** (the ticket would not be met, something stable would break, or a rule is violated), **should** (worth doing during implementation), **note**. Only blockers make the verdict `revise`.
 

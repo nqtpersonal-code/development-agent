@@ -76,7 +76,7 @@ Run only when a change point touches a code smell (diverging copies, a must-patc
 ## architect
 
 1. Recommend **yes** when the brief involves a change to how data is stored, new or changed server calls, two or more components, existing data to handle, **a new module or service, behaviour that needs two or more variants, or a rule that lives in three or more places** (it is where the structure of the new code is decided); else **skip**. Ask with that recommendation first.
-2. Yes → `S --flag architect=true`, dispatch `nqt:architect`, ask its "Owner part" decisions in batches, record answers in the brief. No → `S --flag architect=false --set architect=skipped`.
+2. Yes → `S --flag architect=true`, dispatch `nqt:architect`, ask its "Owner part" decisions in batches, record answers in the brief. A structure question (`designBias` `ask`) may name design patterns, each with its plain sentence; after the owner answers, record it: `nqt.mjs structure-choice --project <p> --ticket <n> --area "<kind of change>" --choice "<pattern or direct>" --why "<reason>"`. No → `S --flag architect=false --set architect=skipped`.
 
 ## doubt
 

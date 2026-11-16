@@ -8,9 +8,12 @@ const DIRS = ['projects', 'work', 'patterns', 'review-rules', 'runtime'];
 const DEFAULT_CONFIG = `---
 # Language the team uses with you: vi (Vietnamese) or en (English).
 language: vi
-# How new code is shaped: extensible = give it a seam (a pattern on its likely axis of growth) so it is easy to extend,
-# but never touch existing logic to do so; minimal = the smallest change only. A project can override it in project.md.
-designBias: extensible
+# How new code is shaped (a project can override it in project.md):
+#   ask        = give new code a seam (a design pattern on its likely axis of growth) so it is easy to extend, never touching
+#                existing logic to do so, and ask you to decide the structure choices that matter (pattern names are used)
+#   extensible = the same, decided without asking
+#   minimal    = the smallest change only
+designBias: ask
 # Folder of your PERSONAL review rules (every .md inside is read). Empty = <data dir>/review-rules
 reviewRules:
   personal:
@@ -69,8 +72,9 @@ function readFm(path) {
 
 const asMap = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
 const asLang = (v) => (v === 'en' ? 'en' : 'vi');
-// extensible (default): new code gets a seam for future growth; minimal: the smallest change only.
-const asBias = (v) => (v === 'minimal' ? 'minimal' : 'extensible');
+// ask (default): new code gets a seam for growth, and the owner decides the structure choices that matter;
+// extensible: the same, decided without asking; minimal: the smallest change only.
+const asBias = (v) => (v === 'minimal' || v === 'extensible' ? v : 'ask');
 
 export function loadConfig(dataDir) {
   const fm = readFm(join(dataDir, 'config.md'));

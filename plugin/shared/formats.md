@@ -18,6 +18,7 @@
 │   ├── project.md
 │   ├── ui.md                    project design context (owner-confirmed)
 │   ├── pitfalls.md              known traps (added only by /nqt:retro)
+│   ├── structure-choices.md     the owner's structure decisions (written by `nqt.mjs structure-choice`; the architect does not ask again about an area already decided)
 │   ├── review-rules/            team review rules (*.md)
 │   ├── patterns/<pack>/         project patterns (override global ones)
 │   └── tracer/{adapter.json,tests.json}
@@ -36,7 +37,7 @@ Frontmatter (all optional except `name`); body holds free notes for agents.
 name: <display name>
 aliases: [<other names used for this project>]
 language: vi                     # override config language for this project
-designBias: extensible           # extensible | minimal; overrides config.md for this project (rules.md → Design for extension)
+designBias: ask                  # ask | extensible | minimal; overrides config.md for this project (rules.md → Design for extension)
 gitHost: github | gitlab           # from `nqt.mjs detect-host`
 gitHostname: <github.com, gitlab.com or the self-hosted name>
 repo: <owner/repo or group/subgroup/repo>   # where the issues live (with several repos: the one holding issues)

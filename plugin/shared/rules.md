@@ -45,6 +45,13 @@ owner sees, written in the configured language (examples below are English):
 | file names and paths (`students.service.ts`, `test-scenarios.md`, `WORK/…`) | only inside an evidence link; otherwise "the test scenarios", "the final report" |
 | refactor, regression, edge case, TC7 alone | "tidy the code", "something that used to work breaks", "an unusual case", "check 7 (…what it checks)" |
 
+**Exception: design pattern names.** When you ask or tell the owner about the
+structure of new code, use the pattern's name (Strategy, Factory, Adapter,
+Decorator, Observer, Pipeline, Specification, State, Chain of Responsibility…)
+and follow it with one plain sentence on what it means here and what it costs
+or saves; the owner knows these names and decides faster with them. No other
+developer word is excused by this.
+
 Technical words are fine only inside evidence links and sections marked
 "Technical part". Progress lines the orchestrator prints between steps
 ("Checking the attendance page…") are owner-facing too: write them in the
@@ -136,12 +143,14 @@ Each finding becomes a change point or a question for the owner.
 
 ## Design for extension
 
-`designBias` (config.md, overridable in project.md; printed by `start`) is `extensible` by default: **new code is shaped so that it is easy to extend later**. With `minimal` this section is off and the smallest change wins. Decide in this order for each piece of **new** code a ticket adds:
+`designBias` (config.md, overridable in project.md; printed by `start`): `ask` (default) and `extensible` both mean **new code is shaped so that it is easy to extend later**; `ask` also puts the structure choices that matter to the owner (below), `extensible` decides them without asking. With `minimal` this section is off and the smallest change wins. Decide in this order for each piece of **new** code a ticket adds:
 
 1. **The project already has a way to do this kind of thing** (a registry of rules, a strategy per kind, a handler per message, a service interface): use exactly that. Never add a second mechanism beside it.
 2. **Touch-risk gate: existing logic stays as it is.** Existing code changes only at the brief's must-patch points and only as far as the ticket needs. Do not move, extract, rename, re-route or re-signature existing logic to make room for a pattern: that is a refactor, and only the brief's fix mode allows one. When the pattern would need it, put the new code behind the seam, leave the old path alone, and note "old path X can move behind this seam when a ticket allows refactoring". New behaviour added to a chain of branches in a must-patch function is written as its own unit behind the seam and called from one new branch.
 3. **Otherwise lean towards an extensible shape.** Find the axis along which the new code will likely grow (another kind, rule, channel, provider, step) and give it the **lightest** structure that fits: a table of functions or a delegate first, then an interface with implementations behind the project's own dependency wiring, then a named pattern (`extensibility` pack, `choosing.md`). At most one layer of indirection; every abstraction has the current implementation behind it and a stated axis of growth.
 4. **Direct code is right** for glue and one-off steps, where no axis of growth is visible, and where the project's style would make a pattern look foreign. Say "direct" and why.
+
+**Owner questions (`ask`).** The architect asks the owner — in the Owner part, in the one batch with its other questions, pattern names allowed — only when a structure decision meets **any** of these: (a) the extensible shape would need existing logic changed (the gate says no, so the question is "may this old part be refactored?", and the recommended answer is keep it); (b) it adds three or more new classes or files for one capability; (c) it departs from the style of the code around it; (d) the project has two or more existing ways to do it and none is clearly the model. Anything else is decided without asking and listed in the Structure decision. Phrase each question as a trade-off the owner can weigh: the effort now, the effort for the next change of this kind, the risk to what works today; two to four options, the recommended one first. Read `DATA/projects/PROJECT/structure-choices.md` first: an area the owner already decided is not asked again. After the owner answers, the lead records the choice with `nqt.mjs structure-choice`. With no architect step there are no questions: `dev` takes the conservative option (the seam on new code only) and the final report lists the choice.
 
 Every new class, interface or function table gets one line in the design (`architecture.md` → Structure decision, or the plan's task): the pattern or "direct", the axis of extension, and, for step 2, the migration note. A missing seam on an obvious axis is a **minor** review suggestion; existing logic restructured outside the must-patch points is **critical**.
 
