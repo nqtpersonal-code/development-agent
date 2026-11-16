@@ -32,7 +32,7 @@ the `risk.md` format in your brief, `WORK/ba.md`,
    - **A. Patch, preserve the scene**: the narrowest change on the ticket's path; the other copies stay as they are.
    - **B. Fix the smell within the ticket**: e.g. route the copies through one implementation, or align the diverging copies; stays inside what the ticket's users need.
    - a hybrid when it is clearly better (e.g. patch now, align only the copy that is visibly wrong).
-3. For each option: **immediate risk** (which stable screens/APIs could change, how well tests protect them), **later risk** (copies left diverging, how often this area breaks per git history), **effort**, **data impact**, **how to verify** (which regression scenarios QA must run).
+3. For each option: **immediate risk** (which stable screens/APIs could change, how well tests protect them), **later risk** (copies left diverging, how often this area breaks per git history), **effort**, **data impact**, **undo** (how to go back, and what cannot be undone), **how to verify** (which regression scenarios QA must run).
 4. **Recommend** one option with a one-sentence reason. Default to A unless the signals show a concrete long-term cost (frequent bug fixes, a copy that is already wrong, a narrow radius with good test cover).
 
 ## Produce `WORK/risk.md`

@@ -33,6 +33,12 @@ in `reviewRules.personal` and in `teamReviewRules`. Missing or empty folder →
 The change: for each repo from `nqt.mjs repos --root "PROJECT_ROOT"`, `git diff BASE...HEAD`
 and `git log BASE..HEAD --oneline` inside it. Report findings with the repo name.
 
+Pattern packs: read the `index.md` files in `DATA/projects/PROJECT/patterns/` then `DATA/patterns/`,
+and open a pack's files only when the diff matches it — `migration-safety` when the change adds or
+alters a migration, schema file or SQL (open the file for the project's engine); `dotnet-review`
+when it touches `.cs`, `.cshtml` or `.razor`. They are checklists to apply to the changed lines,
+below the owner's rules and the project's own conventions.
+
 ## Checks
 
 1. **Personal rules**, then **team rules** — each: respected / violated (where).
@@ -54,6 +60,15 @@ and `git log BASE..HEAD --oneline` inside it. Report findings with the repo name
 | "It is a small diff; a quick look is enough." | Small diffs miss whole places that should have changed. | Compare the diff with the Change points table row by row. |
 | "That rule is just style." | The owner wrote it down because it matters to them. | Report every violated rule, with its severity. |
 | "This finding would mean a lot of rework." | Cost of the fix does not change whether it is wrong. | Report it; the owner decides. |
+
+## Findings need proof
+
+- Every **critical** or **important** finding carries `file:line` and how it fails: the input, row or
+  step that triggers it and what the user or the data ends up with. A suspicion you cannot show goes
+  under **Questions** (one line each), not under findings.
+- Report a finding only when you are fairly sure it is real (about four times in five or better);
+  a style preference or an unusual-looking line is not a finding.
+- **No findings** is a valid result: say so plainly instead of adding minor remarks to fill the page.
 
 ## Produce `WORK/review.md`
 

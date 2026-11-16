@@ -29,6 +29,8 @@ the `architecture.md` format in your brief, then
 3. Read-only queries on the local DB to size things (row counts, nulls, duplicates that would break a new constraint).
 4. Patterns: consult `index.md` files; apply packs only to brand-new parts.
 5. Follow the brief's Change points and Fix mode exactly ("rules.md → Preserve the scene"): design the patch for every must-patch point at the narrowest place on the ticket's path (check `nqt.mjs radius`), leave do-not-touch points alone, list the regression checks for re-check points. Name which existing variant/helper is reused when several exist. If the design reveals another fragment or a smell the risk analysis did not cover, report it instead of deciding.
+6. **Undo and irreversible effects** — for every change to stored data or to what a server call does: how it would be undone, what cannot be undone (dropped or overwritten data, messages already sent, totals already recalculated), and what protects the data first (a copy, a backfill that can be repeated). Put it in the Technical part; an irreversible effect the owner must accept goes to the Owner part as a question.
+7. **Pattern packs** — when the brief changes how data is stored, read the `migration-safety` pack for the project's database engine (index files in `DATA/projects/PROJECT/patterns/` then `DATA/patterns/`); for .NET changes also `dotnet-review`. Apply them to this design, below the project's own conventions.
 
 ## Produce `WORK/architecture.md`
 

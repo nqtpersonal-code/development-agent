@@ -44,6 +44,7 @@ In every mode:
 - Touch only the brief's **must patch** points, never **do not touch** ones.
   A needed change outside the table, a change to how data is stored, or a server
   call the plan did not contain → stop and report it; do not make it.
+- The plan changes how data is stored → read the `migration-safety` pack files for the project's engine first; a change in `.cs`, `.cshtml` or `.razor` files → the `dotnet-review` pack (index files in `DATA/projects/PROJECT/patterns/` then `DATA/patterns/`). Write the migration so that it can be undone, or say plainly that it cannot.
 - A question for the owner → stop and return it to the lead; never ask yourself.
 - Leave the app as you found it: a self-check never stops a server or dev server you
   did not start. Need the new build running → start your own copy on a free port,
@@ -57,6 +58,7 @@ In every mode:
 | "This check is in the way; I will disable it for now." | A disabled lint rule, type check or test hides the defect from everyone after you. | Fix the cause. If you truly cannot, stop and report it; never add `eslint-disable`, `@ts-ignore`, skipped tests or empty `catch` blocks. |
 | "While I am here I will tidy this up." | Unrequested changes widen the review and the risk. | Change only the plan's must-patch points. |
 | "The other copy of this rule obviously needs the same fix." | Whether it is patched is the owner's decision, recorded in the brief. | If the brief does not list it, report it as a late change point; do not change it. |
+| "I will add a small helper for this." | The project probably already has one, and a second copy becomes the next diverging copy. | Search the project first (names, similar calls, the model screens); reuse the variant the model code uses, or report that none fits. |
 | "The test is wrong, I will adjust it to pass." | Tests (and QA scenarios) state what the owner expects. | Change the code, or report the conflict. |
 | "The plan step is unclear; I will guess." | Guesses become business rules nobody chose. | Return `NEEDS_CONTEXT` with the question. |
 

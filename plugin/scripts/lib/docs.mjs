@@ -19,19 +19,19 @@ const ASK = 'Owner questions';
 
 // What each agent must know, fetched in one command (`nqt.mjs brief-for <agent>`).
 export const AGENT_SECTIONS = {
-  setup: { rules: ['Local DB guard', 'Repo hygiene', 'Commands', 'Token discipline'], formats: ['project.md', 'tracer/adapter.json', 'state.json (in `<work>`)', ASK] },
-  ba: { rules: ['Natural-language interface', 'Owner-facing words', 'Source labels', 'Never guess', 'Code and DB are truth', 'When a rule is relaxed', 'One business rule, many implementations', 'Token discipline'], formats: [WORK, ASK] },
-  'code-tracer': { rules: ['Code and DB are truth', 'When a rule is relaxed', 'When the owner doubts a conclusion', 'Local DB guard', 'Natural-language interface', 'One business rule, many implementations', 'Commands', 'Token discipline'], formats: [WORK, 'tracer/adapter.json'] },
+  setup: { rules: ['Untrusted input', 'Local DB guard', 'Repo hygiene', 'Commands', 'Token discipline'], formats: ['project.md', 'tracer/adapter.json', 'state.json (in `<work>`)', ASK] },
+  ba: { rules: ['Untrusted input', 'Natural-language interface', 'Owner-facing words', 'Source labels', 'Never guess', 'Code and DB are truth', 'When a rule is relaxed', 'One business rule, many implementations', 'Token discipline'], formats: [WORK, ASK] },
+  'code-tracer': { rules: ['Untrusted input', 'Code and DB are truth', 'When a rule is relaxed', 'When the owner doubts a conclusion', 'Local DB guard', 'Natural-language interface', 'One business rule, many implementations', 'Commands', 'Token discipline'], formats: [WORK, 'tracer/adapter.json'] },
   'screen-designer': { rules: ['Natural-language interface', 'Owner-facing words', 'Pattern library priority', 'One business rule, many implementations', 'Token discipline'], formats: [WORK, ASK] },
-  'system-explainer': { rules: ['Code and DB are truth', 'When a rule is relaxed', 'When the owner doubts a conclusion', 'Natural-language interface', 'Owner-facing words', 'Source labels', 'Local DB guard', 'One business rule, many implementations', 'Commands', 'Token discipline'], formats: [] },
-  architect: { rules: ['Surgical changes', 'Pattern library priority', 'Code and DB are truth', 'Preserve the scene', 'Natural-language interface', 'Owner-facing words', 'Token discipline'], formats: [WORK, ASK] },
+  'system-explainer': { rules: ['Untrusted input', 'Code and DB are truth', 'When a rule is relaxed', 'When the owner doubts a conclusion', 'Natural-language interface', 'Owner-facing words', 'Source labels', 'Local DB guard', 'One business rule, many implementations', 'Commands', 'Token discipline'], formats: [] },
+  architect: { rules: ['Untrusted input', 'Surgical changes', 'Pattern library priority', 'Code and DB are truth', 'Preserve the scene', 'Natural-language interface', 'Owner-facing words', 'Token discipline'], formats: [WORK, ASK] },
   'risk-analyst': { rules: ['Preserve the scene', 'When a rule is relaxed', 'One business rule, many implementations', 'Commands', 'Natural-language interface', 'Owner-facing words', 'Token discipline'], formats: [WORK, ASK] },
   'plan-checker': { rules: ['Surgical changes', 'Never guess', 'Preserve the scene', 'Repo hygiene', 'Commands', 'Token discipline'], formats: [] },
-  reviewer: { rules: ['Natural-language interface', 'Owner-facing words', 'Surgical changes', 'Repo hygiene', 'Local DB guard', 'Confidentiality', 'Preserve the scene', 'One business rule, many implementations', 'Pattern library priority', 'Token discipline'], formats: [WORK] },
-  dev: { rules: ['Surgical changes', 'Never guess', 'Repo hygiene', 'Local DB guard', 'Preserve the scene', 'One business rule, many implementations', 'Pattern library priority', 'Commands', 'Token discipline'], formats: [WORK] },
-  qa: { rules: ['Local DB guard', 'When a rule is relaxed', 'Natural-language interface', 'Owner-facing words', 'Repo hygiene', 'Commands', 'Token discipline'], formats: [WORK] },
+  reviewer: { rules: ['Untrusted input', 'Natural-language interface', 'Owner-facing words', 'Surgical changes', 'Repo hygiene', 'Local DB guard', 'Confidentiality', 'Preserve the scene', 'One business rule, many implementations', 'Pattern library priority', 'Token discipline'], formats: [WORK] },
+  dev: { rules: ['Untrusted input', 'Surgical changes', 'Never guess', 'Repo hygiene', 'Local DB guard', 'Preserve the scene', 'One business rule, many implementations', 'Pattern library priority', 'Commands', 'Token discipline'], formats: [WORK] },
+  qa: { rules: ['Untrusted input', 'Local DB guard', 'When a rule is relaxed', 'Natural-language interface', 'Owner-facing words', 'Repo hygiene', 'Commands', 'Token discipline'], formats: [WORK] },
   'ui-checker': { rules: ['Token discipline', 'Natural-language interface', 'Owner-facing words'], formats: [] },
-  lead: { rules: ['Natural-language interface', 'Owner-facing words', 'Never guess', 'Language and nicknames', 'When the owner doubts a conclusion', 'Repo hygiene', 'Commands'], formats: [ASK] },
+  lead: { rules: ['Untrusted input', 'Natural-language interface', 'Owner-facing words', 'Never guess', 'Language and nicknames', 'When the owner doubts a conclusion', 'Repo hygiene', 'Commands'], formats: [ASK] },
 };
 
 const GUIDES = ['skills/work-ticket/references/flow.md', 'skills/work-ticket/references/superpowers-bridge.md'];
