@@ -8,7 +8,8 @@ import { STEPS, newState, readState, writeState, setStep, setWaiting, setFlag, r
 import { scanLeaks, projectNamesFrom, fixtureNames } from './lib/leaks.mjs';
 import { walkFiles, readText, rel } from './lib/files.mjs';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { doctor } from './lib/runtime.mjs';
+import { doctor, installRuntime, setAutoInstall, RUNTIME_PACKAGES } from './lib/runtime.mjs';
+import { neededDbPackages } from './lib/needs.mjs';
 import { nameVariants } from './lib/names.mjs';
 import { searchCode } from './lib/search.mjs';
 import { readSchema } from './lib/schema.mjs';
@@ -137,15 +138,30 @@ const commands = {
     // A finished step hands over the next step's instructions in the same call.
     else if (args.set && s.current !== before && s.current !== 'done') console.log(`\n${stepGuide(pluginRoot, s.current)}`);
   },
+  // doctor [--root dir] [--install [pg|mysql2|mssql|playwright|all ...]]
+  // Required: Node, git, superpowers. Runtime packages are installed one by one:
+  // --install with no names installs only what this folder's database needs.
   doctor(args) {
     const dataDir = getDataDir();
     ensureDataDir(dataDir, pluginRoot);
-    const r = doctor(dataDir, { install: Boolean(args.install) });
+    const root = resolve(args.root ?? process.cwd());
+    let names = [].concat(args.install === undefined || args.install === true ? [] : args.install, args._)
+      .flatMap((n) => String(n).split(',')).filter(Boolean);
+    if (names.includes('all')) names = RUNTIME_PACKAGES;
+    if (args.install !== undefined && !names.length) {
+      names = neededDbPackages(root);
+      if (!names.length) console.log('doctor: no database settings found in this folder, so nothing to install; name what you want: doctor --install pg|mysql2|mssql|playwright|all');
+    }
+    const r = doctor(dataDir, { install: names });
     for (const c of r.checks) {
       const mark = c.ok ? 'ok ' : c.required ? 'MISSING' : 'optional-missing';
       console.log(`${mark.padEnd(16)} ${c.name} — ${c.detail}`);
     }
-    if (!r.ok) console.log('fix: node <plugin>/scripts/nqt.mjs doctor --install (and install the superpowers plugin if missing)');
+    if (args.root !== undefined) {
+      const need = neededDbPackages(root);
+      console.log(`needed here: ${need.length ? need.map((n) => `runtime:${n}`).join(', ') : 'no database driver (no database settings found)'}`);
+    }
+    if (!r.ok) console.log('fix: install the missing item above (superpowers is a Claude Code plugin; Node 20+ and git from their sites)');
     return r.ok ? 0 : 1;
   },
   search(args) {
@@ -376,7 +392,7 @@ const commands = {
     const doc = doctor(dataDir);
     const missing = doc.checks.filter((c) => c.required && !c.ok).map((c) => c.name);
     if (missing.length) {
-      console.log(`start: MISSING ${missing.join(', ')} — runtime packages: doctor --install; superpowers: install the plugin`);
+      console.log(`start: MISSING ${missing.join(', ')} — install them (superpowers is a Claude Code plugin; Node 20+ and git from their sites)`);
       return 1;
     }
     if (typeof args.project === 'string') rememberProject({ root, dataDir, project: args.project });
@@ -387,6 +403,18 @@ const commands = {
     }
     const project = found.project;
     const cfg = projectConfig(dataDir, project);
+    // Only the driver of the database this project uses, installed once.
+    let runtimeLine;
+    const need = neededDbPackages(root, cfg.project);
+    if (!need.length) runtimeLine = 'runtime: no database settings found yet; a driver installs the first time it is needed';
+    else {
+      try {
+        installRuntime(dataDir, need, { quiet: true });
+        runtimeLine = `runtime: ${need.join(', ')} ready (only what this project's database needs)`;
+      } catch (e) {
+        runtimeLine = `runtime: could not install ${need.join(', ')} (${e.message}); database commands will fail until: doctor --install ${need.join(' ')}`;
+      }
+    }
     const ticket = parseTicketRef(ref) ?? ref.replace(/[^\w.-]+/g, '-');
     const work = join(dataDir, 'work', project, ticket);
     if (!readState(work)) writeState(work, newState(project, ticket));
@@ -401,6 +429,7 @@ const commands = {
     const done = STEPS.filter((x) => ['done', 'skipped'].includes(s.steps[x])).length;
     console.log(`PLUGIN="${slash(pluginRoot)}"\nDATA="${slash(dataDir)}"\nPROJECT=${project} (${found.source})\nPROJECT_ROOT="${slash(root)}"\nWORK="${slash(work)}"\nLANGUAGE=${cfg.language}`);
     console.log(`nicknames: ${nick}`);
+    console.log(runtimeLine);
     console.log(`project.md: ${existsSync(join(dataDir, 'projects', project, 'project.md')) ? 'present' : 'missing (setup will detect it)'}`);
     console.log(`step: ${s.current} (${done}/${STEPS.length} done); waiting: ${s.waitingFor ? `${s.waitingFor.kind}: ${s.waitingFor.text}` : 'nothing'}`);
     console.log(ticketLine);
@@ -549,5 +578,6 @@ export function register(name, fn) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  setAutoInstall(true);
   process.exitCode = await main(process.argv.slice(2));
 }

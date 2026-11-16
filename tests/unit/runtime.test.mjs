@@ -18,6 +18,19 @@ test('doctor reports node as ok and lists missing runtime packages', () => {
   const byName = Object.fromEntries(r.checks.map((c) => [c.name, c]));
   assert.equal(byName.node.ok, true);
   assert.equal(byName['runtime:pg'].ok, false);
+  assert.equal(byName['runtime:pg'].required, false, 'a driver is never required up front');
   assert.equal(byName.superpowers.ok, false);
   assert.equal(byName.superpowers.required, true);
+});
+
+test('only the driver of the own database of a project is needed, and installing validates names', async () => {
+  const { neededDbPackages } = await import('../../plugin/scripts/lib/needs.mjs');
+  const { installRuntime } = await import('../../plugin/scripts/lib/runtime.mjs');
+  const { fileURLToPath } = await import('node:url');
+  const fx = fileURLToPath(new URL('../fixtures/', import.meta.url));
+  assert.deepEqual(neededDbPackages(join(fx, 'school-a')), ['pg']);
+  assert.deepEqual(neededDbPackages(join(fx, 'school-b-api')), ['mysql2']);
+  assert.deepEqual(neededDbPackages(join(fx, 'clinic')), ['mssql']);
+  assert.deepEqual(neededDbPackages(tmp()), []);
+  assert.throws(() => installRuntime(tmp(), ['left-pad']), /unknown runtime package/);
 });

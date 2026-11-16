@@ -12,7 +12,7 @@
 ├── config.md                    language, reviewRules.personal, pluginSourceDir, nicknames
 ├── review-rules/                personal review rules (*.md), default location
 ├── patterns/<pack>/index.md     global pattern library
-├── runtime/                     pg, mysql2, playwright (installed by `doctor --install`)
+├── runtime/                     only the DB drivers your projects use (pg, mysql2 or mssql) and playwright, each installed when first needed
 ├── projects/_map.json            remembered project names (git remote → project, or folder → project)
 ├── projects/<project>/
 │   ├── project.md

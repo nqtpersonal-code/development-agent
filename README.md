@@ -18,7 +18,9 @@ superpowers), reviews, tests and reports. It never pushes.
 - The **superpowers** plugin installed.
 - `gh` / `glab` (optional; without them you paste the ticket text).
 
-Check everything at once: `node "<installed-plugin-folder>/scripts/nqt.mjs" doctor`.
+Nothing else is required up front. The helper libraries are installed one by one, only when a project needs them: a project on SQL Server gets the SQL Server driver, one on PostgreSQL gets the PostgreSQL driver, and the browser for UI checks is downloaded the first time a ticket with screens reaches QA.
+
+Check what is installed: `node "<installed-plugin-folder>/scripts/nqt.mjs" doctor` (add `--root "<project-folder>"` to see what that project needs).
 
 ## Install (user scope only)
 
@@ -38,11 +40,7 @@ claude plugin install nqt@nqt-local --scope user
 
 Do not install at project scope (`--scope project`): that writes into the team repo's `.claude/settings.json`.
 
-**After installing, run once** to install the helper libraries (pg, mysql2, mssql, Playwright + Chromium) into the data folder:
-
-```
-node "<installed-plugin-folder>/scripts/nqt.mjs" doctor --install
-```
+**Helper libraries (nothing to do):** the first `/nqt:work-ticket` in a project installs the driver for that project's database into the data folder. To do it yourself, or to add another one: `node "<installed-plugin-folder>/scripts/nqt.mjs" doctor --install` (inside the project folder: installs what its database needs), or name them: `doctor --install mssql playwright` (`pg`, `mysql2`, `mssql`, `playwright`, or `all`).
 
 (The installed plugin folder is usually `~/.claude/plugins/cache/nqt-local/nqt/<version>/`.)
 
@@ -145,7 +143,7 @@ Everything stays outside the plugin and outside the project repos, in `~/.claude
 ├── config.md                 language, personal review rules folder, nicknames
 ├── review-rules/             your personal review rules (every .md)
 ├── patterns/<pack>/          shared pattern library (two starter packs included)
-├── runtime/                  pg, mysql2, mssql, playwright (installed by doctor --install)
+├── runtime/                  only the DB drivers your projects use + playwright, each installed when first needed
 ├── projects/<project>/
 │   ├── project.md            detected facts: git host/repo, DB, run commands...
 │   ├── ui.md                 design context

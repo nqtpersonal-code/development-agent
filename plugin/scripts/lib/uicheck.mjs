@@ -60,7 +60,13 @@ function measure(isPhone) {
 export async function uiCheck({ url, outDir, viewports = DEFAULT_VIEWPORTS, login, waitFor, dataDir = getDataDir() }) {
   const { chromium } = runtimeRequire(dataDir, 'playwright');
   mkdirSync(outDir, { recursive: true });
-  const browser = await chromium.launch();
+  let browser;
+  try {
+    browser = await chromium.launch();
+  } catch (e) {
+    if (/Executable doesn't exist|playwright install/i.test(e.message)) throw new Error('the browser for UI checks is not installed: run node <plugin>/scripts/nqt.mjs doctor --install playwright (a one-time download of about a minute)');
+    throw e;
+  }
   const issues = [];
   const screenshots = [];
   try {
