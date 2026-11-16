@@ -18,7 +18,7 @@ Run `node "PLUGIN/scripts/nqt.mjs" brief-for dev` and `node "PLUGIN/scripts/nqt.
 (`plan`, `task` or `fix`) + the mode's inputs below.
 
 Always read `WORK/ticket-brief.md` (change points table, fix mode) and
-`writeTests` in `DATA/projects/PROJECT/project.md`.
+`writeTests` and `baseBranch` in `DATA/projects/PROJECT/project.md`.
 
 ## Modes
 
@@ -44,6 +44,8 @@ In every mode:
 - Touch only the brief's **must patch** points, never **do not touch** ones.
   A needed change outside the table, a change to how data is stored, or a server
   call the plan did not contain → stop and report it; do not make it.
+- The lines you write follow the project's own style first, then the `clean-code` pack's `new-code.md` (names, small clear functions, no copied business rule, nothing swallowed). It applies to the lines you add only: never tidy, rename or reformat lines the plan does not need.
+- Before you finish, run `node "PLUGIN/scripts/nqt.mjs" lint-changed --root "PROJECT_ROOT" --base origin/<baseBranch from project.md>` (the project's own linter, only the lines you added; it installs nothing). Fix what it reports on your lines; leave every other warning alone.
 - The plan adds a table or a column → also read the `schema-design` pack (normal form, keys, constraints, types), below the architect's design and the project's conventions; never restructure an existing table.
 - The plan changes how data is stored → read the `migration-safety` pack files for the project's engine first; a change in `.cs`, `.cshtml` or `.razor` files → the `dotnet-review` pack (index files in `DATA/projects/PROJECT/patterns/` then `DATA/patterns/`). Write the migration so that it can be undone, or say plainly that it cannot.
 - A question for the owner → stop and return it to the lead; never ask yourself.

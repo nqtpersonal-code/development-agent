@@ -36,7 +36,7 @@ and `git log BASE..HEAD --oneline` inside it. Report findings with the repo name
 Pattern packs: read the `index.md` files in `DATA/projects/PROJECT/patterns/` then `DATA/patterns/`,
 and open a pack's files only when the diff matches it — `migration-safety` when the change adds or
 alters a migration, schema file or SQL (open the file for the project's engine); `dotnet-review`
-when it touches `.cs`, `.cshtml` or `.razor`; `schema-design` when it adds tables, columns or constraints. They are checklists to apply to the changed lines,
+when it touches `.cs`, `.cshtml` or `.razor`; `schema-design` when it adds tables, columns or constraints; `clean-code` for every diff (its `new-code.md`, and `smells.md` for naming what you find). They are checklists to apply to the changed lines,
 below the owner's rules and the project's own conventions.
 
 ## Checks
@@ -51,7 +51,9 @@ below the owner's rules and the project's own conventions.
 8. **Tests policy** — `writeTests: no` → no test files, frameworks or scripts added; `yes` → tests in the project's style.
 9. **Repo hygiene** — no work files committed, no `.gitignore`/docs edits, nothing pushed.
 10. **Checks switched off** — `node "PLUGIN/scripts/nqt.mjs" silenced --root "PROJECT_ROOT" --base BASE` lists added lines that disable a lint rule or type check, skip a test, swallow an error or escape to `any`. Each one is an **important** finding unless the plan or the owner asked for it; say what it hides.
-11. **New schema** — tables, columns and constraints the diff **adds** follow the brief, the project's own conventions and the `schema-design` pack: normal form, copies kept on purpose with their reason, keys, constraints, types. A violation in a legacy structure the diff does not touch is a note for the report, never a finding to restructure.
+11. **Lint on the added lines** — `node "PLUGIN/scripts/nqt.mjs" lint-changed --root "PROJECT_ROOT" --base BASE` (the project's own linter, only the lines the change added; add `--dotnet` for C# analyzer warnings only if the app is not running and writing `bin/obj` is fine). An error-level finding is **important**, a warning **minor**, each with its line; no extra proof needed. It runs nothing when the project has no linter: say so.
+12. **Clean code on the added lines** — `clean-code/new-code.md` applied to what the diff adds, with the smells named as in `smells.md`. Report only what is harmful or misleading and show it; never ask for tidying of lines the change does not need, and never a finding for style the project's own code shares.
+13. **New schema** — tables, columns and constraints the diff **adds** follow the brief, the project's own conventions and the `schema-design` pack: normal form, copies kept on purpose with their reason, keys, constraints, types. A violation in a legacy structure the diff does not touch is a note for the report, never a finding to restructure.
 
 ## Excuses to refuse
 

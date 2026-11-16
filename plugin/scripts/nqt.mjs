@@ -31,6 +31,7 @@ import { checkWork, CHECKED_STEPS } from './lib/workcheck.mjs';
 import { findSilenced } from './lib/silenced.mjs';
 import { scanUntrusted } from './lib/untrusted.mjs';
 import { checkLinks } from './lib/links.mjs';
+import { lintRepo } from './lib/lintchanged.mjs';
 import { briefSkeleton, parseAnswers, addOwnerAnswers } from './lib/brief.mjs';
 import { setupDetect } from './lib/setup.mjs';
 import { runSql } from './lib/sql.mjs';
@@ -540,6 +541,32 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     console.log(`silenced: ${hits.length} line(s) switch a check off instead of satisfying it`);
     for (const h of hits.slice(0, 12)) console.log(`  ${h.repo === '.' ? '' : `${h.repo}/`}${h.file}:${h.line} [${h.kind}] ${h.text}`);
     return 1;
+  },
+  // lint-changed --root <PROJECT_ROOT> --base <base> [--dotnet]: findings of the linter the project
+  // already uses, only on lines this change added. Nothing is installed or configured.
+  'lint-changed'(args) {
+    const root = resolve(args.root ?? process.cwd());
+    const base = args.base;
+    if (!base || base === true) throw new Error('usage: lint-changed --root <PROJECT_ROOT> --base <base branch or commit> [--dotnet]');
+    const repos = listRepos(root);
+    const lines = [];
+    const notes = [];
+    let count = 0;
+    for (const r of repos.length ? repos : [{ dir: '.' }]) {
+      const res = lintRepo({ repoDir: join(root, r.dir), root, base: String(base), dotnet: Boolean(args.dotnet) });
+      for (const tool of res.tools) {
+        if (!tool.ran) notes.push(`${res.dir === '.' ? '' : `${res.dir}: `}${tool.name} not run — ${tool.note}`);
+        for (const f of tool.findings) {
+          count++;
+          lines.push(`  ${res.dir === '.' ? '' : `${res.dir}/`}${f.file}:${f.line} [${tool.name} ${f.rule}, ${f.severity}] ${f.message}`);
+        }
+      }
+    }
+    console.log(count ? `lint-changed: ${count} finding(s) on lines this change added` : 'lint-changed: nothing on the lines this change added');
+    for (const l of lines.slice(0, 12)) console.log(l);
+    if (lines.length > 12) console.log(`  … ${lines.length - 12} more`);
+    for (const n of notes) console.log(`  note: ${n}`);
+    return count ? 1 : 0;
   },
   // scan-untrusted <file-or-folder>... : hidden characters and instruction-like phrases in text
   // that other people wrote (ticket, linked docs, pattern packs).

@@ -24,6 +24,8 @@ the `risk.md` format in your brief, `WORK/ba.md`,
 
 ## For each smell
 
+Name each smell with its standard name (Duplicated Code, Shotgun Surgery, Divergent Change… see the `clean-code` pack's `smells.md`, in `DATA/projects/PROJECT/patterns/` then `DATA/patterns/`) so the owner, the tracer and you mean the same thing.
+
 1. **Measure** (scripts first; full output to `WORK/trace/`):
    - `node "PLUGIN/scripts/nqt.mjs" risk-signals --project PROJECT --root "PROJECT_ROOT" --file <f> --function <fn> --out "WORK/trace/risk-<fn>.json"` for each function a fix would touch: call sites, API routes, screens, git changes and bug-fix commits in the last 180 days, tests covering it.
    - `siblings` for the copies and how they differ; `schema` look-alike columns when data is split.
