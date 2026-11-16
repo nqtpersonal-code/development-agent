@@ -1,6 +1,7 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { criteriaIds, changePointFiles, MUST, FORBID, tcPattern } from './plancheck.mjs';
+import { checkLinks } from './links.mjs';
 
 // Definition of done for each step's work files, checked by script so an agent
 // that skipped part of its job is sent back before anyone builds on its output.
@@ -29,16 +30,43 @@ function needFile(work, f, problems) {
   return t;
 }
 
+// Places the impact script found that the map neither confirms nor rules out.
+// Seeds, fixtures and tests are left to the agent's judgement.
+const MINOR = /(^|\/)(seeds?|fixtures?|__tests__|tests?|specs?)(\/|\.)|\.(test|spec)\.[a-z]+$/i;
+function unaccounted(work, impact) {
+  const dir = join(work, 'trace');
+  if (!existsSync(dir)) return [];
+  const doc = impact.toLowerCase().replaceAll('\\', '/');
+  const missing = new Map();
+  for (const f of readdirSync(dir).filter((n) => /^impact(-.+)?\.json$/.test(n))) {
+    let places;
+    try {
+      places = JSON.parse(readFileSync(join(dir, f), 'utf8')).places ?? [];
+    } catch {
+      continue;
+    }
+    for (const pl of places) {
+      const file = String(pl.file ?? '').replaceAll('\\', '/');
+      if (!file || MINOR.test(file) || missing.has(file)) continue;
+      if (!doc.includes(file.toLowerCase()) && !doc.includes(file.split('/').pop().toLowerCase())) missing.set(file, pl);
+    }
+  }
+  const list = [...missing.entries()];
+  return list.slice(0, 6).map(([file, pl]) => `${file} (${pl.certainty ?? 'candidate'}) is in the impact script's results but impact.md neither confirms nor rules it out: add it as a place, or under "Checked and rejected" with the reason`)
+    .concat(list.length > 6 ? [`…and ${list.length - 6} more places from impact.json that impact.md does not mention`] : []);
+}
+
 const CHECKS = {
   analysis(work, p) {
     const impact = needFile(work, 'trace/impact.md', p);
     if (impact) {
-      for (const [name, re] of [['Change points', /change points/], ['What else this could break', /what else this could break/], ['Already in the system', /already in the system/], ['Not scanned', /not scanned/]]) {
+      for (const [name, re] of [['Change points', /change points/], ['What else this could break', /what else this could break/], ['Already in the system', /already in the system/], ['Checked and rejected', /checked and rejected/], ['Not scanned', /not scanned/]]) {
         if (!heading(impact, re)) p.push(`trace/impact.md has no "${name}" section (write "none" when empty)`);
       }
       for (const row of tableRows(impact).filter((r) => MUST.test(r))) {
         if (!FILE_REF.test(row)) p.push(`must-patch row without a file:line link: ${row.trim().slice(0, 100)}`);
       }
+      unaccounted(work, impact).forEach((x) => p.push(x));
     }
     const ba = needFile(work, 'ba.md', p);
     if (ba) {
@@ -88,10 +116,20 @@ const CHECKS = {
 
 export const CHECKED_STEPS = Object.keys(CHECKS);
 
-export function checkWork(work, step) {
+// Work files whose evidence links are checked against the project, per step.
+const LINK_FILES = {
+  analysis: ['trace/impact.md', 'ba.md'],
+  brief: ['ticket-brief.md'],
+  review: ['review.md'],
+  qa: ['qa-report.md'],
+};
+
+// With `root` (the project folder) the evidence links in the step's files are checked too.
+export function checkWork(work, step, { root } = {}) {
   const check = CHECKS[step];
   if (!check) throw new Error(`no check for step "${step}" (have: ${CHECKED_STEPS.join(', ')})`);
   const problems = [];
   check(work, problems);
+  if (root && LINK_FILES[step]) problems.push(...checkLinks({ work, root, files: LINK_FILES[step] }));
   return { step, problems };
 }

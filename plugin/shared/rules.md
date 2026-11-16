@@ -17,6 +17,7 @@ Evidence links are allowed and encouraged: attach the place in code that
 shows the claim, as a clickable markdown link with a path relative to the
 project folder, e.g. "…shows *Student already exists* ([students.service.ts:26-27](api/src/students/students.service.ts#L26-L27))".
 The owner clicks it to dig deeper; the sentence itself stays non-technical.
+Cite only lines you opened, and give the label and the link the same file and lines: `nqt.mjs check-links` checks every link against the real files, and a link that does not hold sends the work back.
 
 Talk about consequences, not mechanisms: not "missing null check in X" but
 "if a class has no teacher yet, the Timetable page breaks (link)".

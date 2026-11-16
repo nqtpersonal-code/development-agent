@@ -30,6 +30,7 @@ import { planCheck } from './lib/plancheck.mjs';
 import { checkWork, CHECKED_STEPS } from './lib/workcheck.mjs';
 import { findSilenced } from './lib/silenced.mjs';
 import { scanUntrusted } from './lib/untrusted.mjs';
+import { checkLinks } from './lib/links.mjs';
 import { briefSkeleton, parseAnswers, addOwnerAnswers } from './lib/brief.mjs';
 import { setupDetect } from './lib/setup.mjs';
 import { runSql } from './lib/sql.mjs';
@@ -517,8 +518,8 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
   'check-work'(args) {
     const work = args._[0];
     const step = args.step ?? args._[1];
-    if (!work || !step) throw new Error(`usage: check-work <WORK> --step <${CHECKED_STEPS.join('|')}>`);
-    const r = checkWork(work, String(step));
+    if (!work || !step) throw new Error(`usage: check-work <WORK> --step <${CHECKED_STEPS.join('|')}> [--root <PROJECT_ROOT>]`);
+    const r = checkWork(work, String(step), { root: args.root ? resolve(String(args.root)) : undefined });
     if (!r.problems.length) return void console.log(`check-work ${r.step}: complete`);
     console.log(`check-work ${r.step}: ${r.problems.length} problem(s) — send them back to the agent that wrote the files`);
     for (const x of r.problems.slice(0, 12)) console.log(`  - ${x}`);
@@ -542,6 +543,18 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
   },
   // scan-untrusted <file-or-folder>... : hidden characters and instruction-like phrases in text
   // that other people wrote (ticket, linked docs, pattern packs).
+  // check-links <WORK> --root <PROJECT_ROOT> [--file name.md ...]: do the evidence links in the
+  // work files point at real files and lines?
+  'check-links'(args) {
+    const work = args._[0];
+    if (!work || !args.root) throw new Error('usage: check-links <WORK> --root <PROJECT_ROOT> [--file name.md ...]');
+    const files = [].concat(args.file ?? []).length ? [].concat(args.file).map(String) : ['trace/impact.md', 'ba.md', 'ticket-brief.md', 'architecture.md', 'review.md', 'qa-report.md', 'final-report.md'];
+    const problems = checkLinks({ work, root: resolve(String(args.root)), files });
+    if (!problems.length) return void console.log('check-links: every evidence link points at a real file and line');
+    console.log(`check-links: ${problems.length} link(s) that do not hold — send them back to the agent that wrote them`);
+    for (const x of problems.slice(0, 12)) console.log(`  - ${x}`);
+    return 1;
+  },
   'scan-untrusted'(args) {
     const targets = args._;
     if (!targets.length) throw new Error('usage: scan-untrusted <file-or-folder>...');

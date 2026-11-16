@@ -117,7 +117,7 @@ function processOf(root, work) {
     }
   }
   const steps = STEPS_EXPECTED.map(([name, ok]) => ({ name, ok: ok(cmds, reads) }));
-  const check = spawnSync(process.execPath, [join(repoRoot, 'plugin', 'scripts', 'nqt.mjs'), 'check-work', work, '--step', 'analysis'], { encoding: 'utf8' });
+  const check = spawnSync(process.execPath, [join(repoRoot, 'plugin', 'scripts', 'nqt.mjs'), 'check-work', work, '--step', 'analysis', '--root', root], { encoding: 'utf8' });
   const problems = check.stdout.split('\n').filter((l) => l.startsWith('  - ')).map((l) => l.slice(4))
     // the eval runs the tracer alone: no ba.md is expected
     .filter((p) => !/^ba\.md/.test(p));

@@ -31,7 +31,7 @@ Read `DATA/projects/PROJECT/pitfalls.md` if present: each trap is a place to che
    - `nqt.mjs search --root <component> --term <name> [--context <table>] --out "WORK/trace/search-<name>.json"` for names impact did not cover.
    - `nqt.mjs schema --project PROJECT --root "PROJECT_ROOT" --out "WORK/trace/schema.json"` when relations or look-alike columns matter.
    - `adapter-assumption-failed` → stop and return `need-adapter-update`.
-2. **Confirm in code**: open each candidate **around the reported lines** (Read with offset/limit; whole files only when short). Keep a place only if it really reads, writes or derives from the start column; record file:line ranges. Unsettled places (dynamic SQL, other systems) are `suspected` — never drop them silently.
+2. **Confirm in code**: open each candidate **around the reported lines** (Read with offset/limit; whole files only when short). Keep a place only if it really reads, writes or derives from the start column; record file:line ranges. Unsettled places (dynamic SQL, other systems) are `suspected` — never drop them silently — and each says **what would confirm or rule it out** (the file to read, the data to query, the person to ask).
 3. **Variants and change points**: `nqt.mjs siblings --project PROJECT --root "PROJECT_ROOT" --table <t>` and `siblings --file <f> --line <n>` on the main implementation; confirm each. Every fragment of the changed behaviour is a change point (must patch / do not touch / re-check) with its `nqt.mjs radius --file <f> --function <fn>`. Flag smells.
 4. **Both directions**: where the data is written (forms, imports, jobs) and every place it is read (screens, exports, messages, reports, jobs, other services).
 5. **Relaxed or removed rules** ("When a rule is relaxed"): when the ticket loosens a constraint, list the screens and lookups that relied on it and the existing rows the old rule hid (deleted, hidden, already duplicated).
@@ -55,7 +55,9 @@ Read `DATA/projects/PROJECT/pitfalls.md` if present: each trap is a place to che
 Section headings keep their English names and categories are written in English (see the format in your brief); every must-patch row names its file and line.
 
 
-- **Owner part** (in `LANGUAGE`, "Owner-facing words"): each affected screen/function as users know it with certainty and a link; "how it works today" with real data; **Variants**; **Change points** (in plain words, with category and what users see there); **What else this could break**; **Already in the system** (odd data or behaviour seen, not caused by the ticket); **Not scanned** as questions.
+- **Every place the scripts report is accounted for**: it is a place in this map (confirmed or suspected), or it is listed under **Checked and rejected** with the reason (for example "`teacher.ts` — `fullName` there is the teacher's name, not the student's"). `nqt.mjs check-work` compares your map with `impact.json` and sends it back when a place is neither.
+- **Evidence links are checked by script** (`nqt.mjs check-links`): cite only files and lines you opened; a label and its link name the same file and the same lines.
+- **Owner part** (in `LANGUAGE`, "Owner-facing words"): each affected screen/function as users know it with certainty and a link; "how it works today" with real data; **Variants**; **Change points** (in plain words, with category and what users see there); **What else this could break**; **Already in the system** (odd data or behaviour seen, not caused by the ticket); **Checked and rejected** (candidates you opened and ruled out, one line each with why — "none" when empty); **Not scanned** as questions.
 - **Technical part**: place list with layer, file:line, chain (`via`), routes reached, relations used, queries run.
 
 ## Survey (TASK=survey for adapter / survey changes)

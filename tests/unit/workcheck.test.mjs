@@ -35,7 +35,11 @@ test('check-work brief: categories, files of must-patch rows, open questions', (
 test('check-work analysis: required impact sections in any language, ticket kind', () => {
   const impact = '## Điểm cần thay đổi (Change points)\n| a `x.ts:1` | must patch |\n## What else this could break\nnone\n## Already in the system\nnone\n';
   const r = checkWork(work({ 'trace/impact.md': impact, 'ba.md': 'Screen design needed: no' }), 'analysis');
-  assert.deepEqual(r.problems, ['trace/impact.md has no "Not scanned" section (write "none" when empty)', 'ba.md does not give the ticket kind (bug / change / feature)']);
+  assert.deepEqual(r.problems, [
+    'trace/impact.md has no "Checked and rejected" section (write "none" when empty)',
+    'trace/impact.md has no "Not scanned" section (write "none" when empty)',
+    'ba.md does not give the ticket kind (bug / change / feature)',
+  ]);
 });
 
 test('check-work test-design and qa: every criterion covered (TC1a counts for TC1), bug reproduction, results, test data', () => {
@@ -70,4 +74,24 @@ test('planCheck follows hyphenated labels and plain or bare file names', () => {
   assert.equal(r.verdict, 'pass');
   const miss = planCheck({ brief: brief.replace('`api/src/students/students.service.ts:30`', '(ClassDetailPage.tsx:24)'), plan: '### Task 1 (TC1, TC2)\n' });
   assert.deepEqual(miss.missingMustPatch, ['ClassDetailPage.tsx']);
+});
+
+test('check-work analysis: every place the impact script reports is confirmed or rejected in impact.md', () => {
+  const impact = [
+    '## Change points', '| a `api/src/students/students.service.ts:30` | must patch |',
+    '## What else this could break', 'none', '## Already in the system', 'none',
+    '## Checked and rejected', '- classes.controller.ts: only lists classes',
+    '## Not scanned', 'none',
+  ].join('\n');
+  const json = JSON.stringify({ places: [
+    { file: 'api/src/students/students.service.ts', certainty: 'confirmed-uses-column' },
+    { file: 'api/src/classes/classes.controller.ts', certainty: 'confirmed-uses-column' },
+    { file: 'api/src/fees/fees.controller.ts', certainty: 'related-through-table' },
+    { file: 'api/prisma/seed.mjs', certainty: 'confirmed-uses-column' },
+    { file: 'api/src/students/students.service.spec.ts', certainty: 'confirmed-uses-column' },
+  ] });
+  const d = work({ 'trace/impact.md': impact, 'trace/impact.json': json, 'ba.md': 'Screen design needed: no\nTicket kind: change' });
+  const r = checkWork(d, 'analysis');
+  assert.equal(r.problems.length, 1);
+  assert.match(r.problems[0], /^api\/src\/fees\/fees\.controller\.ts \(related-through-table\) .*neither confirms nor rules it out/);
 });

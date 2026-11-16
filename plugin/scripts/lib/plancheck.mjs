@@ -1,7 +1,7 @@
 // Deterministic plan check: every acceptance criterion has a task, every
 // must-patch file is in the plan, no do-not-touch file is. Regression checks
 // belong to QA's scenarios, not to the plan, so they are not required here.
-const CODE_EXT = 'tsx?|jsx?|mjs|cjs|vue|svelte|cs|cshtml|razor|sql|py|java|kt|go|rb|php|html|scss|css';
+export const CODE_EXT = 'tsx?|jsx?|mjs|cjs|vue|svelte|cs|cshtml|razor|sql|py|java|kt|go|rb|php|html|scss|css';
 // A path with a folder (any extension), or a bare code file name.
 const FILE_RE = new RegExp(`([\\w.-]+(?:/[\\w.-]+)+\\.[A-Za-z]{1,6}|\\b[\\w-]+(?:\\.[\\w-]+)*\\.(?:${CODE_EXT}))\\b`, 'g');
 // Labels may be written with spaces, hyphens or underscores; briefs may also
