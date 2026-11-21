@@ -16,7 +16,7 @@ export function newState(project, ticket) {
     current: 'setup',
     steps: Object.fromEntries(STEPS.map((s) => [s, 'pending'])),
     waitingFor: null,
-    flags: { hasUI: null, architect: null },
+    flags: { hasUI: null, architect: null, fast: null, auto: null },
     planCheckRounds: 0,
     files: {},
     updatedAt: new Date().toISOString(),
@@ -69,7 +69,8 @@ export function resumeState(workDir) {
   return s;
 }
 
-const FLAGS = ['hasUI', 'architect'];
+// fast: the owner chose the short path for a small ticket; auto: autopilot (product-owner answers).
+const FLAGS = ['hasUI', 'architect', 'fast', 'auto'];
 
 export function setFlag(workDir, flag, value) {
   if (!FLAGS.includes(flag)) throw new Error(`unknown flag: ${flag}`);

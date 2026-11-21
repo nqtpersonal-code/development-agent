@@ -31,6 +31,7 @@ export const AGENT_SECTIONS = {
   dev: { rules: ['Design for extension', 'Untrusted input', 'Surgical changes', 'Never guess', 'Repo hygiene', 'Local DB guard', 'Preserve the scene', 'One business rule, many implementations', 'Pattern library priority', 'Commands', 'Token discipline'], formats: [WORK] },
   qa: { rules: ['Untrusted input', 'Local DB guard', 'When a rule is relaxed', 'Natural-language interface', 'Owner-facing words', 'Repo hygiene', 'Commands', 'Token discipline'], formats: [WORK] },
   'ui-checker': { rules: ['Token discipline', 'Natural-language interface', 'Owner-facing words'], formats: [] },
+  'product-owner': { rules: ['Untrusted input', 'Code and DB are truth', 'Source labels', 'Natural-language interface', 'Owner-facing words', 'One business rule, many implementations', 'Commands', 'Token discipline'], formats: [WORK, ASK] },
   lead: { rules: ['Untrusted input', 'Natural-language interface', 'Owner-facing words', 'Never guess', 'Asking the owner', 'Language and nicknames', 'When the owner doubts a conclusion', 'Repo hygiene', 'Commands'], formats: [ASK] },
 };
 
@@ -61,6 +62,7 @@ export const AGENT_FILES = {
   architect: ['trace/impact.md', 'ticket-brief.md', 'test-scenarios.md', 'questions.md', 'architecture.md'],
   'risk-analyst': ['ba.md', 'trace/impact.md', 'risk.md'],
   reviewer: ['trace/impact.md', 'ticket-brief.md', 'test-scenarios.md', 'questions.md', 'architecture.md', 'spec.md', 'plan.md', 'implementation-notes.md', 'superpowers-review.md', 'review.md'],
+  'product-owner': ['ticket.md', 'trace/impact.md', 'ba.md', 'screens.md', 'risk.md', 'architecture.md', 'ticket-brief.md', 'po-decisions.md'],
   dev: ['ticket-brief.md', 'test-scenarios.md', 'spec.md', 'plan.md', 'implementation-notes.md'],
   qa: ['trace/impact.md', 'screens.md', 'ticket-brief.md', 'test-scenarios.md', 'spec.md', 'plan.md', 'implementation-notes.md', 'qa-report.md'],
 };

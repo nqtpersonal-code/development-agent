@@ -51,6 +51,7 @@ Open Claude Code **in the ticket's project folder**, then:
 | Command | What it does |
 |---|---|
 | `/nqt:work-ticket <ticket>` | works a whole ticket (issue number, with or without `#`, or the issue link) |
+| `/nqt:auto-ticket <ticket>` | works a whole ticket **on autopilot**: a product-owner agent answers the questions from the ticket, your earlier decisions and how the system already works; it stops at red lines (bulk data changes, money, permissions, personal data, a self-contradicting ticket) and at a cost cap ($10 by default); the final report lists every decision made for you. Never pushes |
 | `/nqt:ask-system` | answers questions about the current system |
 | `/nqt:retro <ticket>` | lessons learned after a ticket (best in a fresh session) |
 | `/nqt:add-pattern <folder>` | adds a best-practice pattern pack to the library |
@@ -58,6 +59,15 @@ Open Claude Code **in the ticket's project folder**, then:
 The project name comes from the folder's `git remote`: every ticket folder cloned from the same repo shares one project profile. To use another name (for example to group the front-end and back-end repos under one profile), put it before the ticket: `/nqt:work-ticket shop 123`; the name is remembered.
 
 The first time with a project, the team detects what it can and asks you a few questions to build the project profile and, when needed, a tracer adapter (with its own tests); later tickets reuse them.
+
+**Small tickets** (a bug or a change with at most three places to patch, no new screen, no change to how data is stored or to a server call) get a **short path** offer after analysis: it skips screen design, risk analysis, technical design, brainstorming and the separate planning round; review and QA still run.
+
+**Cost:** agents run on Sonnet (Haiku for setup and the UI checker) whatever model your session uses. To give one agent a stronger model, add it to `config.md`:
+
+```
+agentModels:
+  reviewer: opus
+```
 
 ## Connecting to a GitLab (or GitHub) project
 
@@ -140,7 +150,7 @@ Everything stays outside the plugin and outside the project repos, in `~/.claude
 
 ```
 ~/.claude/nqt/
-├── config.md                 language, personal review rules folder, nicknames
+├── config.md                 language, design bias, model per agent, autopilot cost cap and red lines, personal review rules folder, nicknames
 ├── review-rules/             your personal review rules (every .md)
 ├── patterns/<pack>/          shared pattern library (two starter packs included)
 ├── runtime/                  only the DB drivers your projects use + playwright, each installed when first needed

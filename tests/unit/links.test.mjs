@@ -52,7 +52,7 @@ test('check-work with a project folder also checks the evidence links of that st
   const root = project();
   const impact = ['## Change points', '| a [students.service.ts:30](api/src/students/students.service.ts#L30) | must patch |', '## What else this could break', 'none', '## Already in the system', 'none', '## Checked and rejected', 'none', '## Not scanned', 'none', '[gone.ts:4](api/src/gone.ts#L4)'].join('\n');
   const d = tmp();
-  writeFileSync(join(d, 'ba.md'), 'Screen design needed: no\nTicket kind: bug');
+  writeFileSync(join(d, 'ba.md'), 'Screen design needed: no\nTicket kind: bug\nFast path: eligible');
   mkdirSync(join(d, 'trace'), { recursive: true });
   writeFileSync(join(d, 'trace', 'impact.md'), impact);
   assert.deepEqual(checkWork(d, 'analysis').problems, []);

@@ -36,6 +36,8 @@ bind you. Do not read `rules.md`, `formats.md`, agent prompts or plugin scripts.
 2. `start` already printed the current step's instructions, and every `state --set <step>=done|skipped` prints the next step's instructions in the same call — follow them; there is no separate call per step. Use `guide --step <step>` only for a step you have not been shown (e.g. `build-adapter`, `doubt`). Never read the whole flow.
 3. Announce each step to the owner with its name (in `LANGUAGE`) and position, e.g. "Step Analysis (2/15)".
 
+Short path (`start` printed `fast path`): after analysis, follow `guide --step fast-path` instead of the guides of the steps it skips.
+
 Order: setup → analysis → screens → risk → brief → test-design → free-qa → architect → design → plan → plan-check → implement → review → qa → report.
 
 | step | display name |
@@ -60,7 +62,8 @@ Show these names translated into `LANGUAGE`; nicknames from `start` replace them
 
 ## 2. Dispatching
 
-- nqt agents: `nqt:setup`, `nqt:ba`, `nqt:code-tracer`, `nqt:screen-designer`, `nqt:system-explainer`, `nqt:architect`, `nqt:risk-analyst`, `nqt:plan-checker`, `nqt:dev`, `nqt:reviewer`, `nqt:qa`, `nqt:ui-checker` (bare names if your harness lists them without the prefix). Coding and fixes go to `nqt:dev`; planning and plan fixes go to general-purpose subagents, as the guide says.
+- Models: each agent runs on its own model (sonnet; haiku for setup and ui-checker). When `start` prints `pass model= when dispatching: reviewer=opus, …`, pass that model in the dispatch of that agent.
+- nqt agents: `nqt:product-owner` (autopilot only), `nqt:setup`, `nqt:ba`, `nqt:code-tracer`, `nqt:screen-designer`, `nqt:system-explainer`, `nqt:architect`, `nqt:risk-analyst`, `nqt:plan-checker`, `nqt:dev`, `nqt:reviewer`, `nqt:qa`, `nqt:ui-checker` (bare names if your harness lists them without the prefix). Coding and fixes go to `nqt:dev`; planning and plan fixes go to general-purpose subagents, as the guide says.
 - Pass paths, not content: `PLUGIN`, `DATA`, `PROJECT`, `TICKET`, `PROJECT_ROOT`, `WORK`, `LANGUAGE` + step inputs. Agents read files and load their own rules.
 - Never open the agents' work files to re-check or recount them; read their ≤15-line return. Need more detail? Ask the agent to put it in its return next time. Open a file only for a part you must show the owner verbatim.
 - Independent agents run in parallel. While an agent runs, you simply wait: never record that as `waitingFor`.
@@ -72,7 +75,7 @@ Show these names translated into `LANGUAGE`; nicknames from `start` replace them
 - `S` = `node "PLUGIN/scripts/nqt.mjs" state "WORK"`. Before a question batch or approval: `S --wait question "<ids>"` or `S --wait approval "<what>"`; after the answer: `S --clear-wait`. These and `clear` are the only wait kinds.
 - Owner doubts a conclusion → `guide --step doubt`.
 
-## 4. Checkpoints (always stop for the owner)
+## 4. Checkpoints (always stop for the owner, except in autopilot)
 
 After analysis · screens (when run) · risk choices · brief approval · whether to run the architect step · whether to re-run brainstorming · any divergence from the plan · the final report.
 
@@ -84,7 +87,16 @@ then `/nqt:work-ticket <ticket>` to continue in a fresh, cheaper session (or
 just say "continue" (in any language) to go on here), and **end your turn**. Do not
 start the next step in the same turn.
 
-## 6. Never
+## 6. Autopilot (`start` printed `mode: autopilot`)
+
+Nobody is at the keyboard. Run the same flow, with these changes:
+- **Never use the question tool and never wait for the owner**, except at a red line. Every question batch, every approval (brief, screens, whether to run the architect step or brainstorming, the fast path) goes to **`nqt:product-owner`** with `ASK` (the file and question ids, or the approval). Record its decided answers with `nqt.mjs answer "WORK" --by-po --file <UTF-8 file of Q<n>: lines>`.
+- **Red line**: the product-owner returns `owner-decides: Q<k>` → `S --wait question "Q<k> (red line: <why, one line>)"` and **end the session**. The runner stops and the owner answers later, in a normal session.
+- No free Q&A (`S --set free-qa=skipped`), no brainstorming (the design step writes the short pointer spec), no clickable mockup, no questionnaire for someone else (it is a red line or the product-owner decides).
+- `/clear` boundaries: do what `boundary:` says and end the session; the runner starts a fresh one.
+- The owner doubts nothing during the run: the **final report starts with "Decisions made for you"** (from `WORK/po-decisions.md`, lowest confidence first, each with its source and what would change if the owner chose differently), so the owner reviews them before pushing.
+
+## 7. Never
 
 Push, open PRs/MRs, merge, use git worktrees, write work files into the repo,
 edit `.gitignore`/team docs, write to a non-local DB, invent business rules,

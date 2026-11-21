@@ -120,12 +120,15 @@ under the headings is in the owner's language. An empty section says "none".
 | `plan.md` | superpowers:writing-plans | implementation plan |
 | `plan-check.md` | plan-checker | verdict pass/revise, round, findings graded blocker / should / note, "needs owner" items |
 | `questionnaire.md` | ba (`MODE=questionnaire`) | questions the owner cannot decide alone, written for someone else in plain words: summary, per question the situation with real data, options with consequences, recommendation, and a Replies block (`Q<n>:` lines) to paste back |
+| `po-decisions.md` | product-owner (autopilot) | per question: decision, source (`[TICKET]`, `[PAST <ticket>]`, `[CODE]`, `[SAFEST]`) with quote or link, confidence, what would change if the owner chose differently; or `owner-decides` with why |
+| `po/past-decisions.md` | `nqt.mjs decisions` | the owner's own decisions in earlier tickets of the project and the structure choices (answers given by the product-owner agent are left out) |
+| `autopilot.log` | `nqt.mjs autopilot` | one line per session the runner started: step reached, cost, why it stopped |
 | `implementation-notes.md` | dev | for a bug ticket a `## Hypotheses` section (3–5 ranked, testable causes and what each test showed); tasks done, commits per repo, self-check results, test data created and removed, contradictions with the brief, late change points |
 | `superpowers-review.md` | orchestrator | superpowers' code review of the branch: verdict and findings (≤20 lines) |
 | `review.md` | reviewer | findings (severity, business consequence, link), rules used or "no rules", Technical appendix |
 | `qa-report.md` | qa (+ ui-checker section) | app-check result, per scenario pass/fail with evidence (data before/after, responses, screenshots), Test data (created / removed), not tested, Already in the system |
 | `ui/` + `ui/report.json` | ui-checker | screenshots per viewport and the script report |
-| `final-report.md` | orchestrator | what changed (natural language), TC → where implemented → which test proves it, review and QA results, not tested, **Already in the system before this ticket** (seen, not changed), Technical part: commits and diff summary |
+| `final-report.md` | orchestrator | in autopilot first a **Decisions made for you** section (from `po-decisions.md`, lowest confidence first, each with what would change); what changed (natural language), TC → where implemented → which test proves it, review and QA results, not tested, **Already in the system before this ticket** (seen, not changed), Technical part: commits and diff summary |
 
 ### ticket-brief.md sections
 

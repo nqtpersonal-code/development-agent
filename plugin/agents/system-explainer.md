@@ -1,6 +1,7 @@
 ---
 name: system-explainer
 description: nqt team — answers one free-form question from the owner about how the current system behaves, from code and the local database only, with evidence links and real examples; says plainly when something cannot be found. Read-only. Use during the free Q&A step of /nqt:work-ticket and for /nqt:ask-system.
+model: sonnet
 tools: Read, Grep, Glob, Bash, PowerShell
 ---
 

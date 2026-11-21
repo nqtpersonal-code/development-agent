@@ -39,6 +39,7 @@ test('check-work analysis: required impact sections in any language, ticket kind
     'trace/impact.md has no "Checked and rejected" section (write "none" when empty)',
     'trace/impact.md has no "Not scanned" section (write "none" when empty)',
     'ba.md does not give the ticket kind (bug / change / feature)',
+    'ba.md does not say whether the short path is eligible (Fast path: eligible / not eligible, with why)',
   ]);
 });
 
@@ -90,7 +91,7 @@ test('check-work analysis: every place the impact script reports is confirmed or
     { file: 'api/prisma/seed.mjs', certainty: 'confirmed-uses-column' },
     { file: 'api/src/students/students.service.spec.ts', certainty: 'confirmed-uses-column' },
   ] });
-  const d = work({ 'trace/impact.md': impact, 'trace/impact.json': json, 'ba.md': 'Screen design needed: no\nTicket kind: change' });
+  const d = work({ 'trace/impact.md': impact, 'trace/impact.json': json, 'ba.md': 'Screen design needed: no\nTicket kind: change\nFast path: not eligible' });
   const r = checkWork(d, 'analysis');
   assert.equal(r.problems.length, 1);
   assert.match(r.problems[0], /^api\/src\/fees\/fees\.controller\.ts \(related-through-table\) .*neither confirms nor rules it out/);

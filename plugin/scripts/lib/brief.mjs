@@ -14,8 +14,12 @@ export function parseAnswers(text) {
     .map((m) => ({ q: m[1], a: m[2] }));
 }
 
-export function addOwnerAnswers(text, answers, date) {
-  const lines = answers.map(({ q, a }) => `- ${q} → ${a} (${date})`).join('\n');
+// Answers given by the product-owner agent in autopilot carry this tag, so the final
+// report can list them for the owner and they never count as the owner's own precedent.
+export const PO_TAG = '[decided by the product-owner agent]';
+
+export function addOwnerAnswers(text, answers, date, { byPo = false } = {}) {
+  const lines = answers.map(({ q, a }) => `- ${q} → ${a} (${date})${byPo ? ` ${PO_TAG}` : ''}`).join('\n');
   const head = /^##[^\n]*Owner answers[^\n]*\n/im.exec(text);
   if (!head) return `${text.trimEnd()}\n\n## Owner answers\n\n${lines}\n`;
   const start = head.index + head[0].length;

@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { parseFrontmatter } from '../../plugin/scripts/lib/frontmatter.mjs';
 
 const plugin = fileURLToPath(new URL('../../plugin/', import.meta.url));
-const AGENTS = ['setup', 'ba', 'code-tracer', 'screen-designer', 'system-explainer', 'architect', 'risk-analyst', 'plan-checker', 'dev', 'reviewer', 'qa', 'ui-checker'];
-const SKILLS = ['work-ticket', 'ask-system', 'retro', 'add-pattern'];
+const AGENTS = ['product-owner', 'setup', 'ba', 'code-tracer', 'screen-designer', 'system-explainer', 'architect', 'risk-analyst', 'plan-checker', 'dev', 'reviewer', 'qa', 'ui-checker'];
+const SKILLS = ['auto-ticket', 'work-ticket', 'ask-system', 'retro', 'add-pattern'];
 const RULE_HEADINGS = [
   'Natural-language interface', 'Source labels', 'Never guess', 'Code and DB are truth', 'Surgical changes',
   'Repo hygiene', 'Local DB guard', 'Language and nicknames', 'Confidentiality', 'Pattern library priority',

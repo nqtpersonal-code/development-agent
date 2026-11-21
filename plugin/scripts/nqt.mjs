@@ -33,6 +33,8 @@ import { scanUntrusted } from './lib/untrusted.mjs';
 import { checkLinks } from './lib/links.mjs';
 import { lintRepo } from './lib/lintchanged.mjs';
 import { addChoice } from './lib/choices.mjs';
+import { pastDecisions, formatDecisions } from './lib/decisions.mjs';
+import { runAutopilot } from './lib/autopilot.mjs';
 import { stampCode, changesSinceStamp } from './lib/stamp.mjs';
 import { briefSkeleton, parseAnswers, addOwnerAnswers } from './lib/brief.mjs';
 import { setupDetect } from './lib/setup.mjs';
@@ -439,6 +441,15 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     const done = STEPS.filter((x) => ['done', 'skipped'].includes(s.steps[x])).length;
     console.log(`PLUGIN="${slash(pluginRoot)}"\nDATA="${slash(dataDir)}"\nPROJECT=${project} (${found.source})\nPROJECT_ROOT="${slash(root)}"\nWORK="${slash(work)}"\nLANGUAGE=${cfg.language}`);
     console.log(`nicknames: ${nick}`);
+    const overrides = Object.entries(cfg.agentModels);
+    console.log(`agent models: each agent's own (sonnet; haiku for setup and ui-checker)${overrides.length ? `; pass model= when dispatching: ${overrides.map(([a, m]) => `${a}=${m}`).join(', ')}` : ''}`);
+    // Autopilot only for this session: --auto, or NQT_AUTOPILOT=1 set by the autopilot runner. Opening the
+    // ticket normally afterwards is "with the owner" (to answer a red-line question); the flag stays only
+    // as a record that the product-owner agent answered some questions (the final report lists them).
+    const auto = Boolean(args.auto) || process.env.NQT_AUTOPILOT === '1';
+    if (auto) setFlag(work, 'auto', true);
+    const flags = readState(work).flags ?? {};
+    console.log(`mode: ${auto ? `autopilot — the product-owner agent answers for the owner; red lines stop the run; cost cap $${cfg.autopilot.maxCostUsd}` : 'with the owner'}${flags.fast ? '; fast path (small ticket)' : ''}`);
     console.log(`design bias: ${cfg.designBias}${{ ask: ' (new code gets a seam for growth; the owner decides the structure choices that matter; existing logic stays untouched)', extensible: ' (new code gets a seam for growth; existing logic stays untouched)', minimal: ' (smallest change only)' }[cfg.designBias]}`);
     console.log(runtimeLine);
     console.log(`project.md: ${existsSync(join(dataDir, 'projects', project, 'project.md')) ? 'present' : 'missing (setup will detect it)'}`);
@@ -496,7 +507,7 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
   },
   answer(args) {
     const work = args._[0];
-    if (!work) throw new Error('usage: answer <WORK> (--q Q1 --a "answer")... | --file answers.txt');
+    if (!work) throw new Error('usage: answer <WORK> (--q Q1 --a "answer")... | --file answers.txt [--by-po]');
     const qs = [].concat(args.q ?? []);
     const as = [].concat(args.a ?? []);
     const answers = qs.map((q, i) => ({ q: String(q), a: as[i] === undefined || as[i] === true ? '' : String(as[i]) }));
@@ -504,8 +515,22 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     if (!answers.length || answers.some((x) => !x.a)) throw new Error('every --q needs an --a, or the file needs "Q1: answer" lines');
     const file = join(work, 'ticket-brief.md');
     const text = existsSync(file) ? readFileSync(file, 'utf8') : briefSkeleton();
-    writeFileSync(file, addOwnerAnswers(text, answers, new Date().toISOString().slice(0, 10)), 'utf8');
-    console.log(`owner answers: ${answers.map((x) => x.q).join(', ')} added to ${slash(file)}`);
+    writeFileSync(file, addOwnerAnswers(text, answers, new Date().toISOString().slice(0, 10), { byPo: Boolean(args['by-po']) }), 'utf8');
+    console.log(`${args['by-po'] ? 'product-owner agent' : 'owner'} answers: ${answers.map((x) => x.q).join(', ')} added to ${slash(file)}`);
+  },
+  // decisions --project <p> [--except <ticket>] [--out file]: the owner's own past decisions in this
+  // project (Owner answers of every ticket, structure choices), for the product-owner agent.
+  decisions(args) {
+    const project = args.project;
+    if (!project || project === true) throw new Error('usage: decisions --project <p> [--except <ticket>] [--out file]');
+    const text = formatDecisions(pastDecisions({ dataDir: getDataDir(), project: String(project), exceptTicket: args.except }));
+    if (args.out) {
+      mkdirSync(dirname(String(args.out)), { recursive: true });
+      writeFileSync(String(args.out), text, 'utf8');
+      const n = text.split(/\r?\n/).filter((l) => l.startsWith('- ')).length;
+      return void console.log(`decisions: ${n} past decision(s) of the owner written to ${slash(String(args.out))}`);
+    }
+    console.log(text.trimEnd());
   },
   async sql(args) {
     const ctx = projectContext(args);
@@ -558,6 +583,44 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     console.log(`silenced: ${hits.length} added line(s) switch a check off instead of satisfying it, or leave debugging behind`);
     for (const h of hits.slice(0, 12)) console.log(`  ${h.repo === '.' ? '' : `${h.repo}/`}${h.file}:${h.line} [${h.kind}] ${h.text}`);
     return 1;
+  },
+  // autopilot --ticket <t> [--root dir] [--project p] [--max-cost usd] [--max-sessions n] [--model m]:
+  // runs the ticket end to end in fresh headless sessions, the product-owner agent answering for the
+  // owner, and stops when done, at a red line, at the cost cap, or when stuck.
+  autopilot(args) {
+    const dataDir = getDataDir();
+    ensureDataDir(dataDir, pluginRoot);
+    const root = resolve(args.root ?? process.cwd());
+    const ticketRef = String(args.ticket ?? args._[0] ?? '');
+    if (!ticketRef) throw new Error('usage: autopilot --ticket <id> [--root dir] [--project p] [--max-cost usd] [--max-sessions n] [--model m]');
+    if (typeof args.project === 'string') rememberProject({ root, dataDir, project: args.project });
+    const found = resolveProject({ root, dataDir, explicit: typeof args.project === 'string' ? args.project : undefined });
+    if (!found.project) {
+      console.log('autopilot: need-project — no git remote here; run again with --project <name>');
+      return 3;
+    }
+    const project = found.project;
+    const ticket = parseTicketRef(ticketRef) ?? ticketRef.replace(/[^\w.-]+/g, '-');
+    const work = join(dataDir, 'work', project, ticket);
+    const cfg = projectConfig(dataDir, project);
+    const maxCostUsd = Number(args['max-cost']) > 0 ? Number(args['max-cost']) : cfg.autopilot.maxCostUsd;
+    const r = runAutopilot({
+      root, work, ticket, project: typeof args.project === 'string' ? args.project : undefined, maxCostUsd,
+      maxSessions: Number(args['max-sessions']) > 0 ? Number(args['max-sessions']) : 12,
+      model: typeof args.model === 'string' ? args.model : undefined,
+      onSession: (line) => console.log(`  ${line}`),
+    });
+    const next = {
+      finished: `done — read "${slash(join(work, 'final-report.md'))}" (decisions made for you come first), then review the diff and push yourself`,
+      'needs-owner': `waiting for you: ${r.detail} — open the ticket normally (/nqt:work-ticket ${ticket}) to answer, then run autopilot again`,
+      'cost-cap': `stopped at the cost cap (${r.detail}) — continue with /nqt:work-ticket ${ticket}, or run autopilot again with a higher --max-cost`,
+      stuck: `stopped: ${r.detail} — open /nqt:work-ticket ${ticket} to see what is blocking`,
+      error: `stopped on an error: ${r.detail}`,
+      'too-many-sessions': `stopped after ${r.sessions} sessions — open /nqt:work-ticket ${ticket} to continue`,
+    }[r.reason];
+    console.log(`autopilot: ${r.reason} after ${r.sessions} session(s), $${r.cost.toFixed(2)}, at step ${r.step ?? '?'} — ${next}`);
+    console.log(`log: ${slash(join(work, 'autopilot.log'))}`);
+    return r.reason === 'finished' ? 0 : 1;
   },
   // structure-choice --project <p> --ticket <n> --area "..." --choice "..." [--why "..."]: records the
   // owner's decision about the structure of new code, so the architect does not ask it again.

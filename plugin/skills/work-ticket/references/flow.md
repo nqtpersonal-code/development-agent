@@ -32,7 +32,7 @@ Goal: `DATA/projects/<p>/tracer/adapter.json` + `tests.json` that pass.
 3. Dispatch `nqt:ba`.
    Then `nqt.mjs check-work "WORK" --step analysis --root "PROJECT_ROOT"` — problems → re-dispatch the same agent once with the problem list; still problems → tell the owner what is missing.
 4. `S --flag hasUI=true|false` from ba.md ("UI touched").
-5. **Checkpoint 1** — show: what the ticket asks (short); how it works today (links, real data, every variant); the change points ("looks like one change, is really N places"); what the change could break elsewhere (from impact and "rules.md → When a rule is relaxed"); existing data the change will show or hide; contradictions; then the first batch of up to 4 independent questions (question tool, recommended option first). **Before showing them, drop every question whose answer is a fact** (code, data, ticket can show it): send those to `nqt:code-tracer` (`TASK=re-check`, the facts to establish) in one dispatch and use the result as the evidence of the real questions. Add one line to the message: "If a question is for someone else to decide, tell me its number and I will write them a short questionnaire."
+5. **Checkpoint 1** — show: what the ticket asks (short); how it works today (links, real data, every variant); the change points ("looks like one change, is really N places"); what the change could break elsewhere (from impact and "rules.md → When a rule is relaxed"); existing data the change will show or hide; contradictions; then the first batch of up to 4 independent questions (question tool, recommended option first). **Before showing them, drop every question whose answer is a fact** (code, data, ticket can show it): send those to `nqt:code-tracer` (`TASK=re-check`, the facts to establish) in one dispatch and use the result as the evidence of the real questions. Add one line to the message: "If a question is for someone else to decide, tell me its number and I will write them a short questionnaire." When `ba.md` says **Fast path: eligible**, add one question to the first batch: *the short path for this small ticket* (recommended first: it skips screen design, risk analysis, technical design, brainstorming and the separate planning round; review and QA still run) or *the full flow*. Short path chosen → `S --flag fast=true` and, after analysis, `guide --step fast-path`.
 6. Loop: record answers with `nqt.mjs answer "WORK" --q Q1 --a "<answer>" [--q Q2 --a "…"]` (non-ASCII answers: write them as `Q1: <answer>` lines to a new UTF-8 file in `WORK/` and pass `--file`); it adds them to `WORK/ticket-brief.md` → Owner answers, creating the skeleton if needed. Never open the brief to do this. Re-dispatch `nqt:ba` only when answers open new questions or change scope; collect **all** answers of a round before re-dispatching any agent. Until no `[GUESS]` remains.
    **The owner cannot decide a question** (any wording: "ask the customer", "I don't know", "the PM decides"): dispatch `nqt:ba` with `MODE=questionnaire` and those question ids; then `nqt.mjs check-work "WORK" --step questionnaire`; show the owner the path of `WORK/questionnaire.md` in one line and what to do with it; `S --wait question "waiting for replies to Q3, Q5 from <who>"`. Continue with the questions that do not depend on them. If none remain, end the turn: the owner comes back with the replies (a new session works: `start` prints the waiting question), you write them as `Q3: …` lines to a UTF-8 file in `WORK/`, record them with `answer --file`, `S --clear-wait` and go on.
 7. `S --set analysis=done`.
@@ -101,8 +101,22 @@ When the owner doubts a conclusion at any step: dispatch **one** fresh `nqt:code
 ## report
 
 1. Write `WORK/final-report.md` (formats.md).
-2. **Checkpoint 7** — what changed for users; TC → proof table; review and QA results (screenshots for UI); what was not tested; **already in the system before this ticket** (problems or odd data the team saw but did not change, e.g. a deleted student still listed on another page — from impact.md, review.md and qa-report.md); then a "Technical part" with commits per repo (`git log BASE..HEAD --oneline` in each repo from `nqt.mjs repos`). The owner pushes; suggest `/nqt:retro <ticket>` in a fresh session.
+2. In autopilot (`start` printed `mode: autopilot`) the report opens with **Decisions made for you** from `WORK/po-decisions.md`: each decision in one line with its source and confidence, lowest confidence first, and what would change if the owner chose differently; then any red line still waiting.
+   **Checkpoint 7** — what changed for users; TC → proof table; review and QA results (screenshots for UI); what was not tested; **already in the system before this ticket** (problems or odd data the team saw but did not change, e.g. a deleted student still listed on another page — from impact.md, review.md and qa-report.md); then a "Technical part" with commits per repo (`git log BASE..HEAD --oneline` in each repo from `nqt.mjs repos`). The owner pushes; suggest `/nqt:retro <ticket>` in a fresh session.
 3. `S --set report=done`.
+
+## fast-path
+
+Only when the owner (or, in autopilot, the product-owner agent) chose the short path and `state` has `fast=true`. After analysis:
+1. `S --set screens=skipped --set risk=skipped` (a smell that still needs a quick question is asked with the brief's questions).
+2. **brief** as usual (`nqt:ba` `MODE=brief`, `check-work --step brief`, approval).
+3. **test-design**: `nqt:qa` `MODE=design` with `SHORT=yes` — one scenario per criterion, `P…` for a bug, no browser scenario unless a screen changes.
+4. `S --set free-qa=skipped --set architect=skipped --set design=skipped`.
+5. **plan + plan-check + implement in one dispatch**: `nqt:dev` with `MODE=fast`. It writes a short `WORK/plan.md`, runs the plan-check script itself, then builds it.
+   Then `check-work --step implement`; `S --set plan=done --set plan-check=done --set implement=done` (no superpowers code review on this path; the nqt reviewer runs next).
+6. **review**, **qa** (`MODE=run`; UI checker only if a screen changed) and **report** as usual.
+
+If anything found later breaks a fast-path condition (another must-patch place, a data change, a new server call), stop, tell the owner, `S --flag fast=false`, and continue with the full flow from the step you are at.
 
 ## done
 

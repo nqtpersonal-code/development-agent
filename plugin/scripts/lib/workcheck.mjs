@@ -72,6 +72,7 @@ const CHECKS = {
     if (ba) {
       if (!/screen design needed/i.test(ba)) p.push('ba.md does not say whether screen design is needed');
       if (!/ticket kind/i.test(ba)) p.push('ba.md does not give the ticket kind (bug / change / feature)');
+      if (!/fast path/i.test(ba)) p.push('ba.md does not say whether the short path is eligible (Fast path: eligible / not eligible, with why)');
     }
   },
   brief(work, p) {

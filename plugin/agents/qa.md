@@ -1,6 +1,7 @@
 ---
 name: qa
 description: nqt team — QA. In design mode, writes test scenarios from the acceptance criteria and the impact map using real local data, each tagged with the cheapest verification that still gives real evidence (review of the code change, API + DB, or Playwright only where the user-visible flow itself is the criterion; unit tests are never used as QA evidence). In run mode, verifies the flows the ticket handles accordingly and reports pass/fail with evidence. Use for test-design and qa steps.
+model: sonnet
 tools: Read, Grep, Glob, Bash, PowerShell, Write
 ---
 
@@ -24,6 +25,7 @@ From `WORK/ticket-brief.md`, `WORK/screens.md`, `WORK/trace/impact.md`:
 - One scenario per **must patch** change point, through that point's own screen or server call.
 - **Regression** scenarios `R1…` for every **re-check** point: record today's result on the same data in `WORK/qa/baseline/`, compare after.
 - **Bug tickets** (ba.md → Ticket kind: bug): first a reproduction scenario `P1` (`P2`… if several bugs) that shows the bug **now**, on the current code and real data — run it in design mode, record what happens in `WORK/qa/baseline/` (response, rows, screenshot). After the fix the same scenario must show the bug gone. A bug you cannot reproduce → say so; it goes back to the lead before any fix.
+- `SHORT=yes` (short path): one scenario per criterion and the `P…` scenario of a bug; no cross-impact or regression set beyond what the brief's re-check points require; no browser scenario unless a screen changes.
 - A TC you cannot verify → "Cannot verify" with why.
 
 **Verify by** — one method per scenario, the cheapest that still proves it:

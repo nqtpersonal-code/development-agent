@@ -14,6 +14,17 @@ language: vi
 #   extensible = the same, decided without asking
 #   minimal    = the smallest change only
 designBias: ask
+# Model per agent, overriding the plugin's default (sonnet for most agents, haiku for setup and ui-checker).
+# Values: haiku | sonnet | opus | inherit (= the model of your session). A project can override it in project.md.
+agentModels:
+  # reviewer: opus
+# Autopilot (/nqt:auto-ticket): the product-owner agent answers questions for you, except on these red lines,
+# where the run stops and waits for you. A run also stops when its cost passes maxCostUsd.
+autopilot:
+  maxCostUsd: 10
+  # redLines:
+  #   - deleting or rewriting existing data in bulk
+  #   - how money is calculated
 # Folder of your PERSONAL review rules (every .md inside is read). Empty = <data dir>/review-rules
 reviewRules:
   personal:
@@ -75,6 +86,24 @@ const asLang = (v) => (v === 'en' ? 'en' : 'vi');
 // ask (default): new code gets a seam for growth, and the owner decides the structure choices that matter;
 // extensible: the same, decided without asking; minimal: the smallest change only.
 const asBias = (v) => (v === 'minimal' || v === 'extensible' ? v : 'ask');
+const MODELS = ['haiku', 'sonnet', 'opus', 'inherit'];
+// agentModels: { reviewer: opus } overrides an agent's own model for this owner or project.
+const asModels = (v) => Object.fromEntries(Object.entries(asMap(v)).filter(([, m]) => MODELS.includes(String(m))).map(([a, m]) => [a, String(m)]));
+const DEFAULT_RED_LINES = [
+  'deleting or rewriting existing data in bulk',
+  'how money is calculated (fees, prices, discounts, refunds, totals)',
+  "who may see or change what (permissions, roles, access to other people's data)",
+  'personal data leaving the system or being kept longer',
+  'the ticket contradicts itself, or two readings give two different features',
+];
+// Autopilot: the product-owner agent answers for the owner, except on red lines;
+// a run stops when its cost passes maxCostUsd.
+const asAutopilot = (v) => {
+  const a = asMap(v);
+  const cost = Number(a.maxCostUsd);
+  const lines = [].concat(a.redLines ?? []).map(String).filter(Boolean);
+  return { maxCostUsd: Number.isFinite(cost) && cost > 0 ? cost : 10, redLines: lines.length ? lines : DEFAULT_RED_LINES };
+};
 
 export function loadConfig(dataDir) {
   const fm = readFm(join(dataDir, 'config.md'));
@@ -84,6 +113,8 @@ export function loadConfig(dataDir) {
   return {
     language: asLang(fm.language),
     designBias: asBias(fm.designBias),
+    agentModels: asModels(fm.agentModels),
+    autopilot: asAutopilot(fm.autopilot),
     reviewRules: { personal },
     pluginSourceDir: typeof fm.pluginSourceDir === 'string' && fm.pluginSourceDir ? fm.pluginSourceDir : '',
     nicknames: {
@@ -101,6 +132,8 @@ export function projectConfig(dataDir, project) {
     project: fm,
     language: fm.language ? asLang(fm.language) : base.language,
     designBias: fm.designBias ? asBias(fm.designBias) : base.designBias,
+    agentModels: { ...base.agentModels, ...asModels(fm.agentModels) },
+    autopilot: fm.autopilot ? asAutopilot({ ...base.autopilot, ...asMap(fm.autopilot) }) : base.autopilot,
     teamReviewRules: join(dataDir, 'projects', project, 'review-rules'),
   };
 }

@@ -1,6 +1,7 @@
 ---
 name: dev
 description: nqt team — developer. Writes the code for a ticket on the feature branch through the superpowers skills (executing-plans for a whole small plan, the implementer contract for one task of subagent-driven-development, test-driven-development when the project writes tests), inside the owner's dev rules - only the brief's must-patch points, local DB only, no push. Also applies review and QA fixes. Use in the implement step and for fixes.
+model: sonnet
 tools: Read, Grep, Glob, Edit, Write, Bash, PowerShell, Skill
 ---
 
@@ -30,6 +31,7 @@ Always read `WORK/ticket-brief.md` (change points table, fix mode) and
   dispatch prompt is superpowers' implementer contract (task brief path,
   report file path, statuses). Follow it as written; these nqt rules sit on top
   of it and win when they conflict (say so in the report as a concern).
+- **fast** (the owner chose the short path for a small ticket) — first write `WORK/plan.md`: at most 3 tasks, each naming the TCs it serves and the must-patch files it changes (as written in the brief), plus its quick check; run `node "PLUGIN/scripts/nqt.mjs" plan-check "WORK"` and fix the plan until it passes; then build it as in `plan` mode (TDD when `writeTests: yes`), without the superpowers planning or review skills. If the work turns out bigger (a fourth task, another must-patch place, a data change, a new server call), stop and return `NEEDS_CONTEXT`: the ticket leaves the short path.
 - **fix** (`FINDINGS` from review or QA) — fix exactly those findings, nothing
   else; self-check each; one commit per finding or a small group.
 
