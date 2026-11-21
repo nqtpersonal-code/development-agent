@@ -69,8 +69,8 @@ test('stops at the cost cap, when stuck, and on a failed session', () => {
 });
 
 test('sessions run the skill in autopilot and can never push or open a pull request', () => {
-  const cmd = claudeCommand({ model: 'sonnet' });
-  assert.match(cmd, /-p --output-format json --model sonnet/);
+  const cmd = claudeCommand({ model: 'sonnet', addDirs: ['C:/data/nqt'] });
+  assert.match(cmd, /-p --output-format json --model sonnet --permission-mode acceptEdits --add-dir "C:\/data\/nqt"/);
   for (const d of ['Bash(git push:*)', 'PowerShell(git push:*)', 'Bash(gh pr create:*)', 'Bash(glab mr create:*)']) assert.ok(cmd.includes(`"${d}"`), d);
   assert.match(sessionPrompt({ ticket: '7', project: 'shop' }), /nqt:work-ticket" and args "shop 7 --auto"/);
 });

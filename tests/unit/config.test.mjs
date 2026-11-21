@@ -13,7 +13,18 @@ test('getDataDir honours NQT_DATA_DIR', () => {
   process.env.NQT_DATA_DIR = d;
   assert.equal(getDataDir(), d);
   delete process.env.NQT_DATA_DIR;
-  assert.match(getDataDir().replace(/\\/g, '/'), /\.claude\/nqt$/);
+});
+
+test('getDataDir defaults to ~/.nqt and moves data from ~/.claude/nqt once', () => {
+  const fresh = tmp();
+  assert.equal(getDataDir({ home: fresh, env: {} }), join(fresh, '.nqt'));
+  const home = tmp();
+  mkdirSync(join(home, '.claude', 'nqt', 'projects'), { recursive: true });
+  writeFileSync(join(home, '.claude', 'nqt', 'config.md'), 'mine');
+  assert.equal(getDataDir({ home, env: {} }), join(home, '.nqt'));
+  assert.equal(readFileSync(join(home, '.nqt', 'config.md'), 'utf8'), 'mine');
+  assert.ok(!existsSync(join(home, '.claude', 'nqt')));
+  assert.equal(getDataDir({ home, env: { NQT_DATA_DIR: 'X' } }), 'X');
 });
 
 test('ensureDataDir creates the layout once and never overwrites config', () => {

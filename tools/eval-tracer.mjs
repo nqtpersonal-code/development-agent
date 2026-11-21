@@ -13,6 +13,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from '../plugin/scripts/nqt.mjs';
 import { setupDetect } from '../plugin/scripts/lib/setup.mjs';
+import { getDataDir } from '../plugin/scripts/lib/config.mjs';
 import { scoreImpact } from './eval-score.mjs';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -26,7 +27,7 @@ const FIXTURES = {
 const SKIP = new Set(['node_modules', 'dist', 'bin', 'obj', '.vs', 'package-lock.json']);
 
 const slash = (p) => p.replace(/\\/g, '/');
-const realData = process.env.NQT_DATA_DIR || join(homedir(), '.claude', 'nqt');
+const realData = getDataDir();
 
 function installedPlugin() {
   const file = join(homedir(), '.claude', 'plugins', 'installed_plugins.json');

@@ -23,12 +23,16 @@ export function sessionPrompt({ ticket, project }) {
   ].join('\n');
 }
 
-export function claudeCommand({ claude = 'claude', model } = {}) {
+// A headless session may only edit files under its own folder unless told otherwise; the
+// ticket's work files live in the nqt data folder, so that folder is added (`--add-dir`)
+// and file edits there are accepted without a prompt nobody would answer.
+export function claudeCommand({ claude = 'claude', model, addDirs = [] } = {}) {
   return [claude, '-p', '--output-format', 'json', ...(model ? ['--model', model] : []),
+    '--permission-mode', 'acceptEdits', ...addDirs.flatMap((d) => ['--add-dir', `"${d}"`]),
     '--allowedTools', `"${ALLOWED}"`, '--disallowedTools', ...DISALLOWED.map((d) => `"${d}"`)].join(' ');
 }
 
-export function runAutopilot({ root, work, ticket, project, maxCostUsd = 10, maxSessions = 12, model, claude = process.env.NQT_CLAUDE_CMD || 'claude', onSession = () => {} }) {
+export function runAutopilot({ root, work, ticket, project, dataDir, maxCostUsd = 10, maxSessions = 12, model, claude = process.env.NQT_CLAUDE_CMD || 'claude', onSession = () => {} }) {
   mkdirSync(work, { recursive: true });
   const logFile = join(work, 'autopilot.log');
   const log = (line) => appendFileSync(logFile, `${new Date().toISOString()} ${line}\n`, 'utf8');
@@ -37,7 +41,7 @@ export function runAutopilot({ root, work, ticket, project, maxCostUsd = 10, max
   let stalled = 0;
   let before = readState(work);
   for (let i = 1; i <= maxSessions; i++) {
-    const r = spawnSync(claudeCommand({ claude, model }), {
+    const r = spawnSync(claudeCommand({ claude, model, addDirs: [dataDir ?? join(work, '..', '..', '..')] }), {
       shell: true, cwd: root, input: sessionPrompt({ ticket, project }), encoding: 'utf8', maxBuffer: 1 << 26,
       timeout: 2 * 60 * 60 * 1000, env: { ...process.env, NQT_AUTOPILOT: '1' },
     });
@@ -51,6 +55,8 @@ export function runAutopilot({ root, work, ticket, project, maxCostUsd = 10, max
     const s = readState(work);
     const line = `session ${i}: step ${s?.current ?? '?'} (${s ? doneCount(s) : 0}/${STEPS.length} done), cost so far $${cost.toFixed(2)}`;
     log(line);
+    // The session's own last words say why it ended; without them a stuck run cannot be read.
+    if (meta.result) log(`  said: ${String(meta.result).replace(/\s+/g, ' ').slice(0, 600)}`);
     onSession(line);
     const stop = (reason, detail) => {
       log(`stop: ${reason}${detail ? ` — ${detail}` : ''}`);

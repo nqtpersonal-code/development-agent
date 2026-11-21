@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, cpSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, cpSync, renameSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { parseFrontmatter } from './frontmatter.mjs';
@@ -45,8 +45,21 @@ Edit the values at the top of this file (between the two --- lines). Team review
 go in projects/<project-name>/review-rules/.
 `;
 
-export function getDataDir() {
-  return process.env.NQT_DATA_DIR || join(homedir(), '.claude', 'nqt');
+// The data folder lives outside ~/.claude: Claude Code protects every file under ~/.claude, so
+// agents could not write their work files there without a prompt (and never in an unattended run).
+// Data from the old place is moved once; if the move fails (a file in use), the old place is used.
+export function getDataDir({ home = homedir(), env = process.env } = {}) {
+  if (env.NQT_DATA_DIR) return env.NQT_DATA_DIR;
+  const dir = join(home, '.nqt');
+  const legacy = join(home, '.claude', 'nqt');
+  if (!existsSync(dir) && existsSync(legacy)) {
+    try {
+      renameSync(legacy, dir);
+    } catch {
+      return legacy;
+    }
+  }
+  return dir;
 }
 
 export function ensureDataDir(dataDir, pluginRoot) {

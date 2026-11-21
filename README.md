@@ -146,10 +146,10 @@ agent's output. Two starter packs ship with the plugin.
 
 ## Where your data lives
 
-Everything stays outside the plugin and outside the project repos, in `~/.claude/nqt/` (override with env `NQT_DATA_DIR`):
+Everything stays outside the plugin and outside the project repos, in `~/.nqt/` (override with env `NQT_DATA_DIR`). Not under `~/.claude`: Claude Code protects every file there, so agents could not write their work files without a prompt. Data from the old place, `~/.claude/nqt/`, is moved on first use:
 
 ```
-~/.claude/nqt/
+~/.nqt/
 ├── config.md                 language, design bias, model per agent, autopilot cost cap and red lines, personal review rules folder, nicknames
 ├── review-rules/             your personal review rules (every .md)
 ├── patterns/<pack>/          shared pattern library (two starter packs included)

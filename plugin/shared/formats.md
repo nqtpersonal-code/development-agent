@@ -1,6 +1,6 @@
 # nqt file formats
 
-`<dataDir>` defaults to `~/.claude/nqt` (override with env `NQT_DATA_DIR`).
+`<dataDir>` defaults to `~/.nqt` (moved once from `~/.claude/nqt`) (override with env `NQT_DATA_DIR`).
 `<plugin>` is the installed plugin folder; scripts run as
 `node <plugin>/scripts/nqt.mjs <command>`. `<work>` below means
 `<dataDir>/work/<project>/<ticket>/`.

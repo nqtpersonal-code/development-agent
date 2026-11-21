@@ -92,6 +92,7 @@ start the next step in the same turn.
 Nobody is at the keyboard. Run the same flow, with these changes:
 - **Never use the question tool and never wait for the owner**, except at a red line. Every question batch, every approval (brief, screens, whether to run the architect step or brainstorming, the fast path) goes to **`nqt:product-owner`** with `ASK` (the file and question ids, or the approval). Record its decided answers with `nqt.mjs answer "WORK" --by-po --file <UTF-8 file of Q<n>: lines>`.
 - **Red line**: the product-owner returns `owner-decides: Q<k>` → `S --wait question "Q<k> (red line: <why, one line>)"` and **end the session**. The runner stops and the owner answers later, in a normal session.
+- A tool, permission or environment failure (a write refused, a DB or app that will not start) is **not** a red line and not a question: retry once if it may be passing, otherwise end the session with a one-line reason and without `--wait`; the runner reports it as stuck.
 - No free Q&A (`S --set free-qa=skipped`), no brainstorming (the design step writes the short pointer spec), no clickable mockup, no questionnaire for someone else (it is a red line or the product-owner decides).
 - `/clear` boundaries: do what `boundary:` says and end the session; the runner starts a fresh one.
 - The owner doubts nothing during the run: the **final report starts with "Decisions made for you"** (from `WORK/po-decisions.md`, lowest confidence first, each with its source and what would change if the owner chose differently), so the owner reviews them before pushing.

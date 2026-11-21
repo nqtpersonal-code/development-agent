@@ -41,7 +41,7 @@ import { setupDetect } from './lib/setup.mjs';
 import { runSql } from './lib/sql.mjs';
 import { appCheck } from './lib/appcheck.mjs';
 import { parseTicketRef } from './lib/githost.mjs';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 
 function projectContext(args) {
   const dataDir = getDataDir();
@@ -592,7 +592,7 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     ensureDataDir(dataDir, pluginRoot);
     const root = resolve(args.root ?? process.cwd());
     const ticketRef = String(args.ticket ?? args._[0] ?? '');
-    if (!ticketRef) throw new Error('usage: autopilot --ticket <id> [--root dir] [--project p] [--max-cost usd] [--max-sessions n] [--model m]');
+    if (!ticketRef) throw new Error('usage: autopilot --ticket <id> [--ticket-file f] [--root dir] [--project p] [--max-cost usd] [--max-sessions n] [--model m]');
     if (typeof args.project === 'string') rememberProject({ root, dataDir, project: args.project });
     const found = resolveProject({ root, dataDir, explicit: typeof args.project === 'string' ? args.project : undefined });
     if (!found.project) {
@@ -602,10 +602,15 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     const project = found.project;
     const ticket = parseTicketRef(ticketRef) ?? ticketRef.replace(/[^\w.-]+/g, '-');
     const work = join(dataDir, 'work', project, ticket);
+    // Nobody can paste the ticket in an unattended run: take it from a file when the tracker cannot give it.
+    if (typeof args['ticket-file'] === 'string' && !existsSync(join(work, 'ticket.md'))) {
+      mkdirSync(work, { recursive: true });
+      copyFileSync(resolve(args['ticket-file']), join(work, 'ticket.md'));
+    }
     const cfg = projectConfig(dataDir, project);
     const maxCostUsd = Number(args['max-cost']) > 0 ? Number(args['max-cost']) : cfg.autopilot.maxCostUsd;
     const r = runAutopilot({
-      root, work, ticket, project: typeof args.project === 'string' ? args.project : undefined, maxCostUsd,
+      root, work, ticket, dataDir, project: typeof args.project === 'string' ? args.project : undefined, maxCostUsd,
       maxSessions: Number(args['max-sessions']) > 0 ? Number(args['max-sessions']) : 12,
       model: typeof args.model === 'string' ? args.model : undefined,
       onSession: (line) => console.log(`  ${line}`),
