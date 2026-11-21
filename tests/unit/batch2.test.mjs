@@ -143,3 +143,16 @@ test('state --set at a phase boundary tells the lead to stop for /clear', async 
     console.log = log;
   }
 });
+
+test('a brief carries only the work-file rows its agent uses, and the brief sections only with ticket-brief.md', async () => {
+  const { workFilesFor, AGENT_FILES } = await import('../../plugin/scripts/lib/docs.mjs');
+  const section = ['## Ticket work files', '', 'Intro.', '', '| File | Written by | Content |', '|---|---|---|', '| `ba.md` | ba | x |', '| `plan.md` | p | y |', '| `ticket-brief.md` | ba | z |', '', '### ticket-brief.md sections', '', '1. Summary'].join('\n');
+  const onlyBa = workFilesFor(section, ['ba.md']);
+  assert.match(onlyBa, /Intro\./);
+  assert.match(onlyBa, /\| `ba\.md` \|/);
+  assert.doesNotMatch(onlyBa, /plan\.md|ticket-brief\.md sections/);
+  assert.match(workFilesFor(section, ['ticket-brief.md']), /### ticket-brief\.md sections\n\n1\. Summary/);
+  const brief = agentBrief(plugin, 'dev');
+  for (const f of AGENT_FILES.dev) assert.ok(brief.includes(`\`${f}\``), f);
+  assert.doesNotMatch(brief, /\| `mockup\/index\.html` \|/);
+});

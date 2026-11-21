@@ -32,6 +32,7 @@ bind you. Do not read `rules.md`, `formats.md`, agent prompts or plugin scripts.
 ## 1. Each step
 
 1. `waiting` shows a question or approval → ask it again first (it survived a `/clear`).
+   `start` prints `code changed since analysis: …` → the code under places the impact map relies on changed after it was written (a pull, a rebase, someone else's commit). Before anything else, dispatch `nqt:code-tracer` with `TASK=re-check` for exactly those files, update the map, and tell the owner in one line if a conclusion changed. `code moved since analysis … none cited` needs nothing.
 2. `start` already printed the current step's instructions, and every `state --set <step>=done|skipped` prints the next step's instructions in the same call — follow them; there is no separate call per step. Use `guide --step <step>` only for a step you have not been shown (e.g. `build-adapter`, `doubt`). Never read the whole flow.
 3. Announce each step to the owner with its name (in `LANGUAGE`) and position, e.g. "Step Analysis (2/15)".
 

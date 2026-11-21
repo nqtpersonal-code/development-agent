@@ -33,6 +33,7 @@ import { scanUntrusted } from './lib/untrusted.mjs';
 import { checkLinks } from './lib/links.mjs';
 import { lintRepo } from './lib/lintchanged.mjs';
 import { addChoice } from './lib/choices.mjs';
+import { stampCode, changesSinceStamp } from './lib/stamp.mjs';
 import { briefSkeleton, parseAnswers, addOwnerAnswers } from './lib/brief.mjs';
 import { setupDetect } from './lib/setup.mjs';
 import { runSql } from './lib/sql.mjs';
@@ -443,6 +444,17 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     console.log(`project.md: ${existsSync(join(dataDir, 'projects', project, 'project.md')) ? 'present' : 'missing (setup will detect it)'}`);
     console.log(`step: ${s.current} (${done}/${STEPS.length} done); waiting: ${s.waitingFor ? `${s.waitingFor.kind}: ${s.waitingFor.text}` : 'nothing'}`);
     console.log(ticketLine);
+    // Before implementation, warn when the code under the analysed places changed since the analysis.
+    const BEFORE_CODE = ['brief', 'test-design', 'free-qa', 'architect', 'design', 'plan', 'plan-check'];
+    if (BEFORE_CODE.includes(s.current)) {
+      const since = changesSinceStamp(work, root);
+      for (const r of since.repos) {
+        const where = r.dir === '.' ? '' : `${r.dir}: `;
+        if (r.unknown) console.log(`code changed since analysis: ${where}the analysed commit is no longer in this repo — re-trace before going on (guide --step doubt)`);
+        else if (r.cited.length) console.log(`code changed since analysis: ${where}${r.cited.length} file(s) the impact map cites changed (${r.cited.slice(0, 5).join(', ')}${r.cited.length > 5 ? ', …' : ''}) — re-check those places with nqt:code-tracer TASK=re-check before going on`);
+        else console.log(`code moved since analysis: ${where}${r.moved} file(s) changed, none cited by the impact map`);
+      }
+    }
     const fm = cfg.project;
     const facts = ['baseBranch', 'writeTests', 'appUrl', 'apiUrl', 'runApp'].filter((k) => fm[k] !== undefined).map((k) => `${k}=${typeof fm[k] === 'object' ? JSON.stringify(fm[k]) : fm[k]}`);
     if (facts.length) console.log(`project facts: ${facts.join('; ')}`);
@@ -522,7 +534,10 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
     const work = args._[0];
     const step = args.step ?? args._[1];
     if (!work || !step) throw new Error(`usage: check-work <WORK> --step <${CHECKED_STEPS.join('|')}> [--root <PROJECT_ROOT>]`);
-    const r = checkWork(work, String(step), { root: args.root ? resolve(String(args.root)) : undefined });
+    const root = args.root ? resolve(String(args.root)) : undefined;
+    const r = checkWork(work, String(step), { root });
+    // The analysis is checked against the code as it is now: remember which code that was.
+    if (String(step) === 'analysis' && root) stampCode(work, root);
     if (!r.problems.length) return void console.log(`check-work ${r.step}: complete`);
     console.log(`check-work ${r.step}: ${r.problems.length} problem(s) — send them back to the agent that wrote the files`);
     for (const x of r.problems.slice(0, 12)) console.log(`  - ${x}`);
