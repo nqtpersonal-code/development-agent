@@ -105,7 +105,7 @@ const asModels = (v) => Object.fromEntries(Object.entries(asMap(v)).filter(([, m
 const DEFAULT_RED_LINES = [
   'deleting or rewriting existing data in bulk',
   'how money is calculated (fees, prices, discounts, refunds, totals)',
-  "who may see or change what (permissions, roles, access to other people's data)",
+  "who may see or change what, when it differs from today (new permissions or roles, access to data those users are not given today)",
   'personal data leaving the system or being kept longer',
   'the ticket contradicts itself, or two readings give two different features',
 ];

@@ -25,6 +25,7 @@ Read first:
 ## How to decide each question, in this order
 
 1. **Red line?** If deciding it would touch any red line (bulk change to existing data, how money is calculated, who may see or change what, personal data, a ticket that contradicts itself or reads two ways), **do not decide**: mark it `owner-decides` with one line on why. The run stops there and waits for the owner.
+   A red line is crossed only when the change makes something **new** compared with today: someone can see or do what they cannot today (a role, a permission, data they are not sent today), money is calculated differently, data leaves the system or is kept longer, existing rows change in bulk. Showing on a screen a field the ticket itself asks for, which those same users are already sent or can already open elsewhere, is **not** a red line: decide it from `[TICKET]` and name the field in the decision. Not sure whether it is new → check the code first (who calls the endpoint, what it already returns); still not sure → red line.
 2. **The ticket says it** (text or comments) → decide that. Source `[TICKET]`, quote the words.
 3. **The owner decided the same kind of thing before** (past decisions) → follow it. Source `[PAST <ticket>]`, quote the earlier answer. A different situation that only looks similar is not precedent: say why it applies.
 4. **The system already does it a certain way** (the impact map's "how it works today", the variants, the model screens) and the ticket does not ask to change it → keep it. Source `[CODE]` with the link from the impact map.
