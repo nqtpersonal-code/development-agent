@@ -36,7 +36,7 @@ and `git log BASE..HEAD --oneline` inside it. Report findings with the repo name
 Pattern packs: read the `index.md` files in `DATA/projects/PROJECT/patterns/` then `DATA/patterns/`,
 and open a pack's files only when the diff matches it — `migration-safety` when the change adds or
 alters a migration, schema file or SQL (open the file for the project's engine); `dotnet-review`
-when it touches `.cs`, `.cshtml` or `.razor`; `schema-design` when it adds tables, columns or constraints; `extensibility` when the diff adds new classes, modules or kinds; `clean-code` for every diff (its `new-code.md`, and `smells.md` for naming what you find). They are checklists to apply to the changed lines,
+when it touches `.cs`, `.cshtml` or `.razor`; `schema-design` when it adds tables, columns or constraints; `extensibility` when the diff adds new classes, modules or kinds; `security-review` when the diff adds or changes an endpoint, a query, an export, a list or a screen that shows data (its `checklist.md`, and `what-not-to-report.md` before you write any security finding); `clean-code` for every diff (its `new-code.md`, and `smells.md` for naming what you find). They are checklists to apply to the changed lines,
 below the owner's rules and the project's own conventions.
 
 ## Checks
@@ -54,7 +54,8 @@ below the owner's rules and the project's own conventions.
 11. **Lint on the added lines** — `node "PLUGIN/scripts/nqt.mjs" lint-changed --root "PROJECT_ROOT" --base BASE` (the project's own linter, only the lines the change added; add `--dotnet` for C# analyzer warnings only if the app is not running and writing `bin/obj` is fine). An error-level finding is **important**, a warning **minor**, each with its line; no extra proof needed. It runs nothing when the project has no linter: say so.
 12. **Clean code on the added lines** — `clean-code/new-code.md` applied to what the diff adds, with the smells named as in `smells.md`. Report only what is harmful or misleading and show it; never ask for tidying of lines the change does not need, and never a finding for style the project's own code shares.
 13. **Structure of new code** (`designBias` `ask` or `extensible`; rules.md → Design for extension) — new code on an obvious axis of growth (another kind, rule, channel, provider) has a seam, or says "direct" with a reason: a missing seam is a **minor** suggestion, never a blocker; a seam with no axis, or a second mechanism beside the project's own, is a **minor** note. **Existing logic moved, extracted, renamed or re-routed outside the brief's must-patch points to introduce a pattern is critical** (scope). With `designBias: minimal` this check is off.
-14. **New schema** — tables, columns and constraints the diff **adds** follow the brief, the project's own conventions and the `schema-design` pack: normal form, copies kept on purpose with their reason, keys, constraints, types. A violation in a legacy structure the diff does not touch is a note for the report, never a finding to restructure.
+14. **Access and data scope on the changed paths** — `security-review/checklist.md` applied to the endpoints, queries, exports and screens the diff adds or changes (who may call it, which objects and rows they reach, deleted and other people's data, input binding, limits; the login section only when the ticket touches authentication). A path along which the wrong person or the wrong rows get through is **important** or **critical** by what you can show; everything else follows `what-not-to-report.md`.
+15. **New schema** — tables, columns and constraints the diff **adds** follow the brief, the project's own conventions and the `schema-design` pack: normal form, copies kept on purpose with their reason, keys, constraints, types. A violation in a legacy structure the diff does not touch is a note for the report, never a finding to restructure.
 
 ## Excuses to refuse
 
@@ -73,6 +74,7 @@ below the owner's rules and the project's own conventions.
 - Report a finding only when you are fairly sure it is real (about four times in five or better);
   a style preference or an unusual-looking line is not a finding.
 - **No findings** is a valid result: say so plainly instead of adding minor remarks to fill the page.
+- A finding that stands only if a fact **outside the code** is true goes under **Questions** with no severity, saying the path (`file:line`), the one deciding fact and who can confirm it. Never give a severity to a guess about the deployment, and never one higher than the impact you can show.
 
 ## Produce `WORK/review.md`
 
