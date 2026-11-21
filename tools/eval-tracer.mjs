@@ -30,7 +30,7 @@ const slash = (p) => p.replace(/\\/g, '/');
 const realData = getDataDir();
 
 function installedPlugin() {
-  const file = join(homedir(), '.claude', 'plugins', 'installed_plugins.json');
+  const file = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), 'plugins', 'installed_plugins.json');
   const entry = JSON.parse(readFileSync(file, 'utf8')).plugins?.['nqt@nqt-local']?.[0];
   if (!entry) throw new Error('nqt plugin is not installed (claude plugin install nqt@nqt-local --scope user)');
   const repoVersion = JSON.parse(readFileSync(join(repoRoot, 'plugin', '.claude-plugin', 'plugin.json'), 'utf8')).version;
@@ -94,7 +94,7 @@ const STEPS_EXPECTED = [
 function processOf(root, work) {
   // Claude Code keeps a project's transcripts in a folder named after its path.
   // (the drive letter's case varies, so match the folder name case-insensitively).
-  const projects = join(homedir(), '.claude', 'projects');
+  const projects = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), 'projects');
   const want = root.replace(/[:\\/.]/g, '-').toLowerCase();
   const name = existsSync(projects) ? readdirSync(projects).find((n) => n.toLowerCase() === want) : null;
   const dir = name ? join(projects, name) : join(projects, want);

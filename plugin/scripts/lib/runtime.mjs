@@ -107,7 +107,8 @@ export function installRuntime(dataDir, names = RUNTIME_PACKAGES, { quiet = fals
 export function doctor(dataDir, { install = [], pluginsFile } = {}) {
   const names = Array.isArray(install) ? install : [];
   if (names.length) installRuntime(dataDir, names);
-  const file = pluginsFile ?? join(homedir(), '.claude', 'plugins', 'installed_plugins.json');
+  // Claude Code keeps its config in CLAUDE_CONFIG_DIR when that is set, else in ~/.claude.
+  const file = pluginsFile ?? join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), 'plugins', 'installed_plugins.json');
   const major = Number(process.versions.node.split('.')[0]);
   const checks = [
     { name: 'node', required: true, ok: major >= 20, detail: process.versions.node },
