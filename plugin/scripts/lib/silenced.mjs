@@ -1,5 +1,6 @@
-// Added lines that switch a check off instead of satisfying it: lint or type
-// checks disabled, tests skipped, errors swallowed. Read from a unified diff.
+// Added lines that switch a check off instead of satisfying it (lint or type
+// checks disabled, tests skipped, errors swallowed) or that are debugging left
+// behind (the NQT-DEBUG log prefix, debugger statements). Read from a unified diff.
 export const SILENCERS = [
   [/eslint-disable|tslint:disable|prettier-ignore/, 'lint rule turned off'],
   [/@ts-(ignore|nocheck|expect-error)/, 'type check turned off'],
@@ -9,6 +10,8 @@ export const SILENCERS = [
   [/catch\s*(\([^)]*\))?\s*\{\s*\}/, 'error swallowed (empty catch)'],
   [/#\s*noqa|#\s*type:\s*ignore|@pytest\.mark\.skip/, 'Python check or test disabled'],
   [/--no-verify|HUSKY=0|SKIP_PREFLIGHT_CHECK/, 'git hooks or checks skipped'],
+  [/NQT-DEBUG/, 'temporary debug log left behind'],
+  [/^\s*debugger\s*;?\s*$|\bDebugger\.(Break|Launch)\s*\(/, 'debugger statement left behind'],
 ];
 
 export function findSilenced(diff) {

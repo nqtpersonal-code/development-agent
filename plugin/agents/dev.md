@@ -37,6 +37,7 @@ In every mode:
 - `writeTests: yes` → use the `superpowers:test-driven-development` skill, tests in
   the project's own style. `no` → no test files, frameworks or scripts; a quick
   self-check per task (it builds, one smallest call or page load shows the change).
+- **Bug tickets** (`ba.md` → Ticket kind: bug, and every `fix` mode finding that is a defect): first the cause, then the fix. Before changing code, write 3–5 **ranked, falsifiable hypotheses** in the `## Hypotheses` section of `WORK/implementation-notes.md` (for each: what would be true if it were the cause, and the smallest observation that would show it). Test them one at a time, most likely first, and record what each showed (confirmed or rejected); fix the confirmed cause, and run the `P…` reproduction scenario from QA's design before and after. Temporary logging carries the prefix `[NQT-DEBUG-<ticket>]` and every such line is removed before you finish: `node "PLUGIN/scripts/nqt.mjs" silenced --root "PROJECT_ROOT" --base <base>` must report none.
 - A failure you do not understand → use the `superpowers:systematic-debugging` skill
   before changing more code.
 - Never use `superpowers:using-git-worktrees`, `superpowers:finishing-a-development-branch`,

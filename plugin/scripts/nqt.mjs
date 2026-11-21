@@ -539,8 +539,8 @@ ticket scan: ${bad.length} suspicious line(s) (${[...new Set(bad.map((b) => b.ki
       if (g.status !== 0) throw new Error(`git diff failed in ${r.dir}: ${(g.stderr || '').trim().slice(0, 200)}`);
       for (const h of findSilenced(g.stdout)) hits.push({ repo: r.dir, ...h });
     }
-    if (!hits.length) return void console.log('silenced: none — no check was switched off in the change');
-    console.log(`silenced: ${hits.length} line(s) switch a check off instead of satisfying it`);
+    if (!hits.length) return void console.log('silenced: none — no check switched off and no debugging left behind in the change');
+    console.log(`silenced: ${hits.length} added line(s) switch a check off instead of satisfying it, or leave debugging behind`);
     for (const h of hits.slice(0, 12)) console.log(`  ${h.repo === '.' ? '' : `${h.repo}/`}${h.file}:${h.line} [${h.kind}] ${h.text}`);
     return 1;
   },

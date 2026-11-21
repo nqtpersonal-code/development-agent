@@ -95,3 +95,31 @@ test('check-work analysis: every place the impact script reports is confirmed or
   assert.equal(r.problems.length, 1);
   assert.match(r.problems[0], /^api\/src\/fees\/fees\.controller\.ts \(related-through-table\) .*neither confirms nor rules it out/);
 });
+
+test('check-work implement: a bug ticket needs ranked hypotheses in the implementation notes', () => {
+  const bug = work({ 'ba.md': 'Ticket kind: bug', 'implementation-notes.md': '## Tasks\n- fixed the total' });
+  assert.deepEqual(checkWork(bug, 'implement').problems, ['bug ticket without a "Hypotheses" section in implementation-notes.md (3–5 ranked, testable causes and what each test showed)']);
+  const ok = work({ 'ba.md': 'Ticket kind: bug', 'implementation-notes.md': '## Hypotheses\n1. the discount runs twice — rejected\n2. the date is read in UTC — confirmed\n## Tasks\n- fixed' });
+  assert.deepEqual(checkWork(ok, 'implement').problems, []);
+  const change = work({ 'ba.md': 'Ticket kind: change', 'implementation-notes.md': '## Tasks\n- done' });
+  assert.deepEqual(checkWork(change, 'implement').problems, []);
+});
+
+test('check-work questionnaire: every question has its own reply line in a Replies block', () => {
+  const good = work({ 'questionnaire.md': ['# Questions for the product owner', 'Summary…', '## Q3 · Excused absences', 'Options…', '## Q5 · Refunds', 'Options…', '## Replies', 'Q3:', 'Q5:'].join('\n') });
+  assert.deepEqual(checkWork(good, 'questionnaire').problems, []);
+  const bad = work({ 'questionnaire.md': ['## Q3 · Excused absences', '## Q5 · Refunds', '## Replies', 'Q3:'].join('\n') });
+  assert.deepEqual(checkWork(bad, 'questionnaire').problems, ['Q5 has no reply line ("Q5:") in the Replies block']);
+  const noBlock = work({ 'questionnaire.md': '## Q1 · Something\nOptions…' });
+  assert.ok(checkWork(noBlock, 'questionnaire').problems.some((x) => /no "Replies" block/.test(x)));
+  assert.deepEqual(checkWork(work({ 'questionnaire.md': 'Just prose.' }), 'questionnaire').problems, ['questionnaire.md has no questions (Q1, Q2…)']);
+});
+
+test('findSilenced also lists temporary debugging left in the change', () => {
+  const diff = ['+++ b/api/svc.ts', '@@ -3,0 +4,3 @@', '+  console.log("[NQT-DEBUG-abc] total", total);', '+  debugger;', '+  return total;', '+++ b/api/Svc.cs', '@@ -1 +1 @@', '+    Debugger.Break();'].join('\n');
+  assert.deepEqual(findSilenced(diff).map((h) => `${h.file}:${h.line} ${h.kind}`), [
+    'api/svc.ts:4 temporary debug log left behind',
+    'api/svc.ts:5 debugger statement left behind',
+    'api/Svc.cs:1 debugger statement left behind',
+  ]);
+});

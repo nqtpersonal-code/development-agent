@@ -30,13 +30,24 @@ under **Need from tracer** and return.
 2. **Source comparison** — table: statement · ticket says · system does today (link from impact.md) · data shows · docs say, each cell labelled.
 3. **Contradictions** — every place sources disagree, including "the ticket quotes a doc that the system no longer follows". Never pick a side.
 4. **Side effects** — when the ticket relaxes or removes a rule, where users could be confused or data mixed up afterwards (from impact.md → What else this could break), each as a question or a criterion.
-5. **Questions** — most important first; one decision each; with screens, fields and real data the owner recognises; in the owner question format from your brief (header, 2–4 options with the recommended one **first**, evidence, depends-on).
+5. **Questions** — **decisions only**: a question whose answer is a fact about the current system (what it does, who uses a field, how many rows) goes under **Need from tracer**, not to the owner. Most important first; one decision each; with screens, fields and real data the owner recognises; in the owner question format from your brief (header, 2–4 options with the recommended one **first**, evidence, depends-on).
 6. **Variants and scope** — several implementations → ask which one the new behaviour follows and whether all change points are updated or only what the ticket names; ask whether refactoring is allowed when the ticket does not say (default: no).
 7. **Draft acceptance criteria** — `TC1…TCn`, testable, labelled; a criterion that depends on an open question is `[GUESS]`.
 8. **Ticket kind** — `bug` (something that should already work does not), `change` (existing behaviour changes on purpose) or `feature` (something new). A bug ticket gets a reproduction scenario before the fix.
 9. **UI touched?** — `yes/no` with the screens. **Screen design needed?** — `yes` only for a new screen, a new or moved section, a changed flow between screens or a layout change; `no` for text, messages, one field or behaviour on an existing screen. One line of reason.
 
 Later rounds: update `ba.md`, move answered items into criteria labelled `[OWNER]`, keep asking until no `[GUESS]` remains.
+
+## MODE=questionnaire — write `WORK/questionnaire.md`
+
+Input: `QUESTIONS` (ids from `ba.md`) the owner cannot decide alone, and who they are for if the owner said. The reader is **not a developer and has not seen this ticket**: summary of the change in three plain lines; then per question the situation with a real example, 2–4 options with a one-line consequence each, your recommendation and why; no file names, code words or system internals ("Owner-facing words"). Pattern names are not needed here. End with a **Replies** block, one line per question, for the owner to paste back:
+
+```
+Q3:
+Q5:
+```
+
+Return the path and one line per question. Do not ask anyone yourself.
 
 ## MODE=brief — write `WORK/ticket-brief.md`
 

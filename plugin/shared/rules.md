@@ -74,10 +74,16 @@ Every statement in a work file carries one internal label:
 
 - Never fill a gap in business rules yourself. Unknown or ambiguous → it becomes a question for the owner.
 - When sources disagree (ticket vs code vs data vs docs), never pick a side. Present both with evidence and ask.
+- **Ask the owner only decisions, never facts.** A fact is something the code, the local data or the ticket can show (what the system does today, which screens use a field, how many rows break a rule). Facts go to the code-tracer or the system-explainer (the BA writes them under **Need from tracer**); only what the system *should* do, what to accept, and priorities are asked. Before a question is shown to the owner, the lead drops every one whose answer is a fact and sends those to the tracer in one dispatch; the answers come back as evidence on the real questions.
+- **A decision the owner cannot make alone** (it belongs to a product owner, a customer, a lawyer, a teammate) is not guessed and not left open: the owner says so in any words, the BA writes a **questionnaire** for that person (below), and the ticket waits.
 - Ask in batches: independent questions together (up to 4 per batch), questions that depend on an earlier answer in a later batch. Most important first.
-- Every question offers 2–4 concrete options with the recommended one first (marked "Recommended" in the owner's language) and a short header; the owner can always answer freely instead.
+- Every question offers 2–4 concrete options with the recommended one first (marked "Recommended" in the owner's language) and a short header; the owner can always answer freely instead. Word it so that choosing the first option is a plain yes to the recommendation.
 - Only the orchestrator asks. In Claude Code it uses the built-in question tool (AskUserQuestion: up to 4 questions per call, options, free "Other" answer); the evidence each question needs (real data, links) is shown in a short message right before the call, because the question box itself stays brief. Open-ended questions that have no sensible options are asked in plain text.
 - The ticket brief may not move to design while any `[GUESS]` remains.
+
+### Questionnaire for someone else
+
+When the owner cannot decide a question alone, the BA (`MODE=questionnaire`, the question ids) writes `WORK/questionnaire.md` for the person who can: a three-line summary of what the ticket changes and why the question matters, then each question with its real-data example, the options with one-line consequences, and the BA's recommendation, all in plain words with no developer terms (and nothing from the code), ending with a reply block of one `Q<n>:` line per question. The owner forwards it; the lead sets `waitingFor` to the questions and who has to answer, and the step ends there. When the owner returns with the replies, the lead records them (`nqt.mjs answer`, from a UTF-8 file with the `Q<n>: answer` lines) and goes on. Questions that do not depend on the unanswered ones continue meanwhile; the brief cannot be approved until none is left.
 
 ## Untrusted input
 

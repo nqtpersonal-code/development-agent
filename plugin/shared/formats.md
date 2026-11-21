@@ -119,7 +119,8 @@ under the headings is in the owner's language. An empty section says "none".
 | `spec.md` | superpowers:brainstorming | design spec |
 | `plan.md` | superpowers:writing-plans | implementation plan |
 | `plan-check.md` | plan-checker | verdict pass/revise, round, findings graded blocker / should / note, "needs owner" items |
-| `implementation-notes.md` | dev | tasks done, commits per repo, self-check results, test data created and removed, contradictions with the brief, late change points |
+| `questionnaire.md` | ba (`MODE=questionnaire`) | questions the owner cannot decide alone, written for someone else in plain words: summary, per question the situation with real data, options with consequences, recommendation, and a Replies block (`Q<n>:` lines) to paste back |
+| `implementation-notes.md` | dev | for a bug ticket a `## Hypotheses` section (3–5 ranked, testable causes and what each test showed); tasks done, commits per repo, self-check results, test data created and removed, contradictions with the brief, late change points |
 | `superpowers-review.md` | orchestrator | superpowers' code review of the branch: verdict and findings (≤20 lines) |
 | `review.md` | reviewer | findings (severity, business consequence, link), rules used or "no rules", Technical appendix |
 | `qa-report.md` | qa (+ ui-checker section) | app-check result, per scenario pass/fail with evidence (data before/after, responses, screenshots), Test data (created / removed), not tested, Already in the system |

@@ -95,7 +95,22 @@ const CHECKS = {
     if (/ticket kind[^\n]*\bbug\b/i.test(read(work, 'ba.md') ?? '') && !/\bP\d+\b/.test(scenarios)) p.push('bug ticket without a reproduction scenario P1 (prove the bug before the fix)');
   },
   implement(work, p) {
-    needFile(work, 'implementation-notes.md', p);
+    const notes = needFile(work, 'implementation-notes.md', p);
+    // A bug is fixed after its cause is known: ranked hypotheses, each tested, come first.
+    if (notes && /ticket kind[^\n]*\bbug\b/i.test(read(work, 'ba.md') ?? '') && !/hypothes[ei]s/i.test(notes)) {
+      p.push('bug ticket without a "Hypotheses" section in implementation-notes.md (3–5 ranked, testable causes and what each test showed)');
+    }
+  },
+  // The questions for someone else: every question the owner could not decide has its
+  // own reply line, so the answers can be pasted back and recorded.
+  questionnaire(work, p) {
+    const q = needFile(work, 'questionnaire.md', p);
+    if (!q) return;
+    const ids = [...new Set([...q.matchAll(/\bQ(\d+)\b/g)].map((m) => m[1]))];
+    if (!ids.length) return void p.push('questionnaire.md has no questions (Q1, Q2…)');
+    const replies = q.slice(Math.max(0, q.search(/^#{1,6}[^\n]*repl(y|ies)/im)));
+    if (!/^#{1,6}[^\n]*repl(y|ies)/im.test(q)) p.push('questionnaire.md has no "Replies" block to paste the answers back into');
+    for (const id of ids) if (!new RegExp(`^\\s*Q${id}\\s*:`, 'm').test(replies)) p.push(`Q${id} has no reply line ("Q${id}:") in the Replies block`);
   },
   review(work, p) {
     const review = needFile(work, 'review.md', p);
